@@ -5,7 +5,7 @@
 // This module handles staff invitations for:
 // - Sub-Admin
 // - Election Commission
-// - Presiding Officer
+// - Presiding  Officer
 // - Assistant Presiding Officer
 //
 // The administrator NEVER creates or stores the invited user's
