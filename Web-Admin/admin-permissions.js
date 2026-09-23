@@ -6,7 +6,7 @@ import {
 
 export async function checkAdminPermission(
     db,
-    user,
+    user, 
     requiredDuty  
 ) {
 
