@@ -1,0 +1,6690 @@
+rules_version = '2';
+
+service cloud.firestore {
+
+  match /databases/{database}/documents {
+
+    /* =====================================================
+       HELPER FUNCTIONS
+    ===================================================== */
+
+    function isPrincipal() {
+      return request.auth != null
+        && get(
+          /databases/$(database)/documents/Users/$(request.auth.uid)
+        ).data.role == "principal"
+        && get(
+          /databases/$(database)/documents/Users/$(request.auth.uid)
+        ).data.status == "active";
+    }
+
+
+    function isActiveSubAdmin() {
+      return request.auth != null
+        && get(
+          /databases/$(database)/documents/Users/$(request.auth.uid)
+        ).data.role == "sub_admin"
+        && get(
+          /databases/$(database)/documents/Users/$(request.auth.uid)
+        ).data.status == "active"
+        && get(
+          /databases/$(database)/documents/SubAdmins/$(request.auth.uid)
+        ).data.status == "active";
+    }
+
+
+    function hasSubAdminDuty(duty) {
+      return isActiveSubAdmin()
+        &&
+        duty in
+        get(
+          /databases/$(database)/documents/SubAdmins/$(request.auth.uid)
+        ).data.duties;
+    }
+
+
+    function canViewElectionOverview() {
+      return isPrincipal() || isActiveSubAdmin();
+    }
+
+
+    /*
+     * Candidate-wise vote totals are available only after the
+     * election is permanently closed. Principal may review them,
+     * and a Sub-Admin must explicitly hold Review Results.
+     */
+    function canReviewClosedResults(electionId) {
+      return request.auth != null
+        && electionId is string
+        && electionId.size() > 0
+        && exists(
+          /databases/$(database)/documents/Elections/$(electionId)
+        )
+        && get(
+          /databases/$(database)/documents/Elections/$(electionId)
+        ).data.status == "closed"
+        && (
+          isPrincipal()
+          || hasSubAdminDuty("Review Results")
+        );
+    }
+
+
+    function canManageElectionCommission() {
+      return isPrincipal()
+        ||
+        hasSubAdminDuty("Manage Election Commission");
+    }
+
+
+    function canManageElections() {
+      return isPrincipal()
+        ||
+        hasSubAdminDuty("Manage Elections");
+    }
+
+
+    function canCreateElection() {
+      return isPrincipal()
+        ||
+        hasSubAdminDuty("Create New Election");
+    }
+
+
+    function canChangeElectionStatus() {
+      return isPrincipal();
+    }
+
+
+    /*
+     * Starting or resuming voting requires the canonical
+     * nomination form for this election to be finalized and
+     * to contain at least one official position.
+     *
+     * Dynamic candidate-per-position and booth-readiness checks
+     * are performed by the Principal management page immediately
+     * before the status change because Firestore Rules cannot query
+     * arbitrary collections to count candidates or booth readiness.
+     */
+    function hasFinalizedNominationForm(electionId) {
+      return electionId is string
+        && electionId.size() > 0
+        && exists(
+          /databases/$(database)/documents/NominationForms/$(electionId)
+        )
+        && get(
+          /databases/$(database)/documents/NominationForms/$(electionId)
+        ).data.electionId == electionId
+        && get(
+          /databases/$(database)/documents/NominationForms/$(electionId)
+        ).data.formStatus in ["finalized", "closed"]
+        && get(
+          /databases/$(database)/documents/NominationForms/$(electionId)
+        ).data.allowedPositionIds is list
+        && get(
+          /databases/$(database)/documents/NominationForms/$(electionId)
+        ).data.allowedPositionIds.size() > 0;
+    }
+
+
+    /* =====================================================
+       ACTIVE PAIRED ANDROID DEVICE FOR ELECTION
+       ===================================================== */
+    function isActiveVotingDeviceForElection(electionId) {
+      return request.auth != null
+        && request.auth.token.firebase.sign_in_provider == "anonymous"
+        && electionId is string
+        && electionId.size() > 0
+        && exists(
+          /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+        )
+        && get(
+          /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+        ).data.status == "active"
+        && get(
+          /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+        ).data.electionId == electionId;
+    }
+
+
+    function validInvitationAcceptance(invitationId, expectedRole) {
+      return request.auth != null
+        && request.auth.token.email != null
+        && exists(
+          /databases/$(database)/documents/Invitations/$(invitationId)
+        )
+        && get(
+          /databases/$(database)/documents/Invitations/$(invitationId)
+        ).data.status == "pending"
+        && get(
+          /databases/$(database)/documents/Invitations/$(invitationId)
+        ).data.email == request.auth.token.email
+        && get(
+          /databases/$(database)/documents/Invitations/$(invitationId)
+        ).data.role == expectedRole
+        && getAfter(
+          /databases/$(database)/documents/Invitations/$(invitationId)
+        ).data.status == "accepted"
+        && getAfter(
+          /databases/$(database)/documents/Invitations/$(invitationId)
+        ).data.acceptedUid == request.auth.uid;
+    }
+
+function isActiveECWithVoterDuty() {
+      return request.auth != null
+        && get(
+          /databases/$(database)/documents/Users/$(request.auth.uid)
+        ).data.role == "election_commission"
+        && get(
+          /databases/$(database)/documents/Users/$(request.auth.uid)
+        ).data.status == "active"
+        && get(
+          /databases/$(database)/documents/ElectionCommission/$(request.auth.uid)
+        ).data.status == "active"
+        && "Voter Management" in
+        get(
+          /databases/$(database)/documents/ElectionCommission/$(request.auth.uid)
+        ).data.duties;
+    }
+
+    /* =====================================================
+       USERS
+    ===================================================== */
+
+    match /Users/{userId} {
+
+    allow read: if request.auth != null
+            && (
+              request.auth.uid == userId
+              ||
+              isPrincipal()
+              ||
+              (
+                isActiveECWithBoothDuty()
+                &&
+                resource.data.role in [
+                  "presiding_officer",
+                  "assistant_presiding_officer"
+                ]
+              )
+            );
+
+      allow update: if request.auth != null
+                    && (
+
+                      (
+                        request.auth.uid == userId
+                        &&
+                        (
+                          (
+                            resource.data.role == "principal"
+                            &&
+                            request.resource.data.diff(resource.data)
+                              .affectedKeys()
+                              .hasOnly([
+                                "name",
+                                "email",
+                                "collegeName",
+                                "updatedAt"
+                              ])
+                          )
+                          ||
+                          (
+                            resource.data.role != "principal"
+                            &&
+                            request.resource.data.diff(resource.data)
+                              .affectedKeys()
+                              .hasOnly([
+                                "updatedAt"
+                              ])
+                          )
+                        )
+                      )
+
+                      ||
+
+                      (
+                        (
+                          isPrincipal()
+                          ||
+                          canManageElectionCommission()
+                        )
+                        &&
+                        resource.data.role in [
+                          "sub_admin",
+                          "election_commission"
+                        ]
+                        &&
+                        request.resource.data.role == resource.data.role
+                        &&
+                        request.resource.data.diff(resource.data)
+                          .affectedKeys()
+                          .hasOnly([
+                            "name",
+                            "status",
+                            "updatedAt"
+                          ])
+                        &&
+                        request.resource.data.get(
+                          "status",
+                          "active"
+                        ) in [
+                          "active",
+                          "disabled"
+                        ]
+                      )
+                    );
+
+
+allow create: if
+
+  /* FIRST PRINCIPAL - FIRST TIME SETUP */
+  (
+    request.auth != null
+    && request.auth.uid == userId
+    && request.auth.token.email != null
+
+    && request.resource.data.keys().hasOnly([
+      "name",
+      "email",
+      "role",
+      "institutionName",
+      "status",
+      "createdAt"
+    ])
+
+    && request.resource.data.name is string
+    && request.resource.data.email == request.auth.token.email
+    && request.resource.data.role == "principal"
+    && request.resource.data.institutionName is string
+    && request.resource.data.status == "active"
+    && request.resource.data.createdAt is timestamp
+
+    && !exists(
+      /databases/$(database)/documents/SystemSettings/system
+    )
+
+    && existsAfter(
+      /databases/$(database)/documents/SystemSettings/system
+    )
+
+    && getAfter(
+      /databases/$(database)/documents/SystemSettings/system
+    ).data.initialized == true
+
+    && getAfter(
+      /databases/$(database)/documents/SystemSettings/system
+    ).data.principalUid == userId
+
+    && getAfter(
+      /databases/$(database)/documents/SystemSettings/system
+    ).data.institutionName ==
+       request.resource.data.institutionName
+  )
+
+  ||
+
+  /* NORMAL INVITED STAFF */
+  (
+    request.auth != null
+    && request.auth.uid == userId
+    && request.resource.data.email == request.auth.token.email
+    && request.resource.data.status == "active"
+
+    && request.resource.data.keys().hasOnly([
+      "name",
+      "email",
+      "role",
+      "status",
+      "invitationId",
+      "createdAt",
+      "createdBy"
+    ])
+
+    && validInvitationAcceptance(
+      request.resource.data.invitationId,
+      request.resource.data.role
+    )
+  );
+
+
+      allow delete: if false;
+    }
+
+
+
+    /* =====================================================
+       SUB-ADMINS
+    ===================================================== */
+
+    match /SubAdmins/{userId} {
+
+      allow read: if request.auth != null
+                  && (
+                    request.auth.uid == userId
+                    ||
+                    isPrincipal()
+                  );
+
+
+      allow update: if isPrincipal()
+                    &&
+                    resource.data.role == "sub_admin"
+                    &&
+                    request.resource.data.role == "sub_admin"
+                    &&
+                    request.resource.data.diff(resource.data)
+                      .affectedKeys()
+                      .hasOnly([
+                        "name",
+                        "duties",
+                        "status"
+                      ])
+                    &&
+                    request.resource.data.get(
+                      "status",
+                      "active"
+                    ) in [
+                      "active",
+                      "disabled"
+                    ];
+
+
+      allow delete: if isPrincipal();
+
+
+     allow create: if request.auth != null
+
+              && request.auth.uid == userId
+
+              && request.resource.data.keys().hasOnly([
+                "name",
+                "email",
+                "role",
+                "status",
+                "duties",
+                "invitationId",
+                "createdAt",
+                "createdBy"
+              ])
+
+              && request.resource.data.name is string
+              && request.resource.data.email is string
+              && request.resource.data.role == "sub_admin"
+              && request.resource.data.status == "active"
+
+              && request.resource.data.duties is list
+              && request.resource.data.duties.size() == 0
+
+              && request.resource.data.invitationId is string
+              && request.resource.data.createdBy is string
+
+              && request.resource.data.email ==
+                 request.auth.token.email
+
+              && request.resource.data.createdAt ==
+                 request.time
+
+              && validInvitationAcceptance(
+                request.resource.data.invitationId,
+                "sub_admin"
+              )
+
+              && request.resource.data.name ==
+                 get(
+                   /databases/$(database)/documents/Invitations/$(request.resource.data.invitationId)
+                 ).data.name
+
+              && request.resource.data.createdBy ==
+                 get(
+                   /databases/$(database)/documents/Invitations/$(request.resource.data.invitationId)
+                 ).data.createdBy
+
+              && getAfter(
+                /databases/$(database)/documents/Users/$(request.auth.uid)
+              ).data.invitationId ==
+                request.resource.data.invitationId;
+    }
+
+
+
+    /* =====================================================
+       ELECTION COMMISSION
+    ===================================================== */
+
+    match /ElectionCommission/{userId} {
+
+      allow read: if request.auth != null
+                  && (
+                    request.auth.uid == userId
+                    ||
+                    isPrincipal()
+                    ||
+                    canManageElectionCommission()
+                  );
+
+
+      allow update: if canManageElectionCommission()
+                    &&
+                    resource.data.role == "election_commission"
+                    &&
+                    request.resource.data.role == "election_commission"
+                    &&
+                    request.resource.data.diff(resource.data)
+                      .affectedKeys()
+                      .hasOnly([
+                        "name",
+                        "duties",
+                        "status"
+                      ])
+                    &&
+                    request.resource.data.get(
+                      "status",
+                      "active"
+                    ) in [
+                      "active",
+                      "disabled"
+                    ];
+
+
+      allow delete: if false;
+
+
+      allow create: if request.auth != null
+
+              && request.auth.uid == userId
+
+              && request.resource.data.keys().hasOnly([
+                "name",
+                "email",
+                "role",
+                "status",
+                "duties",
+                "invitationId",
+                "createdAt",
+                "createdBy"
+              ])
+
+              && request.resource.data.name is string
+              && request.resource.data.email is string
+
+              && request.resource.data.role ==
+                 "election_commission"
+
+              && request.resource.data.status ==
+                 "active"
+
+              && request.resource.data.duties is list
+              && request.resource.data.duties.size() == 0
+
+              && request.resource.data.invitationId is string
+              && request.resource.data.createdBy is string
+
+              && request.resource.data.email ==
+                 request.auth.token.email
+
+              && request.resource.data.createdAt ==
+                 request.time
+
+              && validInvitationAcceptance(
+                request.resource.data.invitationId,
+                "election_commission"
+              )
+
+              && request.resource.data.name ==
+                 get(
+                   /databases/$(database)/documents/Invitations/$(request.resource.data.invitationId)
+                 ).data.name
+
+              && request.resource.data.createdBy ==
+                 get(
+                   /databases/$(database)/documents/Invitations/$(request.resource.data.invitationId)
+                 ).data.createdBy
+
+              && getAfter(
+                /databases/$(database)/documents/Users/$(request.auth.uid)
+              ).data.invitationId ==
+                request.resource.data.invitationId;
+    }
+
+
+
+    /* =====================================================
+       POSITIONS
+    ===================================================== */
+
+    match /Positions/{positionId} {
+
+      /*
+       * Principal can read all positions.
+       *
+       * Sub-Admin with Manage Elections can read positions.
+       *
+       * EC member with Nomination & Candidate Management
+       * can read positions.
+       */
+
+      allow read: if request.auth != null
+                  && (
+                    isPrincipal()
+
+                    ||
+
+                   (
+  hasSubAdminDuty("Manage Elections")
+  ||
+  hasSubAdminDuty("Control Voting & Election Status")
+)
+
+                    ||
+
+                    canReviewClosedResults(resource.data.electionId)
+
+                    ||
+
+isActiveECWithNominationDuty()
+                  );
+allow get: if
+  resource.data.electionId is string
+
+  &&
+
+  exists(
+    /databases/$(database)/documents/Elections/$(resource.data.electionId)
+  )
+
+  &&
+
+  get(
+    /databases/$(database)/documents/Elections/$(resource.data.electionId)
+  ).data.status == "finalized"
+
+  &&
+
+  get(
+    /databases/$(database)/documents/Elections/$(resource.data.electionId)
+  ).data.get(
+    "voterListFinalized",
+    false
+  ) == true
+
+  &&
+
+  exists(
+    /databases/$(database)/documents/NominationForms/$(resource.data.electionId)
+  )
+
+  &&
+
+  get(
+    /databases/$(database)/documents/NominationForms/$(resource.data.electionId)
+  ).data.formStatus == "finalized"
+
+  &&
+
+  resource.id in
+  get(
+    /databases/$(database)/documents/NominationForms/$(resource.data.electionId)
+  ).data.allowedPositionIds
+
+  &&
+
+  request.time >=
+  get(
+    /databases/$(database)/documents/Elections/$(resource.data.electionId)
+  ).data.nominationStart
+
+  &&
+
+  request.time <=
+  get(
+    /databases/$(database)/documents/Elections/$(resource.data.electionId)
+  ).data.nominationEnd;
+
+
+
+      /*
+       * A paired Android voting device may GET only an official
+       * position explicitly included in the finalized nomination
+       * form for its own active election.
+       */
+      allow get: if
+        resource.data.electionId is string
+        && isActiveVotingDeviceForElection(resource.data.electionId)
+        && exists(
+          /databases/$(database)/documents/Elections/$(resource.data.electionId)
+        )
+        && get(
+          /databases/$(database)/documents/Elections/$(resource.data.electionId)
+        ).data.status == "voting_active"
+        && get(
+          /databases/$(database)/documents/Elections/$(resource.data.electionId)
+        ).data.get("voterListFinalized", false) == true
+        && exists(
+          /databases/$(database)/documents/NominationForms/$(resource.data.electionId)
+        )
+        && get(
+          /databases/$(database)/documents/NominationForms/$(resource.data.electionId)
+        ).data.formStatus in ["finalized", "closed"]
+        && resource.id in get(
+          /databases/$(database)/documents/NominationForms/$(resource.data.electionId)
+        ).data.allowedPositionIds;
+
+      /*
+       * Creating positions:
+       *
+       * Principal can create.
+       *
+       * Sub-Admin with Create New Election can create
+       * the initial positions belonging to an election
+       * created by that Sub-Admin.
+       *
+       * Sub-Admin with Manage Elections can create
+       * positions for existing elections.
+       */
+
+      allow create: if
+                    (
+                      isPrincipal()
+                    )
+
+                    ||
+
+                    (
+                      hasSubAdminDuty("Create New Election")
+                      &&
+                      getAfter(
+                        /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+                      ).data.createdBy == request.auth.uid
+                    )
+
+                    ||
+
+                    (
+                      hasSubAdminDuty("Manage Elections")
+                    );
+
+
+      /*
+       * Editing/deleting positions requires
+       * Manage Elections.
+       */
+
+      allow update, delete: if canManageElections();
+    }
+
+
+
+        /* =====================================================
+       VOTERS
+    ===================================================== */
+
+    match /Voters/{voterId} {
+
+      /*
+       * Principal has supervisory visibility.
+       * Operational voter preparation belongs to an active EC member
+       * with Voter Management duty.
+       * Booth-duty EC members may read finalized voter records only
+       * for booth allocation.
+       */
+      allow read: if canViewElectionOverview()
+                  || isActiveECWithVoterDuty()
+                  || (
+                    isActiveECWithBoothDuty()
+                    && resource.data.electionId is string
+                    && exists(
+                      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                    )
+                    && get(
+                      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                    ).data.status == "finalized"
+                    && get(
+                      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                    ).data.get("voterListFinalized", false) == true
+                  )
+                  || (
+                    resource.data.electionId is string
+                    && resource.data.boothId is string
+                    && resource.data.boothId.size() > 0
+                    && isAssignedPollingOfficer(resource.data.boothId)
+                    && get(
+                      /databases/$(database)/documents/BoothStaff/$(resource.data.boothId)
+                    ).data.electionId == resource.data.electionId
+                  );
+
+      /* Normal voter creation: Voter Management EC only. */
+      allow create: if isActiveECWithVoterDuty()
+                    && request.resource.data.keys().hasAll([
+                      "electionId",
+                      "name",
+                      "rollNumber",
+                      "className",
+                      "section",
+                      "eligible",
+                      "eligibilityReason",
+                      "participationStatus",
+                      "createdAt",
+                      "updatedAt"
+                    ])
+                    && request.resource.data.keys().hasOnly([
+                      "electionId",
+                      "name",
+                      "rollNumber",
+                      "className",
+                      "section",
+                      "eligible",
+                      "eligibilityReason",
+                      "participationStatus",
+                      "createdAt",
+                      "updatedAt"
+                    ])
+                    && request.resource.data.electionId is string
+                    && request.resource.data.name is string
+                    && request.resource.data.rollNumber is string
+                    && request.resource.data.className is string
+                    && request.resource.data.section is string
+                    && request.resource.data.eligible is bool
+                    && request.resource.data.eligibilityReason is string
+                    && request.resource.data.name.size() > 0
+                    && request.resource.data.rollNumber.size() > 0
+                    && request.resource.data.className.size() > 0
+                    && request.resource.data.section.size() > 0
+                    && request.resource.data.participationStatus == "not_voted"
+                    && exists(
+                      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+                    )
+                    && get(
+                      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+                    ).data.status in ["draft", "finalized"]
+                    && get(
+                      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+                    ).data.get("voterListFinalized", false) == false;
+
+      /*
+       * Normal voter-management update.
+       * electionId, rollNumber and participationStatus are immutable here.
+       */
+      allow update: if isActiveECWithVoterDuty()
+                    && resource.data.electionId == request.resource.data.electionId
+                    && resource.data.rollNumber == request.resource.data.rollNumber
+                    && resource.data.participationStatus == request.resource.data.participationStatus
+                    && resource.data.participationStatus == "not_voted"
+                    && exists(
+                      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                    )
+                    && get(
+                      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                    ).data.status in ["draft", "finalized"]
+                    && get(
+                      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                    ).data.get("voterListFinalized", false) == false
+                    && request.resource.data.diff(resource.data)
+                      .affectedKeys()
+                      .hasOnly([
+                        "name",
+                        "className",
+                        "section",
+                        "eligible",
+                        "eligibilityReason",
+                        "updatedAt"
+                      ]);
+
+      /*
+       * Booth assignment after voter-list finalization.
+       * Only boothId and updatedAt may change.
+       * Ineligible or already-voted voters cannot be assigned.
+       * Empty-string unassignment is retained for compatibility with the
+       * current booth page; a missing boothId is also accepted.
+       */
+      allow update: if isActiveECWithBoothDuty()
+                    && resource.data.electionId == request.resource.data.electionId
+                    && resource.data.eligible == true
+                    && resource.data.participationStatus == "not_voted"
+                    && exists(
+                      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                    )
+                    && get(
+                      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                    ).data.status == "finalized"
+                    && get(
+                      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                    ).data.get("voterListFinalized", false) == true
+                    && request.resource.data.diff(resource.data)
+                      .affectedKeys()
+                      .hasOnly(["boothId", "updatedAt"])
+                    && (
+                      !("boothId" in request.resource.data)
+                      || request.resource.data.boothId == ""
+                      || (
+                        request.resource.data.boothId is string
+                        && request.resource.data.boothId.size() > 0
+                        && exists(
+                          /databases/$(database)/documents/Booths/$(request.resource.data.boothId)
+                        )
+                        && get(
+                          /databases/$(database)/documents/Booths/$(request.resource.data.boothId)
+                        ).data.electionId == resource.data.electionId
+                      )
+                    );
+
+      /*
+       * Android may mark exactly one voter as voted only as part of
+       * the same atomic submission that completes the active
+       * VotingSession and releases this booth's voting lock.
+       */
+      allow update: if
+        request.auth != null
+        && request.auth.token.firebase.sign_in_provider == "anonymous"
+        && resource.data.electionId is string
+        && resource.data.boothId is string
+        && resource.data.boothId.size() > 0
+        && isActiveBoundVotingDevice(resource.data.electionId, resource.data.boothId)
+        && resource.data.eligible == true
+        && resource.data.participationStatus == "not_voted"
+        && request.resource.data.electionId == resource.data.electionId
+        && request.resource.data.boothId == resource.data.boothId
+        && request.resource.data.eligible == resource.data.eligible
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "participationStatus",
+          "updatedAt"
+        ])
+        && request.resource.data.participationStatus == "voted"
+        && request.resource.data.updatedAt == request.time
+        && exists(
+          /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+        )
+        && get(
+          /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+        ).data.status == "active"
+        && get(
+          /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+        ).data.electionId == resource.data.electionId
+        && get(
+          /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+        ).data.activeVoterId == voterId
+        && get(
+          /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+        ).data.activeSessionId is string
+        && get(
+          /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+        ).data.activeSessionId.size() > 0
+        && exists(
+          /databases/$(database)/documents/VotingSessions/$(get(
+            /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+          ).data.activeSessionId)
+        )
+        && get(
+          /databases/$(database)/documents/VotingSessions/$(get(
+            /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+          ).data.activeSessionId)
+        ).data.voterId == voterId
+        && get(
+          /databases/$(database)/documents/VotingSessions/$(get(
+            /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+          ).data.activeSessionId)
+        ).data.status == "ballot_open"
+        && get(
+          /databases/$(database)/documents/VotingSessions/$(get(
+            /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+          ).data.activeSessionId)
+        ).data.deviceId == request.auth.uid
+        && getAfter(
+          /databases/$(database)/documents/VotingSessions/$(get(
+            /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+          ).data.activeSessionId)
+        ).data.status == "submitted"
+        && getAfter(
+          /databases/$(database)/documents/VotingSessions/$(get(
+            /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+          ).data.activeSessionId)
+        ).data.submittedAt == request.time
+        && getAfter(
+          /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+        ).data.status == "idle"
+        && getAfter(
+          /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+        ).data.activeSessionId == ""
+        && getAfter(
+          /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+        ).data.activeVoterId == "";
+
+      /* SAVE-SAFE FINAL SUBMISSION FALLBACK: VOTER */
+      allow update: if
+        request.auth != null
+        && request.auth.token.firebase.sign_in_provider == "anonymous"
+        && resource.data.electionId is string
+        && resource.data.boothId is string
+        && resource.data.boothId.size() > 0
+        && isActiveBoundVotingDevice(resource.data.electionId, resource.data.boothId)
+        && resource.data.eligible == true
+        && resource.data.participationStatus == "not_voted"
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "participationStatus",
+          "updatedAt"
+        ])
+        && request.resource.data.participationStatus == "voted"
+        && request.resource.data.updatedAt == request.time
+        && get(
+          /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+        ).data.status == "active"
+        && get(
+          /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+        ).data.electionId == resource.data.electionId
+        && get(
+          /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+        ).data.activeVoterId == voterId
+        && get(
+          /databases/$(database)/documents/VotingSessions/$(get(
+            /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+          ).data.activeSessionId)
+        ).data.status == "ballot_open"
+        && get(
+          /databases/$(database)/documents/VotingSessions/$(get(
+            /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+          ).data.activeSessionId)
+        ).data.voterId == voterId
+        && get(
+          /databases/$(database)/documents/VotingSessions/$(get(
+            /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+          ).data.activeSessionId)
+        ).data.deviceId == request.auth.uid;
+
+      allow delete: if false;
+    }
+/* =====================================================
+   PRIVATE VOTER VERIFICATION
+===================================================== */
+
+match /VoterVerification/{verificationId} {
+
+  /*
+   * Private verification records contain official
+   * voter information.
+   *
+   * Only Principal and active EC members with
+   * Voter Management duty may read them.
+   */
+  allow read: if
+    isPrincipal()
+    ||
+    isActiveECWithVoterDuty();
+
+
+  /*
+   * Verification records are generated only from
+   * official Voter records.
+   *
+   * The authenticated Principal/EC user must be the
+   * person performing the synchronization.
+   */
+  allow create, update: if
+    isActiveECWithVoterDuty()
+
+    &&
+
+    request.resource.data.keys().hasOnly([
+      "electionId",
+      "voterId",
+      "rollNumber",
+      "name",
+      "className",
+      "section",
+      "eligible",
+      "syncedBy",
+      "syncedAt",
+      "updatedAt"
+    ])
+
+    &&
+
+    request.resource.data.electionId is string
+
+    &&
+
+    request.resource.data.voterId is string
+
+    &&
+
+    request.resource.data.rollNumber is string
+
+    &&
+
+    request.resource.data.name is string
+
+    &&
+
+    request.resource.data.className is string
+
+    &&
+
+    request.resource.data.section is string
+
+    &&
+
+    request.resource.data.eligible is bool
+
+    &&
+
+    request.resource.data.syncedBy == request.auth.uid
+
+    &&
+
+    exists(
+      /databases/$(database)/documents/Voters/$(request.resource.data.voterId)
+    )
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Voters/$(request.resource.data.voterId)
+    ).data.electionId ==
+    request.resource.data.electionId
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Voters/$(request.resource.data.voterId)
+    ).data.rollNumber ==
+    request.resource.data.rollNumber
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Voters/$(request.resource.data.voterId)
+    ).data.name ==
+    request.resource.data.name
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Voters/$(request.resource.data.voterId)
+    ).data.className ==
+    request.resource.data.className
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Voters/$(request.resource.data.voterId)
+    ).data.section ==
+    request.resource.data.section
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Voters/$(request.resource.data.voterId)
+    ).data.eligible ==
+    request.resource.data.eligible;
+
+
+  /*
+   * Verification records must never be deleted.
+   */
+  allow delete: if false;
+}
+/* =====================================================
+   PUBLIC VOTER VERIFICATION
+===================================================== */
+
+match /PublicVoterVerification/{verificationId} {
+
+  /*
+   * Student nomination form may read only one
+   * public-safe verification record during the
+   * active nomination period.
+   *
+   * This record contains hashes only.
+   *
+   * Eligibility verification uses:
+   *   1. Name
+   *   2. Roll Number
+   *   3. Eligible status
+   *
+   * Class and Section are NOT used for eligibility.
+   */
+  allow get: if
+    resource.data.electionId is string
+    &&
+    exists(
+      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+    )
+    &&
+    get(
+      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+    ).data.status == "finalized"
+    &&
+    get(
+      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+    ).data.get("voterListFinalized", false) == true
+    &&
+    request.time >=
+      get(
+        /databases/$(database)/documents/Elections/$(resource.data.electionId)
+      ).data.nominationStart
+    &&
+    request.time <=
+      get(
+        /databases/$(database)/documents/Elections/$(resource.data.electionId)
+      ).data.nominationEnd;
+
+
+  /*
+   * Only Principal or EC with Voter Management duty
+   * may create/update these records.
+   */
+  allow create, update: if
+    isActiveECWithVoterDuty()
+    &&
+    request.resource.data.keys().hasOnly([
+      "electionId",
+      "rollNumberHash",
+      "nameHash",
+      "eligible",
+      "updatedAt"
+    ])
+    &&
+    request.resource.data.electionId is string
+    &&
+    request.resource.data.rollNumberHash is string
+    &&
+    request.resource.data.nameHash is string
+    &&
+    request.resource.data.eligible is bool;
+
+  allow delete: if false;
+}
+    /* =====================================================
+       ELECTIONS
+    ===================================================== */
+
+    match /Elections/{electionId} {
+
+      /*
+       * Principal can read all elections.
+       *
+       * Sub-Admin with Manage Elections can read all
+       * elections so delegated management works even
+       * when another user originally created the election.
+       *
+       * Sub-Admin with Election Status can also read
+       * elections because this duty is specifically used
+       * for election start/stop/close operations.
+       *
+       * EC member with Nomination & Candidate Management
+       * can read elections.
+       */
+
+      allow read: if request.auth != null
+                  && (
+                    isPrincipal()
+                    || isActiveSubAdmin()
+                    || hasSubAdminDuty("Manage Elections")
+                    || hasSubAdminDuty("Control Voting & Election Status")
+                    || (
+                      get(
+                        /databases/$(database)/documents/Users/$(request.auth.uid)
+                      ).data.role == "election_commission"
+                      && get(
+                        /databases/$(database)/documents/Users/$(request.auth.uid)
+                      ).data.status == "active"
+                      && get(
+                        /databases/$(database)/documents/ElectionCommission/$(request.auth.uid)
+                      ).data.status == "active"
+                      && (
+                        "Nomination & Candidate Management" in
+                        get(
+                          /databases/$(database)/documents/ElectionCommission/$(request.auth.uid)
+                        ).data.duties
+                        || "Voter Management" in
+                        get(
+                          /databases/$(database)/documents/ElectionCommission/$(request.auth.uid)
+                        ).data.duties
+                        || "Booth & Polling Staff Management" in
+                        get(
+                          /databases/$(database)/documents/ElectionCommission/$(request.auth.uid)
+                        ).data.duties
+                      )
+                    )
+                  );
+
+           /* Assigned polling officers may read election state for their dashboard. */
+      allow get: if isActivePollingOfficer()
+                 && resource.data.status in [
+                   "finalized",
+                   "voting_active",
+                   "voting_stopped",
+                   "closed"
+                 ];
+
+
+      /*
+       * A paired Android voting device may read ONLY
+       * the election to which that device is actively bound.
+       */
+      allow get: if
+        request.auth != null
+        &&
+        request.auth.token.firebase.sign_in_provider ==
+          "anonymous"
+        &&
+        exists(
+          /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+        )
+        &&
+        get(
+          /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+        ).data.status ==
+          "active"
+        &&
+        get(
+          /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+        ).data.electionId ==
+          electionId;
+
+      allow get: if
+
+  resource.data.status == "finalized"
+
+  &&
+
+  resource.data.get(
+    "voterListFinalized",
+    false
+  ) == true
+
+  &&
+
+  request.time >= resource.data.nominationStart
+
+  &&
+
+  request.time <= resource.data.nominationEnd;
+
+
+      /*
+       * CREATE ELECTION
+       *
+       * Principal can create.
+       *
+       * Sub-Admin needs Create New Election duty.
+       *
+       * createdBy is preserved as historical information.
+       */
+
+      allow create: if canCreateElection()
+                    &&
+                    request.resource.data.createdBy ==
+                    request.auth.uid
+                    &&
+                    request.resource.data.status == "draft";
+
+
+      /*
+       * GENERAL ELECTION MANAGEMENT
+       *
+       * Principal or Sub-Admin with Manage Elections
+       * can edit normal election information, schedule,
+       * metadata and finalize the election.
+       *
+       * We deliberately prevent this permission from
+       * changing the voting status directly.
+       */
+
+      allow update: if canManageElections()
+                    &&
+                    request.resource.data.diff(resource.data)
+                      .affectedKeys()
+                      .hasOnly([
+  "electionName",
+  "academicSession",
+  "description",
+  "nominationStart",
+  "nominationEnd",
+  "votingStart",
+  "votingEnd",
+  "status",
+  "finalizedBy",
+  "finalizedAt",
+"updatedBy",
+  "updatedAt"
+                      ])
+                    &&
+                    (
+                      /*
+                       * Normal election information/schedule
+                       * changes are allowed while draft or
+                       * voting has been stopped.
+                       */
+                      (
+                        resource.data.status in [
+                          "draft",
+                          "voting_stopped"
+                        ]
+                        &&
+                        request.resource.data.status ==
+                        resource.data.status
+                      )
+
+                      ||
+
+                      /*
+                       * Finalization:
+                       * draft -> finalized
+                       */
+                      (
+                        resource.data.status == "draft"
+                        &&
+                        request.resource.data.status == "finalized"
+                        &&
+                        request.resource.data.finalizedBy ==
+                        request.auth.uid
+                      )
+                    );
+      /*
+       * VOTER LIST FINALIZATION
+       *
+       * EC member with Voter Management duty can finalize
+       * the official voter list.
+       *
+       * Once finalized, the voter list cannot be unlocked
+       * through this permission.
+       */
+
+      allow update: if isActiveECWithVoterDuty()
+                    && resource.data.status == "finalized"
+                    && resource.data.get("voterListFinalized", false) != true
+                    && request.resource.data.voterListFinalized == true
+                    && request.resource.data.voterListFinalizedBy == request.auth.uid
+                    && request.resource.data.diff(resource.data)
+                      .affectedKeys()
+                      .hasOnly([
+                        "voterListFinalized",
+                        "voterListFinalizedBy",
+                        "voterListFinalizedAt",
+                        "updatedBy",
+                        "updatedAt"
+                      ]);
+
+      /*
+       * ELECTION STATUS CONTROL
+       *
+       * Only the active Principal can start, stop and close
+       * the election.
+       *
+       * Only the status and its corresponding audit fields
+       * can be changed through this permission.
+       */
+
+      allow update: if canChangeElectionStatus()
+                    &&
+                    request.resource.data.diff(resource.data)
+                      .affectedKeys()
+                      .hasOnly([
+                        "status",
+                        "votingStartedBy",
+                        "votingStartedAt",
+                        "votingStoppedBy",
+                        "votingStoppedAt",
+                        "closedBy",
+                        "closedAt",
+                        "updatedBy",
+                        "updatedAt"
+                      ])
+                    &&
+                    (
+                      /*
+                       * Finalized -> Voting Active
+                       */
+                      (
+                        resource.data.status == "finalized"
+                        &&
+                        resource.data.get("voterListFinalized", false) == true
+                        &&
+                        hasFinalizedNominationForm(electionId)
+                        &&
+                        request.resource.data.status ==
+                        "voting_active"
+                        &&
+                        request.resource.data.votingStartedBy ==
+                        request.auth.uid
+                      )
+
+                      ||
+
+                      /*
+                       * Voting Active -> Voting Stopped
+                       */
+                      (
+                        resource.data.status == "voting_active"
+                        &&
+                        request.resource.data.status ==
+                        "voting_stopped"
+                        &&
+                        request.resource.data.votingStoppedBy ==
+                        request.auth.uid
+                      )
+
+                      ||
+
+                      /*
+                       * Voting Stopped -> Voting Active
+                       *
+                       * Allows an authorized status manager
+                       * to resume voting if the application
+                       * provides that operation.
+                       */
+                      (
+                        resource.data.status == "voting_stopped"
+                        &&
+                        resource.data.get("voterListFinalized", false) == true
+                        &&
+                        hasFinalizedNominationForm(electionId)
+                        &&
+                        request.resource.data.status ==
+                        "voting_active"
+                        &&
+                        request.resource.data.votingStartedBy ==
+                        request.auth.uid
+                      )
+
+                      ||
+
+                      /*
+                       * Voting Stopped -> Closed
+                       */
+                      (
+                        resource.data.status == "voting_stopped"
+                        &&
+                        request.resource.data.status ==
+                        "closed"
+                        &&
+                        request.resource.data.closedBy ==
+                        request.auth.uid
+                      )
+                    );
+
+
+      /*
+       * DELETE ELECTION
+       *
+       * Only Principal or Sub-Admin with Manage Elections.
+       *
+       * Only draft elections may be deleted.
+       */
+
+      allow delete: if canManageElections()
+                    &&
+                    resource.data.status == "draft";
+    }
+
+
+
+/* =====================================================
+   NOMINATION & CANDIDATE MANAGEMENT
+   Add/replace the existing NominationForms block with
+   the following rules, and add the NominationApplications
+   and Candidates blocks before the closing database match.
+   ===================================================== */
+
+function isActiveECWithNominationDuty() {
+  return request.auth != null
+    && get(
+      /databases/$(database)/documents/Users/$(request.auth.uid)
+    ).data.role == "election_commission"
+    && get(
+      /databases/$(database)/documents/Users/$(request.auth.uid)
+    ).data.status == "active"
+    && get(
+      /databases/$(database)/documents/ElectionCommission/$(request.auth.uid)
+    ).data.status == "active"
+    && "Nomination & Candidate Management" in
+      get(
+        /databases/$(database)/documents/ElectionCommission/$(request.auth.uid)
+      ).data.duties;
+}
+
+
+
+/* =====================================================
+   NOMINATION FORMS
+   ===================================================== */
+
+match /NominationForms/{formId} {
+
+  /*
+   * READ
+   *
+   * Only Principal and active EC members with the
+   * Nomination & Candidate Management duty can read
+   * nomination form configuration.
+   */
+  allow read: if isPrincipal()
+              || isActiveECWithNominationDuty()
+              || canReviewClosedResults(resource.data.electionId);
+
+allow get: if
+
+  resource.data.electionId == formId
+
+  &&
+
+  resource.data.formStatus == "finalized"
+
+  &&
+
+  exists(
+    /databases/$(database)/documents/Elections/$(formId)
+  )
+
+  &&
+
+  get(
+    /databases/$(database)/documents/Elections/$(formId)
+  ).data.status == "finalized"
+
+  &&
+
+  get(
+    /databases/$(database)/documents/Elections/$(formId)
+  ).data.get(
+    "voterListFinalized",
+    false
+  ) == true
+
+  &&
+
+  request.time >=
+  get(
+    /databases/$(database)/documents/Elections/$(formId)
+  ).data.nominationStart
+
+  &&
+
+  request.time <=
+  get(
+    /databases/$(database)/documents/Elections/$(formId)
+  ).data.nominationEnd;
+
+
+/*
+ * Paired Android voting devices may read only the finalized
+ * nomination configuration for their own active election.
+ * The app uses allowedPositionIds as the authoritative ballot
+ * position list and then GETs those Position documents exactly.
+ */
+allow get: if
+  resource.data.electionId == formId
+  && resource.data.formStatus in ["finalized", "closed"]
+  && isActiveVotingDeviceForElection(formId)
+  && exists(
+    /databases/$(database)/documents/Elections/$(formId)
+  )
+  && get(
+    /databases/$(database)/documents/Elections/$(formId)
+  ).data.status == "voting_active"
+  && get(
+    /databases/$(database)/documents/Elections/$(formId)
+  ).data.get("voterListFinalized", false) == true;
+  /*
+   * CREATE DRAFT
+   *
+   * One nomination form belongs to one election.
+   *
+   * The document ID must equal the election ID.
+   *
+   * The election must already be finalized.
+   */
+  allow create: if isActiveECWithNominationDuty()
+
+                && request.resource.data.electionId == formId
+
+                && request.resource.data.formStatus == "draft"
+
+                && request.resource.data.createdBy == request.auth.uid
+
+                && request.resource.data.updatedBy == request.auth.uid
+
+                && exists(
+                  /databases/$(database)/documents/Elections/$(formId)
+                )
+
+                && get(
+                  /databases/$(database)/documents/Elections/$(formId)
+                ).data.status == "finalized"
+
+                && request.resource.data.keys().hasOnly([
+                  "electionId",
+                  "title",
+                  "instructions",
+                  "requirements",
+                  "rules",
+                  "allowedPositionIds",
+                  "candidateFields",
+                  "candidateSymbolEnabled",
+                  "candidateSymbolRequired",
+                  "declarationText",
+                  "formStatus",
+                  "createdBy",
+                  "createdAt",
+                  "updatedBy",
+                  "updatedAt"
+                ]);
+
+
+  /*
+   * UPDATE DRAFT
+   *
+   * An active EC member with the required duty may
+   * continue editing a draft form.
+   *
+   * The linked election must remain finalized.
+   *
+   * Ownership/history fields cannot be changed.
+   */
+  allow update: if isActiveECWithNominationDuty()
+
+                && resource.data.electionId == formId
+
+                && request.resource.data.electionId ==
+                   resource.data.electionId
+
+                && request.resource.data.createdBy ==
+                   resource.data.createdBy
+
+                && request.resource.data.createdAt ==
+                   resource.data.createdAt
+
+                                && resource.data.formStatus in [
+                  "draft",
+                  "finalized"
+                ]
+
+                && (
+
+                  /*
+                   * -------------------------------------------------
+                   * CASE 1: Draft -> Draft
+                   * -------------------------------------------------
+                   */
+                  (
+                    request.resource.data.formStatus == "draft"
+
+                    &&
+
+                    exists(
+                      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                    )
+
+                    &&
+
+                    get(
+                      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                    ).data.status == "finalized"
+
+                    &&
+
+                    request.resource.data.updatedBy ==
+                    request.auth.uid
+
+                    &&
+
+                    request.resource.data.diff(resource.data)
+                      .affectedKeys()
+                      .hasOnly([
+                        "title",
+                        "instructions",
+                        "requirements",
+                        "rules",
+                        "allowedPositionIds",
+                        "candidateFields",
+                        "candidateSymbolEnabled",
+                        "candidateSymbolRequired",
+                        "declarationText",
+                        "formStatus",
+                        "updatedBy",
+                        "updatedAt"
+                      ])
+                  )
+
+
+                  ||
+
+                  /*
+                   * -------------------------------------------------
+                   * CASE 2: Draft -> Finalized
+                   *
+                   * This is the FINALIZE FORM action.
+                   * -------------------------------------------------
+                   */
+                                   (
+                    request.resource.data.formStatus == "finalized"
+
+                    &&
+
+                    exists(
+                      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                    )
+
+                    &&
+
+                    get(
+                      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                    ).data.status == "finalized"
+
+                    &&
+
+                    get(
+                      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                    ).data.get(
+                      "voterListFinalized",
+                      false
+                    ) == true
+
+                    &&
+
+                    request.resource.data.finalizedBy ==
+                    request.auth.uid
+
+                    &&
+
+                    request.resource.data.diff(resource.data)
+                      .affectedKeys()
+                      .hasOnly([
+                        "title",
+                        "instructions",
+                        "requirements",
+                        "rules",
+                        "allowedPositionIds",
+                        "candidateFields",
+                        "candidateSymbolEnabled",
+                        "candidateSymbolRequired",
+                        "declarationText",
+                        "formStatus",
+                        "finalizedBy",
+                        "finalizedAt",
+                        "updatedBy",
+                        "updatedAt"
+                      ])
+                  )
+
+                  ||
+
+                  /*
+                   * -------------------------------------------------
+                   * CASE 3: Finalized -> Closed
+                   *
+                   * Closing is a one-way action.
+                   * The finalized form configuration remains
+                   * unchanged; only its status and closing
+                   * audit fields are recorded.
+                   * -------------------------------------------------
+                   */
+                  (
+                    resource.data.formStatus == "finalized"
+
+                    &&
+
+                    request.resource.data.formStatus == "closed"
+
+                    &&
+
+                    exists(
+                      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                    )
+
+                    &&
+
+                    get(
+                      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                    ).data.status == "finalized"
+
+                    &&
+
+                    request.resource.data.closedBy ==
+                    request.auth.uid
+
+                    &&
+
+                    request.resource.data.diff(resource.data)
+                      .affectedKeys()
+                      .hasOnly([
+                        "formStatus",
+                        "closedBy",
+                        "closedAt",
+                        "updatedBy",
+                        "updatedAt"
+                      ])
+                  )
+
+                );
+
+
+  /*
+   * CLOSED/FINALIZED FORM DELETION IS NOT ALLOWED.
+   */
+  allow delete: if false;
+
+}
+
+
+/* =====================================================
+   NOMINATION APPLICATIONS
+   ===================================================== */
+
+match /NominationApplications/{applicationId} {
+
+  /*
+   * -----------------------------------------------------
+   * READ
+   * -----------------------------------------------------
+   *
+   * Nomination applications contain private applicant
+   * information.
+   *
+   * Students/public users must NEVER be allowed to read
+   * nomination applications.
+   *
+   * Only Principal and active EC members with the
+   * Nomination & Candidate Management duty may read them.
+   */
+  allow read: if isPrincipal()
+              || isActiveECWithNominationDuty();
+
+
+  /*
+   * -----------------------------------------------------
+   * CREATE - PUBLIC STUDENT SUBMISSION
+   * -----------------------------------------------------
+   *
+   * Students do not authenticate.
+   *
+   * A student may create an application only when:
+   *
+   * 1. The election is finalized.
+   * 2. The official voter list is finalized.
+   * 3. The nomination form is finalized.
+   * 4. The nomination period is currently open.
+   * 5. The application ID matches the submitted
+   *    verification ID.
+   * 6. The verification record exists.
+   * 7. The submitted student information exactly matches
+   *    the official verification record.
+   * 8. The official voter is eligible.
+   * 9. The selected position belongs to this election.
+   * 10. The selected position is allowed by the finalized
+   *     nomination form.
+   * 11. Only the intended application fields are written.
+   *
+   * The document can only be CREATED.
+   *
+   * It cannot be updated by the public after submission.
+   * Therefore, using the same verification ID again will
+   * fail because the document already exists.
+   */
+  allow create: if
+
+    /* ---------------------------------------------
+       Application document structure
+       --------------------------------------------- */
+
+    request.resource.data.keys().hasOnly([
+      "electionId",
+      "formId",
+      "verificationId",
+      "name",
+      "rollNumber",
+      "className",
+      "section",
+      "positionId",
+      "manifesto",
+      "candidateSymbolBase64",
+      "candidateSymbolMimeType",
+      "declarationAccepted",
+      "status",
+      "submittedAt"
+    ])
+
+    &&
+
+    request.resource.data.electionId is string
+
+    &&
+
+    request.resource.data.formId is string
+
+    &&
+
+    request.resource.data.verificationId is string
+
+    &&
+
+    request.resource.data.name is string
+
+    &&
+
+    request.resource.data.rollNumber is string
+
+    &&
+
+    request.resource.data.className is string
+
+    &&
+
+    request.resource.data.section is string
+
+    &&
+
+    request.resource.data.positionId is string
+
+    &&
+
+    request.resource.data.manifesto is string
+
+    &&
+
+    request.resource.data.candidateSymbolBase64 is string
+
+    &&
+
+    request.resource.data.candidateSymbolMimeType is string
+
+    &&
+
+    request.resource.data.declarationAccepted == true
+
+    &&
+
+    request.resource.data.status == "submitted"
+
+    &&
+
+    request.resource.data.submittedAt == request.time
+
+
+    /* ---------------------------------------------
+       Application ID must be the verification ID
+       --------------------------------------------- */
+
+    &&
+
+    applicationId ==
+    request.resource.data.verificationId
+
+
+    /* ---------------------------------------------
+       Election must exist and be finalized
+       --------------------------------------------- */
+
+    &&
+
+    exists(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    )
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    ).data.status == "finalized"
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    ).data.get(
+      "voterListFinalized",
+      false
+    ) == true
+
+
+    /* ---------------------------------------------
+       Nomination form must belong to this election
+       and be finalized
+       --------------------------------------------- */
+
+    &&
+
+    exists(
+      /databases/$(database)/documents/NominationForms/$(request.resource.data.electionId)
+    )
+
+    &&
+
+    get(
+      /databases/$(database)/documents/NominationForms/$(request.resource.data.electionId)
+    ).data.electionId ==
+    request.resource.data.electionId
+
+    &&
+
+    get(
+      /databases/$(database)/documents/NominationForms/$(request.resource.data.electionId)
+    ).data.formStatus == "finalized"
+
+
+    /* ---------------------------------------------
+       Nomination period must currently be open
+       --------------------------------------------- */
+
+    &&
+
+    request.time >=
+    get(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    ).data.nominationStart
+
+    &&
+
+    request.time <=
+    get(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    ).data.nominationEnd
+
+
+    /* ---------------------------------------------
+       Private voter verification record must exist
+       --------------------------------------------- */
+
+    &&
+
+    exists(
+      /databases/$(database)/documents/VoterVerification/$(request.resource.data.verificationId)
+    )
+
+
+    /* ---------------------------------------------
+       Verification record must belong to same election
+       --------------------------------------------- */
+
+    &&
+
+    get(
+      /databases/$(database)/documents/VoterVerification/$(request.resource.data.verificationId)
+    ).data.electionId ==
+    request.resource.data.electionId
+
+
+        /* ---------------------------------------------
+       Student identity must match the official
+       voter verification record.
+       
+       Only Name and Roll Number are used for
+       eligibility verification.
+       
+       Class and Section are application details,
+       but they do NOT determine eligibility.
+       --------------------------------------------- */
+
+    &&
+
+    request.resource.data.rollNumber ==
+    get(
+      /databases/$(database)/documents/VoterVerification/$(request.resource.data.verificationId)
+    ).data.rollNumber
+
+    &&
+
+    request.resource.data.name ==
+    get(
+      /databases/$(database)/documents/VoterVerification/$(request.resource.data.verificationId)
+    ).data.name
+
+
+    /* ---------------------------------------------
+       Student must be officially eligible
+       --------------------------------------------- */
+
+    &&
+
+    get(
+      /databases/$(database)/documents/VoterVerification/$(request.resource.data.verificationId)
+    ).data.eligible == true
+
+
+    /* ---------------------------------------------
+       Selected position must exist
+       --------------------------------------------- */
+
+    &&
+
+    exists(
+      /databases/$(database)/documents/Positions/$(request.resource.data.positionId)
+    )
+
+
+    /* ---------------------------------------------
+       Position must belong to this election
+       --------------------------------------------- */
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Positions/$(request.resource.data.positionId)
+    ).data.electionId ==
+    request.resource.data.electionId
+
+
+    /* ---------------------------------------------
+       Position must be allowed by the finalized
+       nomination form
+       --------------------------------------------- */
+
+    &&
+
+    request.resource.data.positionId in
+    get(
+      /databases/$(database)/documents/NominationForms/$(request.resource.data.electionId)
+    ).data.allowedPositionIds
+
+
+    /* ---------------------------------------------
+       Symbol data limits
+       --------------------------------------------- */
+
+    &&
+
+    request.resource.data.candidateSymbolBase64.size() <= 200000
+
+    &&
+
+    request.resource.data.candidateSymbolMimeType in [
+      "",
+      "image/webp",
+      "image/jpeg",
+      "image/png"
+    ];
+
+
+  /*
+   * -----------------------------------------------------
+   * UPDATE
+   * -----------------------------------------------------
+   *
+   * Public students cannot modify an application after
+   * submission.
+   *
+   * EC review is handled by the separate authenticated
+   * update permission below.
+   */
+  allow update: if
+
+    isActiveECWithNominationDuty()
+
+    &&
+
+    resource.data.electionId is string
+
+    &&
+
+    exists(
+      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+    )
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+    ).data.status == "finalized"
+
+    &&
+
+    request.resource.data.electionId ==
+    resource.data.electionId
+
+    &&
+
+    request.resource.data.diff(resource.data)
+      .affectedKeys()
+      .hasOnly([
+        "status",
+        "reviewedBy",
+        "reviewedAt",
+        "reviewNote",
+        "rejectionReason",
+        "approvedBy",
+        "approvedAt",
+        "candidateId",
+        "updatedAt"
+      ])
+
+    &&
+
+    (
+      /*
+       * submitted -> under_review
+       */
+      (
+        resource.data.status == "submitted"
+
+        &&
+
+        request.resource.data.status == "under_review"
+
+        &&
+
+        request.resource.data.reviewedBy ==
+        request.auth.uid
+      )
+
+      ||
+
+      /*
+       * submitted/under_review -> rejected
+       */
+      (
+        resource.data.status in [
+          "submitted",
+          "under_review"
+        ]
+
+        &&
+
+        request.resource.data.status == "rejected"
+
+        &&
+
+        request.resource.data.reviewedBy ==
+        request.auth.uid
+
+        &&
+
+        request.resource.data.rejectionReason is string
+
+        &&
+
+        request.resource.data.rejectionReason.size() > 0
+      )
+
+      ||
+
+      /*
+       * submitted/under_review -> approved
+       *
+       * Candidate creation must happen atomically.
+       */
+      (
+        resource.data.status in [
+          "submitted",
+          "under_review"
+        ]
+
+        &&
+
+        request.resource.data.status == "approved"
+
+        &&
+
+        request.resource.data.approvedBy ==
+        request.auth.uid
+
+        &&
+
+        request.resource.data.candidateId ==
+        applicationId
+
+
+        &&
+
+        getAfter(
+          /databases/$(database)/documents/Candidates/$(applicationId)
+        ).data.applicationId ==
+        applicationId
+
+        &&
+
+        getAfter(
+          /databases/$(database)/documents/Candidates/$(applicationId)
+        ).data.status == "approved"
+      )
+    );
+
+
+  /*
+   * -----------------------------------------------------
+   * DELETE
+   * -----------------------------------------------------
+   *
+   * Applications are never deleted.
+   */
+  allow delete: if false;
+}
+
+
+/* =====================================================
+   CANDIDATES
+   ===================================================== */
+
+match /Candidates/{candidateId} {
+
+  allow read: if isPrincipal()
+              || isActiveECWithNominationDuty()
+              || canReviewClosedResults(resource.data.electionId);
+
+
+
+  /*
+   * A paired Android voting device may read/query only FINALIZED
+   * candidates for its own active election and an official
+   * position belonging to that election.
+   */
+  allow get, list: if
+    resource.data.electionId is string
+    && resource.data.positionId is string
+    && resource.data.status == "finalized"
+    && isActiveVotingDeviceForElection(resource.data.electionId)
+    && exists(
+      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+    )
+    && get(
+      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+    ).data.status == "voting_active"
+    && get(
+      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+    ).data.get("voterListFinalized", false) == true
+    && exists(
+      /databases/$(database)/documents/Positions/$(resource.data.positionId)
+    )
+    && get(
+      /databases/$(database)/documents/Positions/$(resource.data.positionId)
+    ).data.electionId == resource.data.electionId;
+
+  /*
+   * Candidate creation is only allowed as part of the
+   * atomic application-approval operation.
+   */
+  allow create: if isActiveECWithNominationDuty()
+                && request.resource.data.applicationId is string
+                && request.resource.data.electionId is string
+                && request.resource.data.positionId is string
+                && exists(
+                  /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+                )
+                && get(
+                  /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+                ).data.status == "finalized"
+                && request.resource.data.status == "approved"
+                && request.resource.data.createdBy == request.auth.uid
+                && exists(
+                  /databases/$(database)/documents/NominationApplications/$(request.resource.data.applicationId)
+                )
+                && getAfter(
+                  /databases/$(database)/documents/NominationApplications/$(request.resource.data.applicationId)
+                ).data.status == "approved"
+                && getAfter(
+                  /databases/$(database)/documents/NominationApplications/$(request.resource.data.applicationId)
+                ).data.candidateId == candidateId;
+
+  /*
+   * Approved candidates may only be finalized once.
+   * Finalized candidates are immutable.
+   */
+  allow update: if isActiveECWithNominationDuty()
+                && resource.data.electionId is string
+                && exists(
+                  /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                )
+                && get(
+                  /databases/$(database)/documents/Elections/$(resource.data.electionId)
+                ).data.status == "finalized"
+                && resource.data.status == "approved"
+                && request.resource.data.status == "finalized"
+                && request.resource.data.electionId == resource.data.electionId
+                && request.resource.data.applicationId == resource.data.applicationId
+                && request.resource.data.finalizedBy == request.auth.uid
+                && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                  "status",
+                  "finalizedBy",
+                  "finalizedAt",
+                  "updatedBy",
+                  "updatedAt"
+                ]);
+
+  allow delete: if false;
+}
+
+
+    /* =====================================================
+       INVITATIONS
+    ===================================================== */
+
+    match /Invitations/{invitationId} {
+
+     allow create: if
+              (
+                (
+                  isPrincipal()
+                  && request.resource.data.role in [
+                    "sub_admin",
+                    "election_commission"
+                  ]
+                )
+                ||
+                (
+                  hasSubAdminDuty("Create EC Member")
+                  && request.resource.data.role == "election_commission"
+                )
+                ||
+                (
+                  isActiveECWithBoothDuty()
+                  && request.resource.data.role in [
+                    "presiding_officer",
+                    "assistant_presiding_officer"
+                  ]
+                )
+              )
+              && request.resource.data.status == "pending"
+              && request.resource.data.createdBy == request.auth.uid
+              && request.resource.data.role in [
+                "sub_admin",
+                "election_commission",
+                "presiding_officer",
+                "assistant_presiding_officer"
+              ];
+
+
+      allow get: if request.auth != null;
+
+
+      allow list: if isPrincipal();
+
+
+      allow update: if isPrincipal()
+
+                    ||
+
+                    (
+                      request.auth != null
+                      &&
+                      resource.data.status == "pending"
+                      &&
+                      resource.data.email == request.auth.token.email
+                      &&
+                      request.resource.data
+                        .diff(resource.data)
+                        .affectedKeys()
+                        .hasOnly([
+                          "status",
+                          "acceptedUid",
+                          "acceptedAt"
+                        ])
+                      &&
+                      request.resource.data.status == "accepted"
+                      &&
+                      request.resource.data.acceptedUid == request.auth.uid
+                      &&
+                      getAfter(
+                        /databases/$(database)/documents/Users/$(request.auth.uid)
+                      ).data.invitationId == invitationId
+                    );
+
+
+      allow delete: if isPrincipal();
+    }
+
+
+
+    /* =====================================================
+       SYSTEM SETTINGS
+    ===================================================== */
+
+    match /SystemSettings/system {
+
+      allow read: if true;
+
+      /* The system record can only be made during the initial setup and
+       * only together with that authenticated user's Principal profile. */
+      allow create: if request.auth != null
+                    && !exists(
+                      /databases/$(database)/documents/SystemSettings/system
+                    )
+                    && request.resource.data.keys().hasOnly([
+                      "initialized",
+                      "institutionName",
+                      "principalUid",
+                      "initializedAt"
+                    ])
+                    && request.resource.data.initialized == true
+                    && request.resource.data.institutionName is string
+                    && request.resource.data.principalUid == request.auth.uid
+                    && request.resource.data.initializedAt is timestamp
+                    && existsAfter(
+                      /databases/$(database)/documents/Users/$(request.auth.uid)
+                    )
+                    && getAfter(
+                      /databases/$(database)/documents/Users/$(request.auth.uid)
+                    ).data.role == "principal"
+                    && getAfter(
+                      /databases/$(database)/documents/Users/$(request.auth.uid)
+                    ).data.status == "active"
+                    && getAfter(
+                      /databases/$(database)/documents/Users/$(request.auth.uid)
+                    ).data.email == request.auth.token.email
+                    && getAfter(
+                      /databases/$(database)/documents/Users/$(request.auth.uid)
+                    ).data.institutionName == request.resource.data.institutionName;
+
+      allow update, delete: if false;
+    }
+
+
+
+    /* =====================================================
+       INSTITUTION
+    ===================================================== */
+
+    match /Institutions/{institutionId} {
+
+      allow read: if request.auth != null;
+
+
+      allow create, update: if isPrincipal();
+
+
+      allow delete: if false;
+    }
+/* =====================================================
+   BOOTHS & POLLING STAFF MANAGEMENT
+   ===================================================== */
+
+function isActiveECWithBoothDuty() {
+  return request.auth != null
+    && get(
+      /databases/$(database)/documents/Users/$(request.auth.uid)
+    ).data.role == "election_commission"
+    && get(
+      /databases/$(database)/documents/Users/$(request.auth.uid)
+    ).data.status == "active"
+    && get(
+      /databases/$(database)/documents/ElectionCommission/$(request.auth.uid)
+    ).data.status == "active"
+    && "Booth & Polling Staff Management" in
+      get(
+        /databases/$(database)/documents/ElectionCommission/$(request.auth.uid)
+      ).data.duties;
+}
+
+function isActivePollingOfficer() {
+  return request.auth != null
+    && exists(
+      /databases/$(database)/documents/Users/$(request.auth.uid)
+    )
+    && get(
+      /databases/$(database)/documents/Users/$(request.auth.uid)
+    ).data.status == "active"
+    && get(
+      /databases/$(database)/documents/Users/$(request.auth.uid)
+    ).data.role in [
+      "presiding_officer",
+      "assistant_presiding_officer"
+    ];
+}
+
+function isAssignedPollingOfficer(boothId) {
+  return isActivePollingOfficer()
+    && boothId is string
+    && boothId.size() > 0
+    && exists(
+      /databases/$(database)/documents/BoothStaff/$(boothId)
+    )
+    && (
+      get(
+        /databases/$(database)/documents/BoothStaff/$(boothId)
+      ).data.poUid == request.auth.uid
+      ||
+      get(
+        /databases/$(database)/documents/BoothStaff/$(boothId)
+      ).data.apoUid == request.auth.uid
+    );
+}
+
+/*
+ * Active Android voting-device binding.
+ *
+ * The anonymous Firebase identity must own an active
+ * VotingDevices/{uid} document bound to the exact
+ * election and booth being accessed.
+ */
+function isActiveBoundVotingDevice(electionId, boothId) {
+  return request.auth != null
+    && request.auth.token.firebase.sign_in_provider == "anonymous"
+    && electionId is string
+    && electionId.size() > 0
+    && boothId is string
+    && boothId.size() > 0
+    && exists(
+      /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+    )
+    && get(
+      /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+    ).data.deviceUid == request.auth.uid
+    && get(
+      /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+    ).data.status == "active"
+    && get(
+      /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+    ).data.electionId == electionId
+    && get(
+      /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+    ).data.boothId == boothId;
+}
+
+
+/* =====================================================
+   BOOTHS
+   ===================================================== */
+
+match /Booths/{boothId} {
+
+  /* Principal monitors; Booth-duty EC performs operational writes. */
+  allow read: if isPrincipal()
+              || isActiveECWithBoothDuty();
+
+   /* A PO/APO may read only a booth assigned to that officer. */
+  allow get: if isAssignedPollingOfficer(boothId);
+
+
+  /*
+   * A paired Android voting device may read ONLY
+   * the booth to which that device is actively bound.
+   */
+  allow get: if
+    request.auth != null
+    &&
+    request.auth.token.firebase.sign_in_provider ==
+      "anonymous"
+    &&
+    exists(
+      /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+    )
+    &&
+    get(
+      /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+    ).data.status ==
+      "active"
+    &&
+    get(
+      /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+    ).data.boothId ==
+      boothId;
+
+  allow create: if isActiveECWithBoothDuty()
+    && request.resource.data.keys().hasAll([
+      "electionId",
+      "boothNumber",
+      "location",
+      "status",
+      "createdBy",
+      "createdAt",
+      "updatedBy",
+      "updatedAt"
+    ])
+    && request.resource.data.keys().hasOnly([
+      "electionId",
+      "boothNumber",
+      "location",
+      "status",
+      "createdBy",
+      "createdAt",
+      "updatedBy",
+      "updatedAt"
+    ])
+    && request.resource.data.electionId is string
+    && request.resource.data.boothNumber is string
+    && request.resource.data.location is string
+    && request.resource.data.boothNumber.size() > 0
+    && request.resource.data.location.size() > 0
+    && request.resource.data.status == "incomplete"
+    && request.resource.data.createdBy == request.auth.uid
+    && request.resource.data.updatedBy == request.auth.uid
+    && exists(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    )
+    && get(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    ).data.status == "finalized"
+    && get(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    ).data.get("voterListFinalized", false) == true;
+
+  allow update: if isActiveECWithBoothDuty()
+    && resource.data.electionId == request.resource.data.electionId
+    && resource.data.createdBy == request.resource.data.createdBy
+    && resource.data.createdAt == request.resource.data.createdAt
+    && exists(
+      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+    )
+    && get(
+      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+    ).data.status == "finalized"
+    && get(
+      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+    ).data.get("voterListFinalized", false) == true
+    && request.resource.data.status in ["incomplete", "ready"]
+    && request.resource.data.updatedBy == request.auth.uid
+    && request.resource.data.diff(resource.data)
+      .affectedKeys()
+      .hasOnly([
+        "boothNumber",
+        "location",
+        "status",
+        "updatedBy",
+        "updatedAt"
+      ]);
+
+  allow delete: if false;
+}
+
+
+/* =====================================================
+   BOOTH STAFF
+   ===================================================== */
+
+match /BoothStaff/{assignmentId} {
+
+  /* Principal monitors; Booth-duty EC performs operational writes. */
+  allow read: if isPrincipal()
+              || isActiveECWithBoothDuty()
+              || (
+                isActivePollingOfficer()
+                && (
+                  resource.data.poUid == request.auth.uid
+                  || resource.data.apoUid == request.auth.uid
+                )
+              );
+
+  allow create: if isActiveECWithBoothDuty()
+    && request.resource.data.keys().hasAll([
+      "electionId",
+      "boothId",
+      "poUid",
+      "apoUid",
+      "assignedBy",
+      "assignedAt",
+      "updatedBy",
+      "updatedAt"
+    ])
+    && request.resource.data.keys().hasOnly([
+      "electionId",
+      "boothId",
+      "poUid",
+      "apoUid",
+      "assignedBy",
+      "assignedAt",
+      "updatedBy",
+      "updatedAt"
+    ])
+    && assignmentId == request.resource.data.boothId
+    && request.resource.data.electionId is string
+    && request.resource.data.boothId is string
+    && request.resource.data.poUid is string
+    && request.resource.data.poUid.size() > 0
+    && request.resource.data.apoUid is string
+    && request.resource.data.assignedBy == request.auth.uid
+    && request.resource.data.updatedBy == request.auth.uid
+    && exists(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    )
+    && get(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    ).data.status == "finalized"
+    && get(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    ).data.get("voterListFinalized", false) == true
+    && exists(
+      /databases/$(database)/documents/Booths/$(request.resource.data.boothId)
+    )
+    && get(
+      /databases/$(database)/documents/Booths/$(request.resource.data.boothId)
+    ).data.electionId == request.resource.data.electionId
+    && exists(
+      /databases/$(database)/documents/Users/$(request.resource.data.poUid)
+    )
+    && get(
+      /databases/$(database)/documents/Users/$(request.resource.data.poUid)
+    ).data.role == "presiding_officer"
+    && get(
+      /databases/$(database)/documents/Users/$(request.resource.data.poUid)
+    ).data.status == "active"
+    && (
+      request.resource.data.apoUid == ""
+      || (
+        request.resource.data.apoUid != request.resource.data.poUid
+        && exists(
+          /databases/$(database)/documents/Users/$(request.resource.data.apoUid)
+        )
+        && get(
+          /databases/$(database)/documents/Users/$(request.resource.data.apoUid)
+        ).data.role == "assistant_presiding_officer"
+        && get(
+          /databases/$(database)/documents/Users/$(request.resource.data.apoUid)
+        ).data.status == "active"
+      )
+    );
+
+  allow update: if isActiveECWithBoothDuty()
+    && request.resource.data.keys().hasAll([
+      "electionId",
+      "boothId",
+      "poUid",
+      "apoUid",
+      "assignedBy",
+      "assignedAt",
+      "updatedBy",
+      "updatedAt"
+    ])
+    && request.resource.data.keys().hasOnly([
+      "electionId",
+      "boothId",
+      "poUid",
+      "apoUid",
+      "assignedBy",
+      "assignedAt",
+      "updatedBy",
+      "updatedAt"
+    ])
+    && assignmentId == resource.data.boothId
+    && assignmentId == request.resource.data.boothId
+    && request.resource.data.electionId == resource.data.electionId
+    && request.resource.data.boothId == resource.data.boothId
+    && request.resource.data.assignedBy == resource.data.assignedBy
+    && request.resource.data.assignedAt == resource.data.assignedAt
+    && request.resource.data.updatedBy == request.auth.uid
+    && request.resource.data.poUid is string
+    && request.resource.data.poUid.size() > 0
+    && request.resource.data.apoUid is string
+    && request.resource.data.diff(resource.data)
+      .affectedKeys()
+      .hasOnly(["poUid", "apoUid", "updatedBy", "updatedAt"])
+    && exists(
+      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+    )
+    && get(
+      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+    ).data.status == "finalized"
+    && get(
+      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+    ).data.get("voterListFinalized", false) == true
+    && exists(
+      /databases/$(database)/documents/Booths/$(resource.data.boothId)
+    )
+    && get(
+      /databases/$(database)/documents/Booths/$(resource.data.boothId)
+    ).data.electionId == resource.data.electionId
+    && exists(
+      /databases/$(database)/documents/Users/$(request.resource.data.poUid)
+    )
+    && get(
+      /databases/$(database)/documents/Users/$(request.resource.data.poUid)
+    ).data.role == "presiding_officer"
+    && get(
+      /databases/$(database)/documents/Users/$(request.resource.data.poUid)
+    ).data.status == "active"
+    && (
+      request.resource.data.apoUid == ""
+      || (
+        request.resource.data.apoUid != request.resource.data.poUid
+        && exists(
+          /databases/$(database)/documents/Users/$(request.resource.data.apoUid)
+        )
+        && get(
+          /databases/$(database)/documents/Users/$(request.resource.data.apoUid)
+        ).data.role == "assistant_presiding_officer"
+        && get(
+          /databases/$(database)/documents/Users/$(request.resource.data.apoUid)
+        ).data.status == "active"
+      )
+    );
+
+  allow delete: if isActiveECWithBoothDuty()
+    && exists(
+      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+    )
+    && get(
+      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+    ).data.status == "finalized"
+    && get(
+      /databases/$(database)/documents/Elections/$(resource.data.electionId)
+    ).data.get("voterListFinalized", false) == true;
+}
+/* =====================================================
+   VOTING SESSIONS
+   ===================================================== */
+
+match /VotingSessions/{sessionId} {
+
+
+  /* ===================================================
+     GET
+
+     Principal can inspect sessions.
+
+     An assigned PO/APO may read an existing session
+     belonging to their assigned booth.
+
+     The Presiding Officer may also GET a session path
+     that does not exist yet because the dashboard
+     transaction checks the deterministic session ID
+     before creating it.
+     =================================================== */
+
+  allow get: if canViewElectionOverview();
+
+
+  allow get: if
+    isActivePollingOfficer()
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Users/$(request.auth.uid)
+    ).data.role == "presiding_officer"
+
+    &&
+
+    !exists(
+      /databases/$(database)/documents/VotingSessions/$(sessionId)
+    );
+
+
+  allow get: if
+    resource.data.boothId is string
+
+    &&
+
+    isAssignedPollingOfficer(
+      resource.data.boothId
+    );
+
+
+  /*
+   * Active paired Android device may GET only:
+   * 1. an unclaimed authorized session for its bound booth, or
+   * 2. a ballot_open session already claimed by this exact device.
+   */
+  allow get: if
+    resource.data.electionId is string
+    && resource.data.boothId is string
+    && isActiveBoundVotingDevice(
+      resource.data.electionId,
+      resource.data.boothId
+    )
+    && (
+      (
+        resource.data.status == "authorized"
+        && resource.data.deviceId == ""
+      )
+      ||
+      (
+        resource.data.status == "ballot_open"
+        && resource.data.deviceId == request.auth.uid
+      )
+    );
+
+
+  /* ===================================================
+     LIST / QUERY
+
+     PO/APO may query sessions only for a booth
+     actually assigned to them.
+
+     The dashboard uses:
+
+     where("boothId", "==", assignedBoothId)
+     =================================================== */
+
+  allow list: if
+    canViewElectionOverview()
+
+    ||
+
+    (
+      resource.data.boothId is string
+
+      &&
+
+      isAssignedPollingOfficer(
+        resource.data.boothId
+      )
+    )
+
+    ||
+
+    (
+      resource.data.electionId is string
+      && resource.data.boothId is string
+      && resource.data.status == "authorized"
+      && resource.data.deviceId == ""
+      && isActiveBoundVotingDevice(
+        resource.data.electionId,
+        resource.data.boothId
+      )
+    );
+
+
+  /* ===================================================
+     CREATE BALLOT SESSION
+
+     Only the assigned Presiding Officer may create
+     a session.
+
+     APO may monitor/verify but cannot issue ballots.
+     =================================================== */
+
+  allow create: if
+
+    request.auth != null
+
+
+    /* -------------------------------------------------
+       ACTIVE PRESIDING OFFICER
+       ------------------------------------------------- */
+
+    &&
+
+    isActivePollingOfficer()
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Users/$(request.auth.uid)
+    ).data.role == "presiding_officer"
+
+
+    /* -------------------------------------------------
+       EXACT DOCUMENT STRUCTURE
+       ------------------------------------------------- */
+
+    &&
+
+    request.resource.data.keys().hasAll([
+
+      "electionId",
+      "boothId",
+      "voterId",
+
+      "authorizedBy",
+      "authorizedByRole",
+
+      "status",
+
+      "createdAt",
+      "authorizedAt",
+      "updatedAt",
+      "expiresAt",
+
+      "ballotOpenedAt",
+      "submittedAt",
+      "cancelledAt",
+
+      "deviceId",
+
+      "attemptCount"
+
+    ])
+
+    &&
+
+    request.resource.data.keys().hasOnly([
+
+      "electionId",
+      "boothId",
+      "voterId",
+
+      "authorizedBy",
+      "authorizedByRole",
+
+      "status",
+
+      "createdAt",
+      "authorizedAt",
+      "updatedAt",
+      "expiresAt",
+
+      "ballotOpenedAt",
+      "submittedAt",
+      "cancelledAt",
+
+      "deviceId",
+
+      "attemptCount"
+
+    ])
+
+
+    /* -------------------------------------------------
+       BASIC TYPES
+       ------------------------------------------------- */
+
+    &&
+
+    request.resource.data.electionId
+      is string
+
+    &&
+
+    request.resource.data.boothId
+      is string
+
+    &&
+
+    request.resource.data.voterId
+      is string
+
+    &&
+
+    request.resource.data.authorizedBy
+      is string
+
+    &&
+
+    request.resource.data.authorizedByRole
+      is string
+
+    &&
+
+    request.resource.data.status
+      is string
+
+    &&
+
+    request.resource.data.expiresAt
+      is timestamp
+
+    &&
+
+    request.resource.data.deviceId
+      is string
+
+    &&
+
+    request.resource.data.attemptCount
+      is int
+
+
+    /* -------------------------------------------------
+       NON-EMPTY IDS
+       ------------------------------------------------- */
+
+    &&
+
+    request.resource.data.electionId.size() > 0
+
+    &&
+
+    request.resource.data.boothId.size() > 0
+
+    &&
+
+    request.resource.data.voterId.size() > 0
+
+
+    /* -------------------------------------------------
+       DETERMINISTIC DOCUMENT ID
+
+       electionId_voterId
+
+       This prevents multiple session documents being
+       created for the same voter in the same election.
+       ------------------------------------------------- */
+
+    &&
+
+    sessionId ==
+
+      request.resource.data.electionId
+
+      +
+
+      "_"
+
+      +
+
+      request.resource.data.voterId
+
+
+    /* -------------------------------------------------
+       PO MUST BE ASSIGNED TO THIS BOOTH
+       ------------------------------------------------- */
+
+    &&
+
+    isAssignedPollingOfficer(
+      request.resource.data.boothId
+    )
+
+    &&
+
+    get(
+      /databases/$(database)/documents/BoothStaff/$(request.resource.data.boothId)
+    ).data.poUid == request.auth.uid
+
+
+    /* -------------------------------------------------
+       BOOTH MUST EXIST
+       ------------------------------------------------- */
+
+    &&
+
+    exists(
+      /databases/$(database)/documents/Booths/$(request.resource.data.boothId)
+    )
+
+
+    /* -------------------------------------------------
+       BOOTH MUST BELONG TO SAME ELECTION
+       ------------------------------------------------- */
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Booths/$(request.resource.data.boothId)
+    ).data.electionId ==
+      request.resource.data.electionId
+
+
+    /* -------------------------------------------------
+       ELECTION MUST EXIST
+       ------------------------------------------------- */
+
+    &&
+
+    exists(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    )
+
+
+    /* -------------------------------------------------
+       VOTING MUST ACTUALLY BE ACTIVE
+       ------------------------------------------------- */
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    ).data.status ==
+      "voting_active"
+
+
+    /* -------------------------------------------------
+       OFFICIAL VOTER LIST MUST BE FINALIZED
+       ------------------------------------------------- */
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    ).data.get(
+      "voterListFinalized",
+      false
+    ) == true
+
+
+    /* -------------------------------------------------
+       VOTER MUST EXIST
+       ------------------------------------------------- */
+
+    &&
+
+    exists(
+      /databases/$(database)/documents/Voters/$(request.resource.data.voterId)
+    )
+
+
+    /* -------------------------------------------------
+       VOTER MUST BELONG TO THIS ELECTION
+       ------------------------------------------------- */
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Voters/$(request.resource.data.voterId)
+    ).data.electionId ==
+      request.resource.data.electionId
+
+
+    /* -------------------------------------------------
+       VOTER MUST BELONG TO THIS BOOTH
+       ------------------------------------------------- */
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Voters/$(request.resource.data.voterId)
+    ).data.boothId ==
+      request.resource.data.boothId
+
+
+    /* -------------------------------------------------
+       VOTER MUST BE ELIGIBLE
+       ------------------------------------------------- */
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Voters/$(request.resource.data.voterId)
+    ).data.eligible ==
+      true
+
+
+    /* -------------------------------------------------
+       VOTER MUST NOT HAVE COMPLETED VOTING
+       ------------------------------------------------- */
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Voters/$(request.resource.data.voterId)
+    ).data.participationStatus ==
+      "not_voted"
+
+
+    /* -------------------------------------------------
+       AUTHORIZATION OWNER
+       ------------------------------------------------- */
+
+    &&
+
+    request.resource.data.authorizedBy ==
+      request.auth.uid
+
+    &&
+
+    request.resource.data.authorizedByRole ==
+      "presiding_officer"
+
+
+    /* -------------------------------------------------
+       INITIAL SESSION STATUS
+       ------------------------------------------------- */
+
+    &&
+
+    request.resource.data.status ==
+      "authorized"
+
+
+    /* -------------------------------------------------
+       SERVER TIMESTAMPS
+       ------------------------------------------------- */
+
+    &&
+
+    request.resource.data.createdAt ==
+      request.time
+
+    &&
+
+    request.resource.data.authorizedAt ==
+      request.time
+
+    &&
+
+    request.resource.data.updatedAt ==
+      request.time
+
+
+    /* -------------------------------------------------
+       SESSION MUST EXPIRE IN FUTURE
+       ------------------------------------------------- */
+
+    &&
+
+    request.resource.data.expiresAt >
+      request.time
+
+
+    /* -------------------------------------------------
+       DEVICE HAS NOT CLAIMED BALLOT YET
+       ------------------------------------------------- */
+
+    &&
+
+    request.resource.data.deviceId ==
+      ""
+
+
+    /* -------------------------------------------------
+       BALLOT HAS NOT OPENED
+       ------------------------------------------------- */
+
+    &&
+
+    request.resource.data.ballotOpenedAt ==
+      null
+
+
+    /* -------------------------------------------------
+       NOTHING SUBMITTED
+       ------------------------------------------------- */
+
+    &&
+
+    request.resource.data.submittedAt ==
+      null
+
+
+    /* -------------------------------------------------
+       NOT CANCELLED
+       ------------------------------------------------- */
+
+    &&
+
+    request.resource.data.cancelledAt ==
+      null
+
+
+    /* -------------------------------------------------
+       FIRST AUTHORIZATION ATTEMPT
+       ------------------------------------------------- */
+
+    &&
+
+    request.resource.data.attemptCount ==
+      1
+
+    &&
+
+    existsAfter(
+      /databases/$(database)/documents/BoothVotingState/$(request.resource.data.boothId)
+    )
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/BoothVotingState/$(request.resource.data.boothId)
+    ).data.status == "active"
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/BoothVotingState/$(request.resource.data.boothId)
+    ).data.electionId == request.resource.data.electionId
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/BoothVotingState/$(request.resource.data.boothId)
+    ).data.activeSessionId == sessionId
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/BoothVotingState/$(request.resource.data.boothId)
+    ).data.activeVoterId == request.resource.data.voterId;
+
+
+
+  /* ===================================================
+     UPDATE
+
+     Allowed controlled transitions:
+
+     1. Presiding Officer re-authorizes an
+        expired/cancelled session.
+     2. Presiding Officer cancels an active session.
+     3. The active paired Android device claims an
+        unexpired authorized session and changes it
+        to ballot_open.
+
+     Vote submission remains a separate later step.
+     =================================================== */
+
+  allow update: if
+
+
+    /* =================================================
+       CASE 1
+       RE-AUTHORIZE CANCELLED / EXPIRED SESSION
+       ================================================= */
+
+    (
+
+      request.auth != null
+
+
+      /* -----------------------------------------------
+         ACTIVE PO ONLY
+         ----------------------------------------------- */
+
+      &&
+
+      isActivePollingOfficer()
+
+      &&
+
+      get(
+        /databases/$(database)/documents/Users/$(request.auth.uid)
+      ).data.role ==
+        "presiding_officer"
+
+
+      /* -----------------------------------------------
+         SESSION IDENTITY CANNOT CHANGE
+         ----------------------------------------------- */
+
+      &&
+
+      sessionId ==
+
+        resource.data.electionId
+
+        +
+
+        "_"
+
+        +
+
+        resource.data.voterId
+
+
+      &&
+
+      request.resource.data.electionId ==
+        resource.data.electionId
+
+      &&
+
+      request.resource.data.boothId ==
+        resource.data.boothId
+
+      &&
+
+      request.resource.data.voterId ==
+        resource.data.voterId
+
+      &&
+
+      request.resource.data.createdAt ==
+        resource.data.createdAt
+
+
+      /* -----------------------------------------------
+         PO MUST STILL BE ASSIGNED TO BOOTH
+         ----------------------------------------------- */
+
+      &&
+
+      isAssignedPollingOfficer(
+        resource.data.boothId
+      )
+
+      &&
+
+      get(
+        /databases/$(database)/documents/BoothStaff/$(resource.data.boothId)
+      ).data.poUid ==
+        request.auth.uid
+
+
+      /* -----------------------------------------------
+         ELECTION MUST STILL BE ACTIVE
+         ----------------------------------------------- */
+
+      &&
+
+      exists(
+        /databases/$(database)/documents/Elections/$(resource.data.electionId)
+      )
+
+      &&
+
+      get(
+        /databases/$(database)/documents/Elections/$(resource.data.electionId)
+      ).data.status ==
+        "voting_active"
+
+      &&
+
+      get(
+        /databases/$(database)/documents/Elections/$(resource.data.electionId)
+      ).data.get(
+        "voterListFinalized",
+        false
+      ) == true
+
+
+      /* -----------------------------------------------
+         VOTER MUST STILL BE VALID
+         ----------------------------------------------- */
+
+      &&
+
+      exists(
+        /databases/$(database)/documents/Voters/$(resource.data.voterId)
+      )
+
+      &&
+
+      get(
+        /databases/$(database)/documents/Voters/$(resource.data.voterId)
+      ).data.electionId ==
+        resource.data.electionId
+
+      &&
+
+      get(
+        /databases/$(database)/documents/Voters/$(resource.data.voterId)
+      ).data.boothId ==
+        resource.data.boothId
+
+      &&
+
+      get(
+        /databases/$(database)/documents/Voters/$(resource.data.voterId)
+      ).data.eligible ==
+        true
+
+      &&
+
+      get(
+        /databases/$(database)/documents/Voters/$(resource.data.voterId)
+      ).data.participationStatus ==
+        "not_voted"
+
+
+      /* -----------------------------------------------
+         OLD SESSION MUST BE CANCELLED OR EXPIRED
+
+         Expired can either be stored explicitly later,
+         or be an authorized session whose expiresAt
+         has already passed.
+         ----------------------------------------------- */
+
+      &&
+
+      (
+
+        resource.data.status ==
+          "cancelled"
+
+        ||
+
+        resource.data.status ==
+          "expired"
+
+        ||
+
+        (
+
+          resource.data.status ==
+            "authorized"
+
+          &&
+
+          resource.data.expiresAt
+            is timestamp
+
+          &&
+
+          resource.data.expiresAt <=
+            request.time
+
+        )
+
+      )
+
+
+      /* -----------------------------------------------
+         ONLY THESE FIELDS CAN CHANGE
+         ----------------------------------------------- */
+
+      &&
+
+      request.resource.data
+        .diff(
+          resource.data
+        )
+        .affectedKeys()
+        .hasOnly([
+
+          "authorizedBy",
+          "authorizedByRole",
+
+          "status",
+
+          "authorizedAt",
+          "updatedAt",
+          "expiresAt",
+
+          "ballotOpenedAt",
+          "submittedAt",
+          "cancelledAt",
+
+          "deviceId",
+
+          "attemptCount"
+
+        ])
+
+
+      /* -----------------------------------------------
+         RE-AUTHORIZED BY CURRENT PO
+         ----------------------------------------------- */
+
+      &&
+
+      request.resource.data.authorizedBy ==
+        request.auth.uid
+
+      &&
+
+      request.resource.data.authorizedByRole ==
+        "presiding_officer"
+
+
+      /* -----------------------------------------------
+         RESET STATUS
+         ----------------------------------------------- */
+
+      &&
+
+      request.resource.data.status ==
+        "authorized"
+
+
+      /* -----------------------------------------------
+         NEW SERVER TIMESTAMPS
+         ----------------------------------------------- */
+
+      &&
+
+      request.resource.data.authorizedAt ==
+        request.time
+
+      &&
+
+      request.resource.data.updatedAt ==
+        request.time
+
+
+      /* -----------------------------------------------
+         NEW EXPIRY
+         ----------------------------------------------- */
+
+      &&
+
+      request.resource.data.expiresAt
+        is timestamp
+
+      &&
+
+      request.resource.data.expiresAt >
+        request.time
+
+
+      /* -----------------------------------------------
+         RESET BALLOT STATE
+         ----------------------------------------------- */
+
+      &&
+
+      request.resource.data.ballotOpenedAt ==
+        null
+
+      &&
+
+      request.resource.data.submittedAt ==
+        null
+
+      &&
+
+      request.resource.data.cancelledAt ==
+        null
+
+      &&
+
+      request.resource.data.deviceId ==
+        ""
+
+
+      /* -----------------------------------------------
+         ATTEMPT NUMBER MUST INCREASE EXACTLY BY ONE
+         ----------------------------------------------- */
+
+      &&
+
+      resource.data.attemptCount
+        is int
+
+      &&
+
+      request.resource.data.attemptCount
+        is int
+
+      &&
+
+      request.resource.data.attemptCount ==
+
+        resource.data.attemptCount
+
+        +
+
+        1
+
+      &&
+
+      existsAfter(
+        /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+      )
+
+      &&
+
+      getAfter(
+        /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+      ).data.status == "active"
+
+      &&
+
+      getAfter(
+        /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+      ).data.activeSessionId == sessionId
+
+      &&
+
+      getAfter(
+        /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+      ).data.activeVoterId == resource.data.voterId
+
+    )
+
+
+    ||
+
+
+    /* =================================================
+       CASE 2
+       CANCEL ACTIVE SESSION
+       ================================================= */
+
+    (
+
+      request.auth != null
+
+
+      /* -----------------------------------------------
+         The assigned PO may cancel at any time.
+         Principal cancellation is allowed only in the
+         same atomic batch that permanently closes this
+         session's election.
+         ----------------------------------------------- */
+
+      &&
+
+      (
+
+        (
+
+          isActivePollingOfficer()
+
+          &&
+
+          get(
+            /databases/$(database)/documents/Users/$(request.auth.uid)
+          ).data.role ==
+            "presiding_officer"
+
+          &&
+
+          resource.data.boothId
+            is string
+
+          &&
+
+          isAssignedPollingOfficer(
+            resource.data.boothId
+          )
+
+          &&
+
+          get(
+            /databases/$(database)/documents/BoothStaff/$(resource.data.boothId)
+          ).data.poUid ==
+            request.auth.uid
+
+        )
+
+        ||
+
+        (
+
+          isPrincipal()
+
+          &&
+
+          resource.data.electionId
+            is string
+
+          &&
+
+          exists(
+            /databases/$(database)/documents/Elections/$(resource.data.electionId)
+          )
+
+          &&
+
+          getAfter(
+            /databases/$(database)/documents/Elections/$(resource.data.electionId)
+          ).data.status == "closed"
+
+        )
+
+      )
+
+
+      /* -----------------------------------------------
+         ONLY AN ACTIVE SESSION MAY BE CANCELLED
+         ----------------------------------------------- */
+
+      &&
+
+      resource.data.status in [
+
+        "authorized",
+        "ballot_open"
+
+      ]
+
+
+      /* -----------------------------------------------
+         IDENTITY AND OTHER SESSION DATA CANNOT CHANGE
+
+         Only cancellation fields are allowed.
+         ----------------------------------------------- */
+
+      &&
+
+      request.resource.data
+        .diff(
+          resource.data
+        )
+        .affectedKeys()
+        .hasOnly([
+
+          "status",
+          "cancelledAt",
+          "updatedAt",
+          "cancelledBy"
+
+        ])
+
+
+      /* -----------------------------------------------
+         NEW STATUS
+         ----------------------------------------------- */
+
+      &&
+
+      request.resource.data.status ==
+        "cancelled"
+
+
+      /* -----------------------------------------------
+         CANCELLATION AUDIT
+         ----------------------------------------------- */
+
+      &&
+
+      request.resource.data.cancelledBy ==
+        request.auth.uid
+
+      &&
+
+      request.resource.data.cancelledAt ==
+        request.time
+
+      &&
+
+      request.resource.data.updatedAt ==
+        request.time
+
+    )
+
+
+    ||
+
+
+    /* =================================================
+       CASE 3
+       ANDROID DEVICE CLAIMS AUTHORIZED BALLOT SESSION
+       ================================================= */
+
+    (
+      request.auth != null
+
+      &&
+
+      request.auth.token.firebase.sign_in_provider ==
+        "anonymous"
+
+
+      /* -----------------------------------------------
+         SESSION MUST STILL BE AUTHORIZED + UNEXPIRED
+         ----------------------------------------------- */
+
+      &&
+
+      resource.data.status ==
+        "authorized"
+
+      &&
+
+      resource.data.deviceId ==
+        ""
+
+      &&
+
+      resource.data.expiresAt
+        is timestamp
+
+      &&
+
+      request.time <
+        resource.data.expiresAt
+
+      &&
+
+      resource.data.ballotOpenedAt ==
+        null
+
+      &&
+
+      resource.data.submittedAt ==
+        null
+
+      &&
+
+      resource.data.cancelledAt ==
+        null
+
+
+      /* -----------------------------------------------
+         SESSION IDENTITY MUST BE VALID
+         ----------------------------------------------- */
+
+      &&
+
+      resource.data.electionId
+        is string
+
+      &&
+
+      resource.data.boothId
+        is string
+
+      &&
+
+      resource.data.voterId
+        is string
+
+      &&
+
+      sessionId ==
+        resource.data.electionId
+        +
+        "_"
+        +
+        resource.data.voterId
+
+
+      /* -----------------------------------------------
+         DEVICE MUST BE ACTIVE + BOUND TO THIS BOOTH
+         ----------------------------------------------- */
+
+      &&
+
+      isActiveBoundVotingDevice(
+        resource.data.electionId,
+        resource.data.boothId
+      )
+
+
+      /* -----------------------------------------------
+         ELECTION MUST STILL BE VOTING_ACTIVE
+         ----------------------------------------------- */
+
+      &&
+
+      exists(
+        /databases/$(database)/documents/Elections/$(resource.data.electionId)
+      )
+
+      &&
+
+      get(
+        /databases/$(database)/documents/Elections/$(resource.data.electionId)
+      ).data.status ==
+        "voting_active"
+
+      &&
+
+      get(
+        /databases/$(database)/documents/Elections/$(resource.data.electionId)
+      ).data.get(
+        "voterListFinalized",
+        false
+      ) == true
+
+
+      /* -----------------------------------------------
+         VOTER MUST STILL BE VALID + NOT VOTED
+         ----------------------------------------------- */
+
+      &&
+
+      exists(
+        /databases/$(database)/documents/Voters/$(resource.data.voterId)
+      )
+
+      &&
+
+      get(
+        /databases/$(database)/documents/Voters/$(resource.data.voterId)
+      ).data.electionId ==
+        resource.data.electionId
+
+      &&
+
+      get(
+        /databases/$(database)/documents/Voters/$(resource.data.voterId)
+      ).data.boothId ==
+        resource.data.boothId
+
+      &&
+
+      get(
+        /databases/$(database)/documents/Voters/$(resource.data.voterId)
+      ).data.eligible ==
+        true
+
+      &&
+
+      get(
+        /databases/$(database)/documents/Voters/$(resource.data.voterId)
+      ).data.participationStatus ==
+        "not_voted"
+
+
+      /* -----------------------------------------------
+         DEVICE MAY CHANGE ONLY BALLOT-OPEN FIELDS
+         ----------------------------------------------- */
+
+      &&
+
+      request.resource.data
+        .diff(resource.data)
+        .affectedKeys()
+        .hasOnly([
+          "status",
+          "deviceId",
+          "ballotOpenedAt",
+          "updatedAt"
+        ])
+
+      &&
+
+      request.resource.data.status ==
+        "ballot_open"
+
+      &&
+
+      request.resource.data.deviceId ==
+        request.auth.uid
+
+      &&
+
+      request.resource.data.ballotOpenedAt ==
+        request.time
+
+      &&
+
+      request.resource.data.updatedAt ==
+        request.time
+
+      &&
+
+      exists(
+        /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+      )
+
+      &&
+
+      get(
+        /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+      ).data.status == "active"
+
+      &&
+
+      get(
+        /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+      ).data.electionId == resource.data.electionId
+
+      &&
+
+      get(
+        /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+      ).data.activeSessionId == sessionId
+
+      &&
+
+      get(
+        /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+      ).data.activeVoterId == resource.data.voterId
+
+    )
+
+
+    ||
+
+
+    /* =================================================
+       CASE 4
+       ANDROID DEVICE SUBMITS COMPLETED BALLOT
+       ================================================= */
+
+    (
+      request.auth != null
+
+      &&
+
+      request.auth.token.firebase.sign_in_provider == "anonymous"
+
+      &&
+
+      resource.data.status == "ballot_open"
+
+      &&
+
+      resource.data.deviceId == request.auth.uid
+
+      &&
+
+      resource.data.electionId is string
+
+      &&
+
+      resource.data.boothId is string
+
+      &&
+
+      resource.data.voterId is string
+
+      &&
+
+      sessionId == resource.data.electionId + "_" + resource.data.voterId
+
+      &&
+
+      isActiveBoundVotingDevice(
+        resource.data.electionId,
+        resource.data.boothId
+      )
+
+      &&
+
+      exists(
+        /databases/$(database)/documents/Elections/$(resource.data.electionId)
+      )
+
+      &&
+
+      get(
+        /databases/$(database)/documents/Elections/$(resource.data.electionId)
+      ).data.status == "voting_active"
+
+      &&
+
+      exists(
+        /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+      )
+
+      &&
+
+      get(
+        /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+      ).data.status == "active"
+
+      &&
+
+      get(
+        /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+      ).data.activeSessionId == sessionId
+
+      &&
+
+      get(
+        /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+      ).data.activeVoterId == resource.data.voterId
+
+      &&
+
+      request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        "status",
+        "submittedAt",
+        "updatedAt"
+      ])
+
+      &&
+
+      request.resource.data.status == "submitted"
+
+      &&
+
+      request.resource.data.submittedAt == request.time
+
+      &&
+
+      request.resource.data.updatedAt == request.time
+
+      &&
+
+      getAfter(
+        /databases/$(database)/documents/Voters/$(resource.data.voterId)
+      ).data.participationStatus == "voted"
+
+      &&
+
+      getAfter(
+        /databases/$(database)/documents/Voters/$(resource.data.voterId)
+      ).data.updatedAt == request.time
+
+      &&
+
+      getAfter(
+        /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+      ).data.status == "idle"
+
+      &&
+
+      getAfter(
+        /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+      ).data.activeSessionId == ""
+
+      &&
+
+      getAfter(
+        /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+      ).data.activeVoterId == ""
+
+    );
+
+  /* SAVE-SAFE FINAL SUBMISSION FALLBACK: SESSION */
+  allow update: if
+    request.auth != null
+    && request.auth.token.firebase.sign_in_provider == "anonymous"
+    && resource.data.status == "ballot_open"
+    && resource.data.deviceId == request.auth.uid
+    && resource.data.electionId is string
+    && resource.data.boothId is string
+    && resource.data.voterId is string
+    && isActiveBoundVotingDevice(resource.data.electionId, resource.data.boothId)
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+      "status",
+      "submittedAt",
+      "updatedAt"
+    ])
+    && request.resource.data.status == "submitted"
+    && request.resource.data.submittedAt == request.time
+    && request.resource.data.updatedAt == request.time
+    && getAfter(
+      /databases/$(database)/documents/Voters/$(resource.data.voterId)
+    ).data.participationStatus == "voted"
+    && getAfter(
+      /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+    ).data.status == "idle"
+    && getAfter(
+      /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+    ).data.activeSessionId == ""
+    && getAfter(
+      /databases/$(database)/documents/BoothVotingState/$(resource.data.boothId)
+    ).data.activeVoterId == "";
+
+
+  /* ===================================================
+     DELETE
+
+     Session history must never be deleted.
+     =================================================== */
+
+  allow delete: if false;
+
+}
+
+
+/* =====================================================
+   BOOTH VOTING STATE / ACTIVE SESSION LOCK
+   =====================================================
+
+   Rollout phase 1:
+
+   This collection introduces the server-controlled booth
+   lock used to prevent two voters from holding active
+   sessions at the same booth.
+
+   Existing VotingSessions permissions are intentionally
+   left unchanged in this rollout so publishing these rules
+   does not break the currently working PO dashboard.
+
+   The dashboard will be migrated next to create/update this
+   lock atomically with VotingSessions. After that migration
+   is verified, VotingSessions will be tightened so creation
+   and re-authorization REQUIRE this lock in the same atomic
+   transaction.
+   ===================================================== */
+
+match /BoothVotingState/{boothId} {
+
+  /* -----------------------------------------------------
+     READ
+
+     Principal may inspect every lock.
+     PO/APO may read only the state of an assigned booth.
+     Android does not need direct access to this document.
+     ----------------------------------------------------- */
+
+  allow get: if
+    canViewElectionOverview()
+    ||
+    isAssignedPollingOfficer(boothId)
+    ||
+    (
+      resource.data.electionId is string
+      &&
+      isActiveBoundVotingDevice(resource.data.electionId, boothId)
+    );
+
+  allow list: if
+    canViewElectionOverview();
+
+
+  /* -----------------------------------------------------
+     CREATE ACTIVE LOCK
+
+     The first lock document for a booth is created only by
+     the assigned Presiding Officer.
+
+     The referenced VotingSession must already exist after
+     this atomic operation and must be an unexpired
+     authorized session for exactly this election/booth/
+     voter and exactly this PO.
+     ----------------------------------------------------- */
+
+  allow create: if
+    request.auth != null
+
+    &&
+
+    isActivePollingOfficer()
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Users/$(request.auth.uid)
+    ).data.role == "presiding_officer"
+
+    &&
+
+    request.resource.data.keys().hasAll([
+      "electionId",
+      "boothId",
+      "status",
+      "activeSessionId",
+      "activeVoterId",
+      "lockedBy",
+      "lockedAt",
+      "releasedBy",
+      "releasedAt",
+      "updatedAt"
+    ])
+
+    &&
+
+    request.resource.data.keys().hasOnly([
+      "electionId",
+      "boothId",
+      "status",
+      "activeSessionId",
+      "activeVoterId",
+      "lockedBy",
+      "lockedAt",
+      "releasedBy",
+      "releasedAt",
+      "updatedAt"
+    ])
+
+    &&
+
+    boothId == request.resource.data.boothId
+
+    &&
+
+    request.resource.data.boothId is string
+
+    &&
+
+    request.resource.data.boothId.size() > 0
+
+    &&
+
+    request.resource.data.electionId is string
+
+    &&
+
+    request.resource.data.electionId.size() > 0
+
+    &&
+
+    request.resource.data.status == "active"
+
+    &&
+
+    request.resource.data.activeSessionId is string
+
+    &&
+
+    request.resource.data.activeSessionId.size() > 0
+
+    &&
+
+    request.resource.data.activeVoterId is string
+
+    &&
+
+    request.resource.data.activeVoterId.size() > 0
+
+    &&
+
+    request.resource.data.lockedBy == request.auth.uid
+
+    &&
+
+    request.resource.data.lockedAt == request.time
+
+    &&
+
+    request.resource.data.releasedBy == ""
+
+    &&
+
+    request.resource.data.releasedAt == null
+
+    &&
+
+    request.resource.data.updatedAt == request.time
+
+    &&
+
+    isAssignedPollingOfficer(boothId)
+
+    &&
+
+    get(
+      /databases/$(database)/documents/BoothStaff/$(boothId)
+    ).data.poUid == request.auth.uid
+
+    &&
+
+    get(
+      /databases/$(database)/documents/BoothStaff/$(boothId)
+    ).data.electionId == request.resource.data.electionId
+
+    &&
+
+    exists(
+      /databases/$(database)/documents/Booths/$(boothId)
+    )
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Booths/$(boothId)
+    ).data.electionId == request.resource.data.electionId
+
+    &&
+
+    exists(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    )
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    ).data.status == "voting_active"
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    ).data.get("voterListFinalized", false) == true
+
+    &&
+
+    existsAfter(
+      /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+    )
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+    ).data.electionId == request.resource.data.electionId
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+    ).data.boothId == boothId
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+    ).data.voterId == request.resource.data.activeVoterId
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+    ).data.authorizedBy == request.auth.uid
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+    ).data.authorizedByRole == "presiding_officer"
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+    ).data.status == "authorized"
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+    ).data.expiresAt is timestamp
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+    ).data.expiresAt > request.time
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+    ).data.deviceId == "";
+
+
+  /* -----------------------------------------------------
+     UPDATE
+
+     CASE 1: acquire/re-acquire an active lock.
+
+     A new lock may replace the previous one only when the
+     previous lock is idle, refers to the same session, or
+     refers to a session that is cancelled/expired/submitted
+     or an authorized session whose expiry has passed.
+
+     CASE 2: release an active lock after the PO cancels the
+     exact active session in the same atomic operation.
+     ----------------------------------------------------- */
+
+  allow update: if
+
+    request.auth != null
+
+    &&
+
+    (
+      (
+        isActivePollingOfficer()
+        &&
+        get(
+          /databases/$(database)/documents/Users/$(request.auth.uid)
+        ).data.role == "presiding_officer"
+        &&
+        isAssignedPollingOfficer(boothId)
+        &&
+        get(
+          /databases/$(database)/documents/BoothStaff/$(boothId)
+        ).data.poUid == request.auth.uid
+        &&
+        get(
+          /databases/$(database)/documents/BoothStaff/$(boothId)
+        ).data.electionId == resource.data.electionId
+      )
+      ||
+      (
+        isPrincipal()
+        && resource.data.electionId is string
+        && exists(
+          /databases/$(database)/documents/Elections/$(resource.data.electionId)
+        )
+        && getAfter(
+          /databases/$(database)/documents/Elections/$(resource.data.electionId)
+        ).data.status == "closed"
+      )
+    )
+
+    &&
+
+    resource.data.boothId == boothId
+
+    &&
+
+    request.resource.data.boothId == resource.data.boothId
+
+    &&
+
+    request.resource.data.electionId == resource.data.electionId
+
+    &&
+
+    (
+
+      /* =================================================
+         CASE 1
+         ACQUIRE / RE-ACQUIRE ACTIVE LOCK
+         ================================================= */
+
+      (
+
+        request.resource.data
+          .diff(resource.data)
+          .affectedKeys()
+          .hasOnly([
+            "status",
+            "activeSessionId",
+            "activeVoterId",
+            "lockedBy",
+            "lockedAt",
+            "releasedBy",
+            "releasedAt",
+            "updatedAt"
+          ])
+
+        &&
+
+        request.resource.data.status == "active"
+
+        &&
+
+        request.resource.data.activeSessionId is string
+
+        &&
+
+        request.resource.data.activeSessionId.size() > 0
+
+        &&
+
+        request.resource.data.activeVoterId is string
+
+        &&
+
+        request.resource.data.activeVoterId.size() > 0
+
+        &&
+
+        request.resource.data.lockedBy == request.auth.uid
+
+        &&
+
+        request.resource.data.lockedAt == request.time
+
+        &&
+
+        request.resource.data.releasedBy == ""
+
+        &&
+
+        request.resource.data.releasedAt == null
+
+        &&
+
+        request.resource.data.updatedAt == request.time
+
+        &&
+
+        exists(
+          /databases/$(database)/documents/Elections/$(resource.data.electionId)
+        )
+
+        &&
+
+        get(
+          /databases/$(database)/documents/Elections/$(resource.data.electionId)
+        ).data.status == "voting_active"
+
+        &&
+
+        get(
+          /databases/$(database)/documents/Elections/$(resource.data.electionId)
+        ).data.get("voterListFinalized", false) == true
+
+        &&
+
+        existsAfter(
+          /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+        )
+
+        &&
+
+        getAfter(
+          /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+        ).data.electionId == resource.data.electionId
+
+        &&
+
+        getAfter(
+          /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+        ).data.boothId == boothId
+
+        &&
+
+        getAfter(
+          /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+        ).data.voterId == request.resource.data.activeVoterId
+
+        &&
+
+        getAfter(
+          /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+        ).data.authorizedBy == request.auth.uid
+
+        &&
+
+        getAfter(
+          /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+        ).data.authorizedByRole == "presiding_officer"
+
+        &&
+
+        getAfter(
+          /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+        ).data.status == "authorized"
+
+        &&
+
+        getAfter(
+          /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+        ).data.expiresAt is timestamp
+
+        &&
+
+        getAfter(
+          /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+        ).data.expiresAt > request.time
+
+        &&
+
+        getAfter(
+          /databases/$(database)/documents/VotingSessions/$(request.resource.data.activeSessionId)
+        ).data.deviceId == ""
+
+        &&
+
+        (
+
+          resource.data.status == "idle"
+
+          ||
+
+          (
+            resource.data.status == "active"
+            &&
+            resource.data.activeSessionId == request.resource.data.activeSessionId
+          )
+
+          ||
+
+          (
+            resource.data.status == "active"
+            &&
+            resource.data.activeSessionId is string
+            &&
+            resource.data.activeSessionId.size() > 0
+            &&
+            exists(
+              /databases/$(database)/documents/VotingSessions/$(resource.data.activeSessionId)
+            )
+            &&
+            (
+              get(
+                /databases/$(database)/documents/VotingSessions/$(resource.data.activeSessionId)
+              ).data.status in [
+                "cancelled",
+                "expired",
+                "submitted"
+              ]
+              ||
+              (
+                get(
+                  /databases/$(database)/documents/VotingSessions/$(resource.data.activeSessionId)
+                ).data.status == "authorized"
+                &&
+                get(
+                  /databases/$(database)/documents/VotingSessions/$(resource.data.activeSessionId)
+                ).data.expiresAt is timestamp
+                &&
+                get(
+                  /databases/$(database)/documents/VotingSessions/$(resource.data.activeSessionId)
+                ).data.expiresAt <= request.time
+              )
+            )
+          )
+
+        )
+
+      )
+
+      ||
+
+      /* =================================================
+         CASE 2
+         RELEASE LOCK AFTER PO CANCELLATION
+         ================================================= */
+
+      (
+
+        resource.data.status == "active"
+
+        &&
+
+        resource.data.activeSessionId is string
+
+        &&
+
+        resource.data.activeSessionId.size() > 0
+
+        &&
+
+        request.resource.data
+          .diff(resource.data)
+          .affectedKeys()
+          .hasOnly([
+            "status",
+            "activeSessionId",
+            "activeVoterId",
+            "releasedBy",
+            "releasedAt",
+            "updatedAt"
+          ])
+
+        &&
+
+        request.resource.data.status == "idle"
+
+        &&
+
+        request.resource.data.activeSessionId == ""
+
+        &&
+
+        request.resource.data.activeVoterId == ""
+
+        &&
+
+        request.resource.data.lockedBy == resource.data.lockedBy
+
+        &&
+
+        request.resource.data.lockedAt == resource.data.lockedAt
+
+        &&
+
+        request.resource.data.releasedBy == request.auth.uid
+
+        &&
+
+        request.resource.data.releasedAt == request.time
+
+        &&
+
+        request.resource.data.updatedAt == request.time
+
+        &&
+
+        existsAfter(
+          /databases/$(database)/documents/VotingSessions/$(resource.data.activeSessionId)
+        )
+
+        &&
+
+        getAfter(
+          /databases/$(database)/documents/VotingSessions/$(resource.data.activeSessionId)
+        ).data.status == "cancelled"
+
+        &&
+
+        getAfter(
+          /databases/$(database)/documents/VotingSessions/$(resource.data.activeSessionId)
+        ).data.cancelledBy == request.auth.uid
+
+      )
+
+      ||
+
+      /* =================================================
+         CASE 3
+         ANDROID RELEASES LOCK AFTER SUCCESSFUL SUBMISSION
+         ================================================= */
+
+      (
+        request.auth != null
+
+        &&
+
+        request.auth.token.firebase.sign_in_provider == "anonymous"
+
+        &&
+
+        resource.data.status == "active"
+
+        &&
+
+        resource.data.activeSessionId is string
+
+        &&
+
+        resource.data.activeSessionId.size() > 0
+
+        &&
+
+        resource.data.activeVoterId is string
+
+        &&
+
+        resource.data.activeVoterId.size() > 0
+
+        &&
+
+        isActiveBoundVotingDevice(
+          resource.data.electionId,
+          boothId
+        )
+
+        &&
+
+        exists(
+          /databases/$(database)/documents/VotingSessions/$(resource.data.activeSessionId)
+        )
+
+        &&
+
+        get(
+          /databases/$(database)/documents/VotingSessions/$(resource.data.activeSessionId)
+        ).data.status == "ballot_open"
+
+        &&
+
+        get(
+          /databases/$(database)/documents/VotingSessions/$(resource.data.activeSessionId)
+        ).data.deviceId == request.auth.uid
+
+        &&
+
+        get(
+          /databases/$(database)/documents/VotingSessions/$(resource.data.activeSessionId)
+        ).data.voterId == resource.data.activeVoterId
+
+        &&
+
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "status",
+          "activeSessionId",
+          "activeVoterId",
+          "releasedBy",
+          "releasedAt",
+          "updatedAt"
+        ])
+
+        &&
+
+        request.resource.data.status == "idle"
+
+        &&
+
+        request.resource.data.activeSessionId == ""
+
+        &&
+
+        request.resource.data.activeVoterId == ""
+
+        &&
+
+        request.resource.data.lockedBy == resource.data.lockedBy
+
+        &&
+
+        request.resource.data.lockedAt == resource.data.lockedAt
+
+        &&
+
+        request.resource.data.releasedBy == request.auth.uid
+
+        &&
+
+        request.resource.data.releasedAt == request.time
+
+        &&
+
+        request.resource.data.updatedAt == request.time
+
+        &&
+
+        getAfter(
+          /databases/$(database)/documents/VotingSessions/$(resource.data.activeSessionId)
+        ).data.status == "submitted"
+
+        &&
+
+        getAfter(
+          /databases/$(database)/documents/Voters/$(resource.data.activeVoterId)
+        ).data.participationStatus == "voted"
+
+      )
+
+    );
+
+  /* SAVE-SAFE FINAL SUBMISSION FALLBACK: BOOTH LOCK */
+  allow update: if
+    request.auth != null
+    && request.auth.token.firebase.sign_in_provider == "anonymous"
+    && resource.data.status == "active"
+    && resource.data.electionId is string
+    && resource.data.activeSessionId is string
+    && resource.data.activeSessionId.size() > 0
+    && resource.data.activeVoterId is string
+    && resource.data.activeVoterId.size() > 0
+    && isActiveBoundVotingDevice(resource.data.electionId, boothId)
+    && get(
+      /databases/$(database)/documents/VotingSessions/$(resource.data.activeSessionId)
+    ).data.status == "ballot_open"
+    && get(
+      /databases/$(database)/documents/VotingSessions/$(resource.data.activeSessionId)
+    ).data.deviceId == request.auth.uid
+    && get(
+      /databases/$(database)/documents/VotingSessions/$(resource.data.activeSessionId)
+    ).data.voterId == resource.data.activeVoterId
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+      "status",
+      "activeSessionId",
+      "activeVoterId",
+      "releasedBy",
+      "releasedAt",
+      "updatedAt"
+    ])
+    && request.resource.data.status == "idle"
+    && request.resource.data.activeSessionId == ""
+    && request.resource.data.activeVoterId == ""
+    && request.resource.data.releasedBy == request.auth.uid
+    && request.resource.data.releasedAt == request.time
+    && request.resource.data.updatedAt == request.time;
+
+
+  allow delete: if false;
+}
+
+/* =====================================================
+   ANONYMOUS VOTES
+   =====================================================
+
+   Vote records intentionally contain no voterId, boothId,
+   sessionId, deviceId, name, roll number or authorization UID.
+   The data layer only stores the election/position/candidate
+   choice and server cast time.
+   ===================================================== */
+
+match /Votes/{voteId} {
+
+  allow create: if
+    request.auth != null
+
+    &&
+
+    request.auth.token.firebase.sign_in_provider == "anonymous"
+
+    &&
+
+    request.resource.data.keys().hasAll([
+      "electionId",
+      "positionId",
+      "candidateId",
+      "castAt"
+    ])
+
+    &&
+
+    request.resource.data.keys().hasOnly([
+      "electionId",
+      "positionId",
+      "candidateId",
+      "castAt"
+    ])
+
+    &&
+
+    request.resource.data.electionId is string
+
+    &&
+
+    request.resource.data.positionId is string
+
+    &&
+
+    request.resource.data.candidateId is string
+
+    &&
+
+    request.resource.data.electionId.size() > 0
+
+    &&
+
+    request.resource.data.positionId.size() > 0
+
+    &&
+
+    request.resource.data.candidateId.size() > 0
+
+    &&
+
+    request.resource.data.castAt == request.time
+
+    &&
+
+    isActiveVotingDeviceForElection(
+      request.resource.data.electionId
+    )
+
+    &&
+
+    exists(
+      /databases/$(database)/documents/Candidates/$(request.resource.data.candidateId)
+    )
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Candidates/$(request.resource.data.candidateId)
+    ).data.electionId == request.resource.data.electionId
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Candidates/$(request.resource.data.candidateId)
+    ).data.positionId == request.resource.data.positionId
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Candidates/$(request.resource.data.candidateId)
+    ).data.status == "finalized"
+
+    &&
+
+    exists(
+      /databases/$(database)/documents/BoothVotingState/$(get(
+        /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+      ).data.boothId)
+    )
+
+    &&
+
+    get(
+      /databases/$(database)/documents/BoothVotingState/$(get(
+        /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+      ).data.boothId)
+    ).data.status == "active"
+
+    &&
+
+    get(
+      /databases/$(database)/documents/BoothVotingState/$(get(
+        /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+      ).data.boothId)
+    ).data.electionId == request.resource.data.electionId
+
+    &&
+
+    get(
+      /databases/$(database)/documents/BoothVotingState/$(get(
+        /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+      ).data.boothId)
+    ).data.activeSessionId is string
+
+    &&
+
+    get(
+      /databases/$(database)/documents/BoothVotingState/$(get(
+        /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+      ).data.boothId)
+    ).data.activeSessionId.size() > 0
+
+    &&
+
+    exists(
+      /databases/$(database)/documents/VotingSessions/$(get(
+        /databases/$(database)/documents/BoothVotingState/$(get(
+          /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+        ).data.boothId)
+      ).data.activeSessionId)
+    )
+
+    &&
+
+    get(
+      /databases/$(database)/documents/VotingSessions/$(get(
+        /databases/$(database)/documents/BoothVotingState/$(get(
+          /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+        ).data.boothId)
+      ).data.activeSessionId)
+    ).data.status == "ballot_open"
+
+    &&
+
+    get(
+      /databases/$(database)/documents/VotingSessions/$(get(
+        /databases/$(database)/documents/BoothVotingState/$(get(
+          /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+        ).data.boothId)
+      ).data.activeSessionId)
+    ).data.deviceId == request.auth.uid
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/VotingSessions/$(get(
+        /databases/$(database)/documents/BoothVotingState/$(get(
+          /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+        ).data.boothId)
+      ).data.activeSessionId)
+    ).data.status == "submitted"
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/VotingSessions/$(get(
+        /databases/$(database)/documents/BoothVotingState/$(get(
+          /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+        ).data.boothId)
+      ).data.activeSessionId)
+    ).data.submittedAt == request.time;
+
+  /* SAVE-SAFE FINAL SUBMISSION FALLBACK: VOTE */
+  allow create: if
+    request.auth != null
+    && request.auth.token.firebase.sign_in_provider == "anonymous"
+    && request.resource.data.keys().hasAll([
+      "electionId",
+      "positionId",
+      "candidateId",
+      "castAt"
+    ])
+    && request.resource.data.keys().hasOnly([
+      "electionId",
+      "positionId",
+      "candidateId",
+      "castAt"
+    ])
+    && request.resource.data.electionId is string
+    && request.resource.data.positionId is string
+    && request.resource.data.candidateId is string
+    && request.resource.data.castAt == request.time
+    && isActiveVotingDeviceForElection(request.resource.data.electionId)
+    && get(
+      /databases/$(database)/documents/Candidates/$(request.resource.data.candidateId)
+    ).data.electionId == request.resource.data.electionId
+    && get(
+      /databases/$(database)/documents/Candidates/$(request.resource.data.candidateId)
+    ).data.positionId == request.resource.data.positionId
+    && get(
+      /databases/$(database)/documents/Candidates/$(request.resource.data.candidateId)
+    ).data.status == "finalized"
+    && get(
+      /databases/$(database)/documents/BoothVotingState/$(get(
+        /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+      ).data.boothId)
+    ).data.status == "active"
+    && get(
+      /databases/$(database)/documents/BoothVotingState/$(get(
+        /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+      ).data.boothId)
+    ).data.electionId == request.resource.data.electionId
+    && get(
+      /databases/$(database)/documents/VotingSessions/$(get(
+        /databases/$(database)/documents/BoothVotingState/$(get(
+          /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+        ).data.boothId)
+      ).data.activeSessionId)
+    ).data.status == "ballot_open"
+    && get(
+      /databases/$(database)/documents/VotingSessions/$(get(
+        /databases/$(database)/documents/BoothVotingState/$(get(
+          /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+        ).data.boothId)
+      ).data.activeSessionId)
+    ).data.deviceId == request.auth.uid
+    && getAfter(
+      /databases/$(database)/documents/VotingSessions/$(get(
+        /databases/$(database)/documents/BoothVotingState/$(get(
+          /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+        ).data.boothId)
+      ).data.activeSessionId)
+    ).data.status == "submitted";
+
+  /*
+   * Vote choices are never readable during an ongoing/stopped poll.
+   * Final result review becomes available only after permanent closure.
+   */
+  allow get, list: if
+    resource.data.electionId is string
+    && canReviewClosedResults(resource.data.electionId);
+
+  allow update, delete: if false;
+}
+
+
+/* =====================================================
+   PUBLISHED WINNER PROFILES
+   =====================================================
+
+   A winner profile contains only the elected candidate's
+   public details (symbol and manifesto). It is immutable,
+   has a deterministic ID, and may exist only with an
+   official published result for the same election.
+   ===================================================== */
+
+match /PublishedWinnerProfiles/{profileId} {
+
+  allow get: if isPrincipal()
+             || (
+               resource.data.electionId is string
+               && resource.data.positionId is string
+               && exists(
+                 /databases/$(database)/documents/PublishedResults/$(resource.data.electionId)
+               )
+               && get(
+                 /databases/$(database)/documents/PublishedResults/$(resource.data.electionId)
+               ).data.status == "published"
+             );
+
+  allow list: if isPrincipal();
+
+  allow create: if isPrincipal()
+                && request.resource.data.keys().hasAll([
+                  "electionId",
+                  "positionId",
+                  "candidateId",
+                  "name",
+                  "className",
+                  "section",
+                  "manifesto",
+                  "symbolBase64",
+                  "symbolMimeType",
+                  "publishedAt"
+                ])
+                && request.resource.data.keys().hasOnly([
+                  "electionId",
+                  "positionId",
+                  "candidateId",
+                  "name",
+                  "className",
+                  "section",
+                  "manifesto",
+                  "symbolBase64",
+                  "symbolMimeType",
+                  "publishedAt"
+                ])
+                && request.resource.data.electionId is string
+                && request.resource.data.electionId.size() > 0
+                && request.resource.data.positionId is string
+                && request.resource.data.positionId.size() > 0
+                && request.resource.data.candidateId is string
+                && request.resource.data.candidateId.size() > 0
+                && profileId == request.resource.data.electionId
+                   + "_" + request.resource.data.positionId
+                && request.resource.data.name is string
+                && request.resource.data.className is string
+                && request.resource.data.section is string
+                && request.resource.data.manifesto is string
+                && request.resource.data.symbolBase64 is string
+                && request.resource.data.symbolMimeType is string
+                && request.resource.data.publishedAt == request.time
+                && exists(
+                  /databases/$(database)/documents/Candidates/$(request.resource.data.candidateId)
+                )
+                && get(
+                  /databases/$(database)/documents/Candidates/$(request.resource.data.candidateId)
+                ).data.electionId == request.resource.data.electionId
+                && get(
+                  /databases/$(database)/documents/Candidates/$(request.resource.data.candidateId)
+                ).data.positionId == request.resource.data.positionId
+                && get(
+                  /databases/$(database)/documents/Candidates/$(request.resource.data.candidateId)
+                ).data.status == "finalized"
+                && existsAfter(
+                  /databases/$(database)/documents/PublishedResults/$(request.resource.data.electionId)
+                )
+                && getAfter(
+                  /databases/$(database)/documents/PublishedResults/$(request.resource.data.electionId)
+                ).data.status == "published";
+
+  allow update, delete: if false;
+}
+
+
+/* =====================================================
+   PUBLISHED OFFICIAL RESULTS
+   =====================================================
+
+   One immutable public snapshot is created per closed election.
+   The document ID is the election ID, so an election cannot be
+   published twice under different official result documents.
+   Raw Votes remain private; public viewers read only this
+   aggregate snapshot.
+   ===================================================== */
+
+match /PublishedResults/{resultId} {
+
+  /*
+   * Public viewers may GET only an already-published result.
+   * Principal may also GET the deterministic document path before
+   * publication so the Review Results page can check if it exists.
+   */
+  allow get: if isPrincipal()
+             || (
+               resource.data.status == "published"
+               && resource.data.electionId == resultId
+             );
+
+  /* Result discovery/listing is not public. */
+  allow list: if isPrincipal();
+
+  /*
+   * Only Principal may publish, only after permanent election close.
+   * The result is a compact aggregate snapshot. Candidate symbols are
+   * intentionally not copied here to avoid oversized Firestore docs.
+   */
+  allow create: if isPrincipal()
+                && resultId == request.resource.data.electionId
+                && request.resource.data.keys().hasAll([
+                  "electionId",
+                  "electionName",
+                  "academicSession",
+                  "description",
+                  "institutionName",
+                  "nominationStart",
+                  "nominationEnd",
+                  "votingStart",
+                  "votingEnd",
+                  "status",
+                  "eligibleVoters",
+                  "votersParticipated",
+                  "turnoutPercentage",
+                  "positionCount",
+                  "positions",
+                  "publishedAt"
+                ])
+                && request.resource.data.keys().hasOnly([
+                  "electionId",
+                  "electionName",
+                  "academicSession",
+                  "description",
+                  "institutionName",
+                  "nominationStart",
+                  "nominationEnd",
+                  "votingStart",
+                  "votingEnd",
+                  "status",
+                  "eligibleVoters",
+                  "votersParticipated",
+                  "turnoutPercentage",
+                  "positionCount",
+                  "positions",
+                  "publishedAt"
+                ])
+                && request.resource.data.electionId is string
+                && request.resource.data.electionId.size() > 0
+                && request.resource.data.electionName is string
+                && request.resource.data.electionName.size() > 0
+                && request.resource.data.academicSession is string
+                && request.resource.data.description is string
+                && request.resource.data.institutionName is string
+                && request.resource.data.institutionName.size() > 0
+                && request.resource.data.nominationStart is timestamp
+                && request.resource.data.nominationEnd is timestamp
+                && request.resource.data.votingStart is timestamp
+                && request.resource.data.votingEnd is timestamp
+                && request.resource.data.status == "published"
+                && request.resource.data.eligibleVoters is int
+                && request.resource.data.eligibleVoters >= 0
+                && request.resource.data.votersParticipated is int
+                && request.resource.data.votersParticipated >= 0
+                && request.resource.data.votersParticipated <=
+                   request.resource.data.eligibleVoters
+                && request.resource.data.turnoutPercentage is number
+                && request.resource.data.turnoutPercentage >= 0
+                && request.resource.data.turnoutPercentage <= 100
+                && request.resource.data.positionCount is int
+                && request.resource.data.positionCount >= 0
+                && request.resource.data.positions is list
+                && request.resource.data.positionCount ==
+                   request.resource.data.positions.size()
+                && request.resource.data.publishedAt == request.time
+                && exists(
+                  /databases/$(database)/documents/Elections/$(resultId)
+                )
+                && get(
+                  /databases/$(database)/documents/Elections/$(resultId)
+                ).data.status == "closed";
+
+  /* Official published snapshots are immutable. */
+  allow update, delete: if false;
+}
+
+
+ /* =====================================================
+   DEVICE PAIRING CODES
+   ===================================================== */
+
+match /DevicePairingCodes/{pairingCode} {
+
+  /*
+   * -----------------------------------------------------
+   * READ ONE PAIRING CODE
+   * -----------------------------------------------------
+   *
+   * Principal may inspect.
+   *
+   * Assigned polling staff may inspect the pairing code
+   * belonging to their booth.
+   *
+   * An anonymous Android device may read ONLY an exact
+   * pending, unexpired pairing-code document.
+   */
+
+  allow get: if
+
+    isPrincipal()
+
+    ||
+
+    (
+      isActivePollingOfficer()
+
+      &&
+
+      resource.data.boothId is string
+
+      &&
+
+      isAssignedPollingOfficer(
+        resource.data.boothId
+      )
+    )
+
+    ||
+
+    (
+      request.auth != null
+
+      &&
+
+      request.auth.token.firebase.sign_in_provider ==
+        "anonymous"
+
+      &&
+
+      resource.data.status ==
+        "pending"
+
+      &&
+
+      resource.data.expiresAt
+        is timestamp
+
+      &&
+
+      request.time <
+        resource.data.expiresAt
+    );
+
+
+  /*
+   * Collection listing is not required for Android.
+   * This prevents anonymous devices from searching
+   * through pairing codes.
+   */
+
+  allow list: if false;
+
+
+  /*
+   * -----------------------------------------------------
+   * CREATE PAIRING CODE
+   * -----------------------------------------------------
+   *
+   * Only the Presiding Officer assigned to the booth
+   * may generate a pairing code.
+   */
+
+  allow create: if
+
+    request.auth != null
+
+    &&
+
+    isActivePollingOfficer()
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Users/$(request.auth.uid)
+    ).data.role ==
+      "presiding_officer"
+
+    &&
+
+    pairingCode.size() >= 8
+
+    &&
+
+    pairingCode.size() <= 20
+
+    &&
+
+    request.resource.data.keys().hasAll([
+      "electionId",
+      "boothId",
+      "createdBy",
+      "status",
+      "createdAt",
+      "expiresAt",
+      "claimedBy",
+      "claimedAt"
+    ])
+
+    &&
+
+    request.resource.data.keys().hasOnly([
+      "electionId",
+      "boothId",
+      "createdBy",
+      "status",
+      "createdAt",
+      "expiresAt",
+      "claimedBy",
+      "claimedAt"
+    ])
+
+    &&
+
+    request.resource.data.electionId
+      is string
+
+    &&
+
+    request.resource.data.boothId
+      is string
+
+    &&
+
+    request.resource.data.createdBy
+      is string
+
+    &&
+
+    request.resource.data.expiresAt
+      is timestamp
+
+    &&
+
+    request.resource.data.electionId.size() > 0
+
+    &&
+
+    request.resource.data.boothId.size() > 0
+
+    &&
+
+    request.resource.data.createdBy ==
+      request.auth.uid
+
+    &&
+
+    request.resource.data.status ==
+      "pending"
+
+    &&
+
+    request.resource.data.claimedBy ==
+      ""
+
+    &&
+
+    request.resource.data.claimedAt ==
+      null
+
+    &&
+
+    request.resource.data.createdAt ==
+      request.time
+
+    &&
+
+    request.resource.data.expiresAt >
+      request.time
+
+    &&
+
+    request.resource.data.expiresAt <=
+      request.time + duration.value(5, "m")
+
+    &&
+
+    isAssignedPollingOfficer(
+      request.resource.data.boothId
+    )
+
+    &&
+
+    get(
+      /databases/$(database)/documents/BoothStaff/$(request.resource.data.boothId)
+    ).data.poUid ==
+      request.auth.uid
+
+    &&
+
+    get(
+      /databases/$(database)/documents/BoothStaff/$(request.resource.data.boothId)
+    ).data.electionId ==
+      request.resource.data.electionId
+
+    &&
+
+    exists(
+      /databases/$(database)/documents/Booths/$(request.resource.data.boothId)
+    )
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Booths/$(request.resource.data.boothId)
+    ).data.electionId ==
+      request.resource.data.electionId
+
+    &&
+
+    exists(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    )
+
+    &&
+
+    get(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    ).data.status in [
+      "finalized",
+      "voting_active",
+      "voting_stopped"
+    ];
+
+
+  /*
+   * -----------------------------------------------------
+   * CLAIM PAIRING CODE
+   * -----------------------------------------------------
+   *
+   * Android must update this document and create its
+   * VotingDevices document in the SAME atomic batch.
+   */
+
+  allow update: if
+
+    request.auth != null
+
+    &&
+
+    request.auth.token.firebase.sign_in_provider ==
+      "anonymous"
+
+    &&
+
+    resource.data.status ==
+      "pending"
+
+    &&
+
+    resource.data.expiresAt
+      is timestamp
+
+    &&
+
+    request.time <
+      resource.data.expiresAt
+
+    &&
+
+    request.resource.data
+      .diff(resource.data)
+      .affectedKeys()
+      .hasOnly([
+        "status",
+        "claimedBy",
+        "claimedAt"
+      ])
+
+    &&
+
+    request.resource.data.status ==
+      "claimed"
+
+    &&
+
+    request.resource.data.claimedBy ==
+      request.auth.uid
+
+    &&
+
+    request.resource.data.claimedAt ==
+      request.time
+
+    &&
+
+    existsAfter(
+      /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+    )
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+    ).data.pairingCode ==
+      pairingCode
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+    ).data.electionId ==
+      resource.data.electionId
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/VotingDevices/$(request.auth.uid)
+    ).data.boothId ==
+      resource.data.boothId;
+
+
+  allow delete: if false;
+}
+
+
+
+/* =====================================================
+   VOTING DEVICES
+   ===================================================== */
+
+match /VotingDevices/{deviceUid} {
+
+  /*
+   * -----------------------------------------------------
+   * READ
+   * -----------------------------------------------------
+   */
+
+  allow read: if
+
+    canViewElectionOverview()
+
+    ||
+
+    (
+      request.auth != null
+
+      &&
+
+      request.auth.uid ==
+        deviceUid
+
+      &&
+
+      request.auth.token.firebase.sign_in_provider ==
+        "anonymous"
+    )
+
+    ||
+
+    (
+      resource.data.boothId is string
+
+      &&
+
+      isAssignedPollingOfficer(
+        resource.data.boothId
+      )
+    );
+
+
+  /*
+   * -----------------------------------------------------
+   * CREATE DEVICE BINDING
+   * -----------------------------------------------------
+   *
+   * Anonymous Android device creates ONLY its own
+   * VotingDevices/{uid} document.
+   *
+   * Pairing-code claim must happen in same atomic batch.
+   */
+
+  allow create: if
+
+    request.auth != null
+
+    &&
+
+    request.auth.uid ==
+      deviceUid
+
+    &&
+
+    request.auth.token.firebase.sign_in_provider ==
+      "anonymous"
+
+    &&
+
+    request.resource.data.keys().hasAll([
+      "deviceUid",
+      "electionId",
+      "boothId",
+      "status",
+      "pairedAt",
+      "pairedBy",
+      "pairingCode",
+      "lastSeenAt",
+      "revokedAt",
+      "revokedBy"
+    ])
+
+    &&
+
+    request.resource.data.keys().hasOnly([
+      "deviceUid",
+      "electionId",
+      "boothId",
+      "status",
+      "pairedAt",
+      "pairedBy",
+      "pairingCode",
+      "lastSeenAt",
+      "revokedAt",
+      "revokedBy"
+    ])
+
+    &&
+
+    request.resource.data.deviceUid
+      is string
+
+    &&
+
+    request.resource.data.electionId
+      is string
+
+    &&
+
+    request.resource.data.boothId
+      is string
+
+    &&
+
+    request.resource.data.pairedBy
+      is string
+
+    &&
+
+    request.resource.data.pairingCode
+      is string
+
+    &&
+
+    request.resource.data.deviceUid ==
+      request.auth.uid
+
+    &&
+
+    request.resource.data.status ==
+      "active"
+
+    &&
+
+    request.resource.data.pairedAt ==
+      request.time
+
+    &&
+
+    request.resource.data.lastSeenAt ==
+      request.time
+
+    &&
+
+    request.resource.data.revokedAt ==
+      null
+
+    &&
+
+    request.resource.data.revokedBy ==
+      ""
+
+    &&
+
+    exists(
+      /databases/$(database)/documents/DevicePairingCodes/$(request.resource.data.pairingCode)
+    )
+
+    &&
+
+    get(
+      /databases/$(database)/documents/DevicePairingCodes/$(request.resource.data.pairingCode)
+    ).data.status ==
+      "pending"
+
+    &&
+
+    get(
+      /databases/$(database)/documents/DevicePairingCodes/$(request.resource.data.pairingCode)
+    ).data.expiresAt >
+      request.time
+
+    &&
+
+    request.resource.data.electionId ==
+      get(
+        /databases/$(database)/documents/DevicePairingCodes/$(request.resource.data.pairingCode)
+      ).data.electionId
+
+    &&
+
+    request.resource.data.boothId ==
+      get(
+        /databases/$(database)/documents/DevicePairingCodes/$(request.resource.data.pairingCode)
+      ).data.boothId
+
+    &&
+
+    request.resource.data.pairedBy ==
+      get(
+        /databases/$(database)/documents/DevicePairingCodes/$(request.resource.data.pairingCode)
+      ).data.createdBy
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/DevicePairingCodes/$(request.resource.data.pairingCode)
+    ).data.status ==
+      "claimed"
+
+    &&
+
+    getAfter(
+      /databases/$(database)/documents/DevicePairingCodes/$(request.resource.data.pairingCode)
+    ).data.claimedBy ==
+      request.auth.uid;
+
+
+    /*
+   * -----------------------------------------------------
+   * UPDATE VOTING DEVICE
+   * -----------------------------------------------------
+   *
+   * CASE 1:
+   * Active Android device may update only its heartbeat.
+   *
+   * CASE 2:
+   * The Presiding Officer assigned to the booth may
+   * revoke/disconnect the active voting device.
+   */
+
+  allow update: if
+
+    /* =================================================
+       CASE 1 — ANDROID HEARTBEAT
+       ================================================= */
+
+    (
+      request.auth != null
+
+      &&
+
+      request.auth.uid ==
+        deviceUid
+
+      &&
+
+      request.auth.token.firebase.sign_in_provider ==
+        "anonymous"
+
+      &&
+
+      resource.data.status ==
+        "active"
+
+      &&
+
+      request.resource.data
+        .diff(resource.data)
+        .affectedKeys()
+        .hasOnly([
+          "lastSeenAt"
+        ])
+
+      &&
+
+      request.resource.data.lastSeenAt ==
+        request.time
+    )
+
+
+    ||
+
+
+    /* =================================================
+       CASE 2 — PO DISCONNECT / REVOKE DEVICE
+       ================================================= */
+
+    (
+      request.auth != null
+
+      &&
+
+      isActivePollingOfficer()
+
+      &&
+
+      get(
+        /databases/$(database)/documents/Users/$(request.auth.uid)
+      ).data.role ==
+        "presiding_officer"
+
+      &&
+
+      resource.data.boothId is string
+
+      &&
+
+      resource.data.boothId.size() > 0
+
+      &&
+
+      isAssignedPollingOfficer(
+        resource.data.boothId
+      )
+
+      &&
+
+      get(
+        /databases/$(database)/documents/BoothStaff/$(resource.data.boothId)
+      ).data.poUid ==
+        request.auth.uid
+
+      &&
+
+      resource.data.status ==
+        "active"
+
+      &&
+
+      request.resource.data
+        .diff(resource.data)
+        .affectedKeys()
+        .hasOnly([
+          "status",
+          "revokedAt",
+          "revokedBy"
+        ])
+
+      &&
+
+      request.resource.data.status ==
+        "revoked"
+
+      &&
+
+      request.resource.data.revokedAt ==
+        request.time
+
+      &&
+
+      request.resource.data.revokedBy ==
+        request.auth.uid
+    );
+
+
+  allow delete: if false;
+
+}
+
+
+/* =====================================================
+   ADMINISTRATIVE AUDIT LOGS
+   =====================================================
+
+   Audit entries are append-only. The log creation is validated
+   against the related state change in the SAME atomic batch so
+   ordinary clients cannot create a convincing event after the fact.
+   Vote choices, voter identities and ballot selections are never
+   stored in this collection.
+*/
+
+match /AuditLogs/{logId} {
+
+  /* Principal has supervisory read access. */
+  allow get, list: if isPrincipal();
+
+  allow create: if
+    request.auth != null
+
+    && request.resource.data.keys().hasAll([
+      "action",
+      "actorUid",
+      "actorName",
+      "actorRole",
+      "electionId",
+      "electionName",
+      "targetType",
+      "targetId",
+      "details",
+      "createdAt"
+    ])
+
+    && request.resource.data.keys().hasOnly([
+      "action",
+      "actorUid",
+      "actorName",
+      "actorRole",
+      "electionId",
+      "electionName",
+      "targetType",
+      "targetId",
+      "details",
+      "createdAt"
+    ])
+
+    && request.resource.data.actorUid == request.auth.uid
+
+    && exists(
+      /databases/$(database)/documents/Users/$(request.auth.uid)
+    )
+
+    && get(
+      /databases/$(database)/documents/Users/$(request.auth.uid)
+    ).data.status == "active"
+
+    && request.resource.data.actorRole == get(
+      /databases/$(database)/documents/Users/$(request.auth.uid)
+    ).data.role
+
+    && request.resource.data.actorName == get(
+      /databases/$(database)/documents/Users/$(request.auth.uid)
+    ).data.get("name", "")
+
+    && request.resource.data.electionId is string
+    && request.resource.data.electionId.size() > 0
+
+    && exists(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    )
+
+    && request.resource.data.electionName == getAfter(
+      /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+    ).data.get("electionName", "")
+
+    && request.resource.data.targetType is string
+    && request.resource.data.targetType.size() > 0
+    && request.resource.data.targetId is string
+    && request.resource.data.targetId.size() > 0
+
+    && request.resource.data.details is string
+    && request.resource.data.details.size() <= 500
+
+    && request.resource.data.createdAt == request.time
+
+    && (
+
+      /* Election draft -> finalized. */
+      (
+        request.resource.data.action == "ELECTION_FINALIZED"
+        && request.resource.data.targetType == "Elections"
+        && request.resource.data.targetId == request.resource.data.electionId
+        && canManageElections()
+        && getAfter(
+          /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+        ).data.status == "finalized"
+        && getAfter(
+          /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+        ).data.finalizedBy == request.auth.uid
+        && getAfter(
+          /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+        ).data.finalizedAt == request.time
+      )
+
+      ||
+
+      /* Principal starts voting after readiness checks. */
+      (
+        request.resource.data.action == "VOTING_STARTED"
+        && request.resource.data.targetType == "Elections"
+        && request.resource.data.targetId == request.resource.data.electionId
+        && isPrincipal()
+        && getAfter(
+          /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+        ).data.status == "voting_active"
+        && getAfter(
+          /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+        ).data.votingStartedBy == request.auth.uid
+        && getAfter(
+          /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+        ).data.votingStartedAt == request.time
+      )
+
+      ||
+
+      /* Principal resumes voting after a stopped state. */
+      (
+        request.resource.data.action == "VOTING_RESUMED"
+        && request.resource.data.targetType == "Elections"
+        && request.resource.data.targetId == request.resource.data.electionId
+        && isPrincipal()
+        && getAfter(
+          /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+        ).data.status == "voting_active"
+        && getAfter(
+          /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+        ).data.votingStartedBy == request.auth.uid
+        && getAfter(
+          /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+        ).data.votingStartedAt == request.time
+      )
+
+      ||
+
+      /* Manual or scheduled voting stop. */
+      (
+        request.resource.data.action == "VOTING_STOPPED"
+        && request.resource.data.targetType == "Elections"
+        && request.resource.data.targetId == request.resource.data.electionId
+        && isPrincipal()
+        && getAfter(
+          /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+        ).data.status == "voting_stopped"
+        && getAfter(
+          /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+        ).data.votingStoppedBy == request.auth.uid
+        && getAfter(
+          /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+        ).data.votingStoppedAt == request.time
+      )
+
+      ||
+
+      /* Permanent election close. */
+      (
+        request.resource.data.action == "ELECTION_CLOSED"
+        && request.resource.data.targetType == "Elections"
+        && request.resource.data.targetId == request.resource.data.electionId
+        && isPrincipal()
+        && getAfter(
+          /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+        ).data.status == "closed"
+        && getAfter(
+          /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+        ).data.closedBy == request.auth.uid
+        && getAfter(
+          /databases/$(database)/documents/Elections/$(request.resource.data.electionId)
+        ).data.closedAt == request.time
+      )
+
+      ||
+
+      /* Nomination form closed by authorized EC. */
+      (
+        request.resource.data.action == "NOMINATION_FORM_CLOSED"
+        && request.resource.data.targetType == "NominationForms"
+        && request.resource.data.targetId == request.resource.data.electionId
+        && isActiveECWithNominationDuty()
+        && getAfter(
+          /databases/$(database)/documents/NominationForms/$(request.resource.data.targetId)
+        ).data.electionId == request.resource.data.electionId
+        && getAfter(
+          /databases/$(database)/documents/NominationForms/$(request.resource.data.targetId)
+        ).data.formStatus == "closed"
+        && getAfter(
+          /databases/$(database)/documents/NominationForms/$(request.resource.data.targetId)
+        ).data.closedBy == request.auth.uid
+        && getAfter(
+          /databases/$(database)/documents/NominationForms/$(request.resource.data.targetId)
+        ).data.closedAt == request.time
+      )
+
+      ||
+
+      /* Candidate application approved. */
+      (
+        request.resource.data.action == "NOMINATION_APPLICATION_APPROVED"
+        && request.resource.data.targetType == "NominationApplications"
+        && isActiveECWithNominationDuty()
+        && getAfter(
+          /databases/$(database)/documents/NominationApplications/$(request.resource.data.targetId)
+        ).data.electionId == request.resource.data.electionId
+        && getAfter(
+          /databases/$(database)/documents/NominationApplications/$(request.resource.data.targetId)
+        ).data.status == "approved"
+        && getAfter(
+          /databases/$(database)/documents/NominationApplications/$(request.resource.data.targetId)
+        ).data.approvedBy == request.auth.uid
+        && getAfter(
+          /databases/$(database)/documents/NominationApplications/$(request.resource.data.targetId)
+        ).data.approvedAt == request.time
+      )
+
+      ||
+
+      /* Candidate application rejected. */
+      (
+        request.resource.data.action == "NOMINATION_APPLICATION_REJECTED"
+        && request.resource.data.targetType == "NominationApplications"
+        && isActiveECWithNominationDuty()
+        && getAfter(
+          /databases/$(database)/documents/NominationApplications/$(request.resource.data.targetId)
+        ).data.electionId == request.resource.data.electionId
+        && getAfter(
+          /databases/$(database)/documents/NominationApplications/$(request.resource.data.targetId)
+        ).data.status == "rejected"
+        && getAfter(
+          /databases/$(database)/documents/NominationApplications/$(request.resource.data.targetId)
+        ).data.reviewedBy == request.auth.uid
+        && getAfter(
+          /databases/$(database)/documents/NominationApplications/$(request.resource.data.targetId)
+        ).data.reviewedAt == request.time
+      )
+
+      ||
+
+      /* Candidate list finalization. The target points to one member
+         of the candidate batch, proving the log is coupled to the
+         same finalization commit. */
+      (
+        request.resource.data.action == "CANDIDATE_LIST_FINALIZED"
+        && request.resource.data.targetType == "Candidates"
+        && isActiveECWithNominationDuty()
+        && getAfter(
+          /databases/$(database)/documents/Candidates/$(request.resource.data.targetId)
+        ).data.electionId == request.resource.data.electionId
+        && getAfter(
+          /databases/$(database)/documents/Candidates/$(request.resource.data.targetId)
+        ).data.status == "finalized"
+        && getAfter(
+          /databases/$(database)/documents/Candidates/$(request.resource.data.targetId)
+        ).data.finalizedBy == request.auth.uid
+        && getAfter(
+          /databases/$(database)/documents/Candidates/$(request.resource.data.targetId)
+        ).data.finalizedAt == request.time
+      )
+
+      ||
+
+      /* Official aggregate result publication. */
+      (
+        request.resource.data.action == "RESULT_PUBLISHED"
+        && request.resource.data.targetType == "PublishedResults"
+        && request.resource.data.targetId == request.resource.data.electionId
+        && isPrincipal()
+        && getAfter(
+          /databases/$(database)/documents/PublishedResults/$(request.resource.data.targetId)
+        ).data.electionId == request.resource.data.electionId
+        && getAfter(
+          /databases/$(database)/documents/PublishedResults/$(request.resource.data.targetId)
+        ).data.status == "published"
+        && getAfter(
+          /databases/$(database)/documents/PublishedResults/$(request.resource.data.targetId)
+        ).data.publishedAt == request.time
+      )
+
+      ||
+
+      /* Missing public winner details added after result publication. */
+      (
+        request.resource.data.action == "WINNER_DETAILS_PUBLISHED"
+        && request.resource.data.targetType == "PublishedWinnerProfiles"
+        && isPrincipal()
+        && existsAfter(
+          /databases/$(database)/documents/PublishedWinnerProfiles/$(request.resource.data.targetId)
+        )
+        && getAfter(
+          /databases/$(database)/documents/PublishedWinnerProfiles/$(request.resource.data.targetId)
+        ).data.electionId == request.resource.data.electionId
+        && getAfter(
+          /databases/$(database)/documents/PublishedWinnerProfiles/$(request.resource.data.targetId)
+        ).data.publishedAt == request.time
+        && existsAfter(
+          /databases/$(database)/documents/PublishedResults/$(request.resofurce.data.electionId)
+        )
+        && getAfter(
+          /databases/$(database)/documents/PublishedResults/$(request.resource.data.electionId)
+        ).data.status == "published"
+      )
+    );
+
+  /* Audit history is append-only and immutable. */
+  allow update, delete: if false;
+}
+
+  }
+}
+
+
+  

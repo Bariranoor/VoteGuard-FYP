@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Official Election Result</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        .header {
+            background: #1976d2;
+            color: white;
+            padding: 24px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 25px;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            opacity: 0.92;
+            font-size: 14px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 28px auto;
+            padding: 0 18px 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .loading,
+        .error {
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .error {
+            color: #a61f1f;
+        }
+
+        .institution {
+            color: #1976d2;
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .election-title {
+            font-size: 24px;
+            margin-bottom: 7px;
+        }
+
+        .meta {
+            color: #666;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .description {
+            margin-top: 12px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 18px;
+        }
+
+        .summary-item {
+            background: #f7f8fa;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .summary-label {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 7px;
+        }
+
+        .summary-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .position-card {
+            background: white;
+            border-radius: 10px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .position-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .position-header h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .position-total {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .outcome {
+            color: #2e7d32;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .outcome.tie {
+            color: #a05a00;
+        }
+
+        .outcome.none {
+            color: #666;
+        }
+
+        .candidate-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .candidate-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 16px;
+            background: #f7f8fa;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+        }
+
+        .candidate-row.winner {
+            background: #f2fbf2;
+            border-color: #9ccc9c;
+        }
+
+        .candidate-name {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .candidate-meta {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .vote-count {
+            min-width: 100px;
+            text-align: right;
+        }
+
+        .vote-count strong {
+            display: block;
+            font-size: 18px;
+        }
+
+        .vote-count span {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .footer-note {
+            color: #777;
+            text-align: center;
+            font-size: 13px;
+            line-height: 1.6;
+            padding: 10px 0;
+        }
+
+        #resultContent[hidden],
+        #errorCard[hidden],
+        #loadingCard[hidden] {
+            display: none;
+        }
+
+        @media (max-width: 700px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .candidate-row {
+                grid-template-columns: 1fr;
+            }
+
+            .vote-count {
+                text-align: left;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .election-title {
+                font-size: 21px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+    <style>
+        body { background: #f5f7fa; color: #1f2937; }
+        .header { background: #173a5e; border-bottom: 1px solid #102c49; padding: 24px 20px; }
+        .header h1 { color: #fff; font-size: 1.55rem; }
+        .header p { color: #edf3f8; }
+        .public-institution-header { color: #fff; font-size: 1.05rem; font-weight: 700; margin-top: 8px; }
+        .container { max-width: 1100px; margin: 32px auto; }
+        .card, .position-card { border: 1px solid #d0d5dd; border-radius: 10px; box-shadow: none; }
+        .institution, .election-title, .position-header h2 { color: #173a5e; }
+        .summary-item, .candidate-row { background: #f8fafc; border: 1px solid #eaecf0; border-radius: 8px; }
+        .candidate-row.winner { background: #f1f8f4; border-color: #b7d9c5; }
+        .election-details { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 18px; }
+        .election-detail { background: #f8fafc; border: 1px solid #eaecf0; border-radius: 8px; padding: 14px; }
+        .election-detail-label { color: #667085; font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+        .election-detail-value { color: #173a5e; font-size: .96rem; font-weight: 700; line-height: 1.45; margin-top: 5px; }
+        .outcome { color: #24704a; }
+        .outcome.tie { color: #8a4b08; }
+        .winner-showcase { background: #f1f8f4; border: 1px solid #9fcdb0; border-radius: 10px; display: grid; gap: 20px; grid-template-columns: 116px minmax(0, 1fr) auto; margin: 18px 0; padding: 20px; }
+        .winner-symbol, .winner-symbol-placeholder { align-items: center; background: #fff; border: 1px solid #b7d9c5; border-radius: 8px; display: flex; height: 116px; justify-content: center; object-fit: contain; overflow: hidden; width: 116px; }
+        .winner-symbol-placeholder { color: #173a5e; font-size: 2.2rem; font-weight: 800; }
+        .winner-label { color: #1b603d; font-size: .82rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+        .winner-name { color: #173a5e; font-size: 1.35rem; font-weight: 800; margin: 5px 0; }
+        .winner-meta, .winner-manifesto { color: #4b5563; line-height: 1.55; }
+        .winner-manifesto { border-top: 1px solid #cfe4d7; font-size: .94rem; margin-top: 12px; padding-top: 12px; }
+        .winner-manifesto strong { color: #173a5e; display: block; margin-bottom: 3px; }
+        .winner-votes { align-self: start; color: #173a5e; min-width: 110px; text-align: right; }
+        .winner-votes strong { display: block; font-size: 1.3rem; }
+        .winner-votes span { color: #4b5563; font-size: .9rem; }
+        @media (max-width: 700px) { .election-details { grid-template-columns: 1fr; } .winner-showcase { grid-template-columns: 82px minmax(0, 1fr); padding: 16px; } .winner-symbol, .winner-symbol-placeholder { height: 82px; width: 82px; } .winner-votes { grid-column: 1 / -1; text-align: left; } }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>Official Election Result</h1>
+    <p id="publicInstitutionHeader" class="public-institution-header" hidden></p>
+</div>
+
+<div class="container">
+    <div id="loadingCard" class="card loading">
+        Loading official result...
+    </div>
+
+    <div id="errorCard" class="card error" hidden></div>
+
+    <div id="resultContent" hidden>
+        <section class="card">
+            <div id="institutionName" class="institution">Institution</div>
+            <h1 id="electionName" class="election-title">Election</h1>
+            <div id="electionMeta" class="meta"></div>
+            <div id="electionDescription" class="description" hidden></div>
+            <div id="electionDetails" class="election-details" hidden></div>
+
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-label">Eligible Voters</div>
+                    <div id="eligibleVoters" class="summary-value">0</div>
+                </div>
+
+                <div class="summary-item">
+                    <div class="summary-label">Voters Participated</div>
+                    <div id="votersParticipated" class="summary-value">0</div>
+                </div>
+
+                <div class="summary-item">
+                    <div class="summary-label">Voter Turnout</div>
+                    <div id="turnout" class="summary-value">0.0%</div>
+                </div>
+            </div>
+        </section>
+
+        <div id="positionsContainer"></div>
+
+        <div class="footer-note">
+            This page displays the immutable official result snapshot published after the election was closed.
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import {
+        db
+    } from "./js/firebase.js";
+
+    import {
+        doc,
+        getDoc
+    } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+
+    const loadingCard =
+        document.getElementById("loadingCard");
+
+    const errorCard =
+        document.getElementById("errorCard");
+
+    const resultContent =
+        document.getElementById("resultContent");
+
+    const positionsContainer =
+        document.getElementById("positionsContainer");
+
+
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+
+    function formatDate(value) {
+        if (!value) {
+            return "";
+        }
+
+        let date;
+
+        if (typeof value.toDate === "function") {
+            date = value.toDate();
+        } else {
+            date = new Date(value);
+        }
+
+        if (Number.isNaN(date.getTime())) {
+            return "";
+        }
+
+        return date.toLocaleString();
+    }
+
+
+    function getCandidateSymbol(candidate) {
+        const raw =
+            typeof candidate?.symbolBase64 === "string"
+                ? candidate.symbolBase64.trim()
+                : "";
+
+        if (!raw) {
+            return "";
+        }
+
+        if (raw.startsWith("data:image/")) {
+            return raw;
+        }
+
+        const mime =
+            typeof candidate?.symbolMimeType === "string" &&
+            candidate.symbolMimeType.startsWith("image/")
+                ? candidate.symbolMimeType
+                : "image/png";
+
+        return `data:${mime};base64,${raw}`;
+    }
+
+
+    async function getPublishedWinnerProfiles(resultId, positions) {
+        const lookups = positions
+            .filter(position =>
+                position.outcomeType === "winner" &&
+                Array.isArray(position.winnerCandidateIds) &&
+                position.winnerCandidateIds.length === 1
+            )
+            .map(async position => {
+                try {
+                    const snapshot = await getDoc(
+                        doc(
+                            db,
+                            "PublishedWinnerProfiles",
+                            `${resultId}_${position.positionId}`
+                        )
+                    );
+
+                    return [
+                        position.positionId,
+                        snapshot.exists() ? snapshot.data() : null
+                    ];
+                } catch (error) {
+                    console.warn("Winner profile is not available:", error);
+                    return [position.positionId, null];
+                }
+            });
+
+        return new Map(await Promise.all(lookups));
+    }
+
+
+    function showError(message) {
+        loadingCard.hidden = true;
+        resultContent.hidden = true;
+        errorCard.hidden = false;
+        errorCard.textContent = message;
+    }
+
+
+    async function getConfiguredInstitutionName(result) {
+        const publishedName = String(result.institutionName || "").trim();
+
+        try {
+            const systemSettings = await getDoc(
+                doc(db, "SystemSettings", "system")
+            );
+
+            const configuredName = systemSettings.exists()
+                ? String(systemSettings.data().institutionName || "").trim()
+                : "";
+
+            return configuredName || publishedName || "Institution";
+        } catch (error) {
+            console.warn("Institution name could not be loaded:", error);
+            return publishedName || "Institution";
+        }
+    }
+
+
+    async function renderResult(result, resultId) {
+        const institutionName = await getConfiguredInstitutionName(result);
+
+        document.getElementById("institutionName").textContent = institutionName;
+        document.getElementById("publicInstitutionHeader").textContent = institutionName;
+        document.getElementById("publicInstitutionHeader").hidden = false;
+
+        document.getElementById("electionName").textContent =
+            result.electionName || "Election";
+
+        document.getElementById("electionMeta").hidden = true;
+
+        const descriptionElement =
+            document.getElementById("electionDescription");
+
+        if (result.description) {
+            descriptionElement.textContent = result.description;
+            descriptionElement.hidden = false;
+        } else {
+            descriptionElement.hidden = true;
+        }
+
+        const formatRange = (start, end) => {
+            const startText = formatDate(start);
+            const endText = formatDate(end);
+
+            if (startText && endText) {
+                return `${startText} to ${endText}`;
+            }
+
+            return startText || endText || "";
+        };
+
+        const details = [
+            ["Academic Session", result.academicSession],
+            ["Nomination Period", formatRange(result.nominationStart, result.nominationEnd)],
+            ["Voting Period", formatRange(result.votingStart, result.votingEnd)],
+            ["Positions", Number.isInteger(result.positionCount) ? String(result.positionCount) : ""],
+            ["Result Published", formatDate(result.publishedAt)]
+        ].filter(([, value]) => value);
+
+        const electionDetails = document.getElementById("electionDetails");
+        electionDetails.innerHTML = details.map(([label, value]) => `
+            <div class="election-detail">
+                <div class="election-detail-label">${escapeHtml(label)}</div>
+                <div class="election-detail-value">${escapeHtml(value)}</div>
+            </div>
+        `).join("");
+        electionDetails.hidden = details.length === 0;
+
+        document.getElementById("eligibleVoters").textContent =
+            String(result.eligibleVoters ?? 0);
+
+        document.getElementById("votersParticipated").textContent =
+            String(result.votersParticipated ?? 0);
+
+        const turnout =
+            Number(result.turnoutPercentage ?? 0);
+
+        document.getElementById("turnout").textContent =
+            `${Number.isFinite(turnout) ? turnout.toFixed(1) : "0.0"}%`;
+
+        positionsContainer.innerHTML = "";
+
+        const positions =
+            Array.isArray(result.positions)
+                ? result.positions
+                : [];
+
+        if (!positions.length) {
+            positionsContainer.innerHTML = `
+                <section class="card">
+                    No position results are available in this published result.
+                </section>
+            `;
+            return;
+        }
+
+        const winnerProfiles =
+            await getPublishedWinnerProfiles(resultId, positions);
+
+        positions.forEach(position => {
+            const candidates =
+                Array.isArray(position.candidates)
+                    ? position.candidates
+                    : [];
+
+            const winnerIds =
+                Array.isArray(position.winnerCandidateIds)
+                    ? position.winnerCandidateIds
+                    : [];
+
+            const winners =
+                candidates.filter(candidate =>
+                    winnerIds.includes(candidate.candidateId)
+                );
+
+            let outcomeText = "No votes recorded";
+            let outcomeClass = "none";
+
+            if (position.outcomeType === "winner" && winners.length === 1) {
+                outcomeText = `Winner: ${winners[0].name}`;
+                outcomeClass = "";
+            } else if (position.outcomeType === "tie" && winners.length > 1) {
+                outcomeText = `Tie: ${winners.map(candidate => candidate.name).join(" / ")}`;
+                outcomeClass = "tie";
+            }
+
+            const winner =
+                position.outcomeType === "winner" && winners.length === 1
+                    ? winners[0]
+                    : null;
+
+            const winnerProfile =
+                winner ? winnerProfiles.get(position.positionId) : null;
+
+            const winnerDetails =
+                winnerProfile || winner;
+
+            const winnerSymbol =
+                winner ? getCandidateSymbol(winnerDetails) : "";
+
+            const winnerClassSection = winner
+                ? [
+                    winnerDetails.className || winner.className || "",
+                    winnerDetails.section || winner.section
+                        ? `Section ${winnerDetails.section || winner.section}`
+                        : ""
+                ]
+                    .filter(Boolean)
+                    .join(" • ")
+                : "";
+
+            const winnerShowcase = winner
+                ? `
+                    <section class="winner-showcase" aria-label="Elected candidate">
+                        ${
+                            winnerSymbol
+                                ? `<img class="winner-symbol" src="${escapeHtml(winnerSymbol)}" alt="${escapeHtml(winner.name || "Winner")} candidate symbol">`
+                                : `<div class="winner-symbol-placeholder">${escapeHtml(String(winner.name || "W").charAt(0).toUpperCase())}</div>`
+                        }
+                        <div>
+                            <div class="winner-label">Elected Candidate</div>
+                            <div class="winner-name">${escapeHtml(winnerDetails.name || winner.name || "Winner")}</div>
+                            <div class="winner-meta">${escapeHtml(winnerClassSection || "Candidate")}</div>
+                            <div class="winner-manifesto">
+                                <strong>Manifesto</strong>
+                                ${escapeHtml(winnerProfile?.manifesto || "No manifesto was provided.")}
+                            </div>
+                        </div>
+                        <div class="winner-votes">
+                            <strong>${Number(winner.votes || 0)} votes</strong>
+                            <span>${Number(winner.percentage || 0).toFixed(1)}%</span>
+                        </div>
+                    </section>
+                `
+                : "";
+
+            const card =
+                document.createElement("section");
+
+            card.className = "position-card";
+
+            card.innerHTML = `
+                <div class="position-header">
+                    <div>
+                        <h2>${escapeHtml(position.positionName || "Unnamed Position")}</h2>
+                        <div class="position-total">
+                            Total votes for this position: ${Number(position.totalVotes || 0)}
+                        </div>
+                    </div>
+
+                    <div class="outcome ${outcomeClass}">
+                        ${escapeHtml(outcomeText)}
+                    </div>
+                </div>
+
+                ${winnerShowcase}
+                <div class="candidate-list"></div>
+            `;
+
+            const list =
+                card.querySelector(".candidate-list");
+
+            if (!candidates.length) {
+                list.innerHTML = `
+                    <div class="candidate-row">
+                        No candidates are included for this position.
+                    </div>
+                `;
+            } else {
+                candidates
+                    .slice()
+                    .sort((a, b) =>
+                        Number(b.votes || 0) - Number(a.votes || 0) ||
+                        String(a.name || "").localeCompare(String(b.name || ""))
+                    )
+                    .filter(candidate => !winner || candidate.candidateId !== winner.candidateId)
+                    .forEach(candidate => {
+                        const isWinner =
+                            false;
+
+                        const row =
+                            document.createElement("div");
+
+                        row.className =
+                            `candidate-row${isWinner ? " winner" : ""}`;
+
+                        const classSection = [
+                            candidate.className || "",
+                            candidate.section
+                                ? `Section ${candidate.section}`
+                                : ""
+                        ]
+                            .filter(Boolean)
+                            .join(" • ");
+
+                        row.innerHTML = `
+                            <div>
+                                <div class="candidate-name">
+                                    ${escapeHtml(candidate.name || "Unnamed Candidate")}
+                                    ${isWinner ? " • Winner" : ""}
+                                </div>
+
+                                <div class="candidate-meta">
+                                    ${escapeHtml(classSection || "Candidate")}
+                                </div>
+                            </div>
+
+                            <div class="vote-count">
+                                <strong>${Number(candidate.votes || 0)} votes</strong>
+                                <span>${Number(candidate.percentage || 0).toFixed(1)}%</span>
+                            </div>
+                        `;
+
+                        list.appendChild(row);
+                    });
+            }
+
+            positionsContainer.appendChild(card);
+        });
+    }
+
+
+    async function initializePage() {
+        const resultId =
+            new URLSearchParams(window.location.search)
+                .get("result");
+
+        if (!resultId) {
+            showError("This result link is incomplete or invalid.");
+            return;
+        }
+
+        try {
+            const snapshot =
+                await getDoc(
+                    doc(db, "PublishedResults", resultId)
+                );
+
+            if (!snapshot.exists()) {
+                showError("The official result could not be found. It may not have been published yet.");
+                return;
+            }
+
+            const result =
+                snapshot.data();
+
+            if (result.status !== "published") {
+                showError("This result is not available for public viewing.");
+                return;
+            }
+
+            await renderResult(result, resultId);
+
+            loadingCard.hidden = true;
+            errorCard.hidden = true;
+            resultContent.hidden = false;
+
+            document.title =
+                `${result.electionName || "Election"} — Official Result`;
+
+        } catch (error) {
+            console.error("Public result load error:", error);
+            showError("Unable to load the official result. Please check the link and try again.");
+        }
+    }
+
+
+    initializePage();
+</script>
+
+</body>
+</html>

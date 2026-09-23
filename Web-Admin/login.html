@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>VoteGuard | Institutional Election Management</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', Arial, sans-serif;
+        }
+
+
+        body {
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background: #f4f6f8;
+
+            color: #222;
+
+            padding: 20px;
+        }
+
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+
+            background: #ffffff;
+
+            padding: 35px 30px;
+
+            border-radius: 12px;
+
+            box-shadow:
+                0 4px 20px rgba(0, 0, 0, 0.08);
+
+            border: 1px solid #e0e0e0;
+        }
+
+
+        .brand-icon {
+            width: 46px;
+            height: 46px;
+
+            background: #1976d2;
+
+            color: white;
+
+            border-radius: 10px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 22px;
+
+            margin: 0 auto 14px;
+        }
+
+        .brand-icon svg {
+            width: 27px;
+            height: 27px;
+            fill: none;
+            stroke: currentColor;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-width: 2;
+        }
+
+        .institution-name {
+            color: #173a5e;
+            font-size: 13px;
+            font-weight: 700;
+            margin: -14px 0 24px;
+            text-align: center;
+        }
+
+
+        h1 {
+            text-align: center;
+
+            font-size: 22px;
+
+            font-weight: 700;
+
+            color: #222;
+
+            margin-bottom: 4px;
+        }
+
+
+        .subtitle {
+            text-align: center;
+
+            color: #666;
+
+            font-size: 14px;
+
+            margin-bottom: 25px;
+        }
+
+
+        .section {
+            background: #fafafa;
+
+            border: 1px solid #e0e0e0;
+
+            padding: 18px;
+
+            border-radius: 10px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .section h2 {
+            font-size: 16px;
+
+            font-weight: 600;
+
+            margin-bottom: 4px;
+
+            color: #333;
+        }
+
+
+        .section p {
+            color: #666;
+
+            font-size: 13px;
+
+            margin-bottom: 12px;
+
+            line-height: 1.4;
+        }
+
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+
+        .form-group label {
+            display: block;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            color: #444;
+
+            margin-bottom: 5px;
+        }
+
+
+        input {
+            width: 100%;
+
+            padding: 11px 12px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 6px;
+
+            font-size: 14px;
+
+            color: #222;
+
+            background: #ffffff;
+        }
+
+
+        input:focus {
+            outline: none;
+
+            border-color: #1976d2;
+        }
+
+
+        button {
+            width: 100%;
+
+            padding: 11px;
+
+            border: none;
+
+            border-radius: 6px;
+
+            background: #1976d2;
+
+            color: white;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+
+        button:hover {
+            background: #1565c0;
+        }
+
+
+        button:disabled {
+            opacity: 0.6;
+
+            cursor: not-allowed;
+        }
+
+
+        .btn-secondary {
+            background: #ffffff;
+
+            color: #444;
+
+            border: 1px solid #ccc;
+        }
+
+
+        .btn-secondary:hover {
+            background: #eee;
+
+            color: #222;
+        }
+
+
+        .btn-link {
+            background: transparent;
+
+            color: #1976d2;
+
+            padding: 4px 0;
+
+            font-size: 13px;
+
+            font-weight: 500;
+
+            text-align: right;
+
+            margin-bottom: 10px;
+        }
+
+
+        .btn-link:hover {
+            background: transparent;
+
+            text-decoration: underline;
+        }
+
+
+        .btn-back {
+            background: #777;
+
+            color: white;
+
+            margin-top: 10px;
+        }
+
+
+        .btn-back:hover {
+            background: #666;
+        }
+
+
+        .hidden {
+            display: none !important;
+        }
+
+
+        .message {
+            margin-top: 15px;
+
+            padding: 10px 12px;
+
+            border-radius: 6px;
+
+            font-size: 13px;
+
+            display: none;
+
+            line-height: 1.4;
+        }
+
+
+        .error {
+            background: #ffe5e5;
+
+            color: #b00020;
+
+            border: 1px solid #ffcdd2;
+        }
+
+
+        .success {
+            background: #e8f5e9;
+
+            color: #2e7d32;
+
+            border: 1px solid #c8e6c9;
+        }
+
+
+        .badge-status {
+            display: inline-block;
+
+            padding: 3px 8px;
+
+            border-radius: 4px;
+
+            font-size: 12px;
+
+            background: #e0e0e0;
+
+            color: #555;
+
+            margin-top: 4px;
+        }
+
+    </style>
+
+    <link rel="stylesheet" href="assets/css/style.css?v=20260914-setup-brand">
+</head>
+
+
+<body class="login-page">
+
+<header class="login-header">
+    <div class="login-header-inner">
+        <div class="brand-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M5 10.5V20h14v-9.5" />
+                <path d="M4 10.5h16" />
+                <path d="M9 4.5l2.1 2.1L16 1.8l2.2 2.2-7.1 7.1L9 9z" />
+            </svg>
+        </div>
+        <div>
+            <h1>VoteGuard</h1>
+            <p>Controlled Institutional Election Management System with Electronic Voting</p>
+            <p id="dynamicInstitutionName" class="institution-name" hidden></p>
+        </div>
+    </div>
+</header>
+
+<main class="login-main">
+<div class="container">
+
+
+
+    <!-- ============================================================
+         ENTRY SCREEN
+         ============================================================ -->
+
+    <div id="entryScreen" class="hidden">
+
+
+        <div class="section">
+
+            <h2>
+                Already have an account?
+            </h2>
+
+            <p>
+                Sign in to access your dashboard.
+            </p>
+
+            <button
+                id="showLoginBtn"
+                type="button"
+            >
+                Sign In
+            </button>
+
+        </div>
+
+
+
+        <div
+            class="section"
+            id="setupSection"
+        >
+
+            <h2>
+                First-time system setup?
+            </h2>
+
+            <p>
+                Initialize the institutional election system
+                and create the first Principal account.
+            </p>
+
+            <button
+                id="showSetupBtn"
+                type="button"
+                class="btn-secondary"
+            >
+                Initialize System
+            </button>
+
+
+            <div
+                id="initBadge"
+                class="hidden"
+                style="margin-top: 6px;"
+            >
+
+                <span class="badge-status">
+                    System Initialized — Please Sign In
+                </span>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- ============================================================
+         LOGIN SCREEN
+         ============================================================ -->
+
+    <div id="loginScreen">
+
+        <h2
+            style="
+                font-size: 16px;
+                margin-bottom: 15px;
+            "
+        >
+            Sign In
+        </h2>
+
+
+        <div
+            id="loginMessage"
+            class="message"
+        ></div>
+
+
+        <div class="form-group">
+
+            <label for="loginEmail">
+                Email Address
+            </label>
+
+            <input
+                type="email"
+                id="loginEmail"
+                placeholder="Enter your email"
+                autocomplete="email"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="loginPassword">
+                Password
+            </label>
+
+            <input
+                type="password"
+                id="loginPassword"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+            >
+
+        </div>
+
+
+        <button
+            id="forgotPasswordBtn"
+            type="button"
+            class="btn-link"
+        >
+            Forgot Password?
+        </button>
+
+
+        <button
+            id="loginBtn"
+            type="button"
+        >
+            Sign In
+        </button>
+
+
+        <button
+            id="backFromLoginBtn"
+            type="button"
+            class="btn-back"
+        >
+            First-time system setup
+        </button>
+
+    </div>
+
+
+
+    <!-- ============================================================
+         INITIAL SYSTEM SETUP
+         ============================================================ -->
+
+    <div
+        id="setupScreen"
+        class="hidden"
+    >
+
+        <div class="setup-intro">
+            <p class="setup-kicker">VoteGuard Setup</p>
+            <h2>Set Up Your Institution</h2>
+            <p class="setup-copy">
+                Add your institution details and create the first Principal account.
+            </p>
+            <p class="setup-note">
+                This setup is needed only once for this system.
+            </p>
+        </div>
+
+
+        <div
+            id="setupMessage"
+            class="message"
+        ></div>
+
+
+
+        <!-- Institution Name -->
+
+        <div class="form-group">
+
+            <label for="institutionName">
+                Institution Name
+            </label>
+
+            <input
+                type="text"
+                id="institutionName"
+                placeholder="Enter institution name"
+                autocomplete="organization"
+            >
+
+        </div>
+
+
+
+        <!-- Principal Name -->
+
+        <div class="form-group">
+
+            <label for="principalName">
+                Principal Full Name
+            </label>
+
+            <input
+                type="text"
+                id="principalName"
+                placeholder="Enter Principal name"
+                autocomplete="name"
+            >
+
+        </div>
+
+
+
+        <!-- Principal Email -->
+
+        <div class="form-group">
+
+            <label for="principalEmail">
+                Principal Email
+            </label>
+
+            <input
+                type="email"
+                id="principalEmail"
+                placeholder="Enter Principal email"
+                autocomplete="email"
+            >
+
+        </div>
+
+
+
+        <!-- Password -->
+
+        <div class="form-group">
+
+            <label for="principalPassword">
+                Password
+            </label>
+
+            <input
+                type="password"
+                id="principalPassword"
+                placeholder="At least 8 characters"
+                autocomplete="new-password"
+            >
+
+        </div>
+
+
+
+        <!-- Confirm Password -->
+
+        <div class="form-group">
+
+            <label for="confirmPassword">
+                Confirm Password
+            </label>
+
+            <input
+                type="password"
+                id="confirmPassword"
+                placeholder="Re-enter password"
+                autocomplete="new-password"
+            >
+
+        </div>
+
+
+
+        <button
+            id="setupBtn"
+            type="button"
+        >
+            Create Principal Account
+        </button>
+
+
+        <button
+            id="backFromSetupBtn"
+            type="button"
+            class="btn-back"
+        >
+            Back
+        </button>
+
+    </div>
+
+
+</div>
+</main>
+
+
+
+<!-- ================================================================
+     JAVASCRIPT
+     ================================================================ -->
+
+<script type="module">
+
+
+    // ============================================================
+    // SHARED FIREBASE
+    // ============================================================
+
+    import {
+        auth,
+        db
+    } from "./js/firebase.js";
+
+
+    // ============================================================
+    // FIREBASE AUTHENTICATION
+    // ============================================================
+
+    import {
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        sendPasswordResetEmail,
+        signOut,
+        setPersistence,
+        browserLocalPersistence
+    } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+
+    // ============================================================
+    // FIRESTORE
+    // ============================================================
+
+    import {
+        doc,
+        getDoc,
+        writeBatch
+    } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+
+    // ============================================================
+    // NAVIGATION
+    // ============================================================
+
+    import {
+        goToDashboard
+    } from "./js/navigation.js";
+
+
+
+    // ============================================================
+    // AUTH PERSISTENCE
+    // ============================================================
+
+    await setPersistence(
+        auth,
+        browserLocalPersistence
+    );
+
+
+
+    // ============================================================
+    // ELEMENTS
+    // ============================================================
+
+    const entryScreen =
+        document.getElementById("entryScreen");
+
+    const loginScreen =
+        document.getElementById("loginScreen");
+
+    const setupScreen =
+        document.getElementById("setupScreen");
+
+
+    const showLoginBtn =
+        document.getElementById("showLoginBtn");
+
+    const showSetupBtn =
+        document.getElementById("showSetupBtn");
+
+    const forgotPasswordBtn =
+        document.getElementById("forgotPasswordBtn");
+
+    const backFromLoginBtn =
+        document.getElementById("backFromLoginBtn");
+
+    const backFromSetupBtn =
+        document.getElementById("backFromSetupBtn");
+
+    const loginBtn =
+        document.getElementById("loginBtn");
+
+    const setupBtn =
+        document.getElementById("setupBtn");
+
+
+    const loginMessage =
+        document.getElementById("loginMessage");
+
+    const setupMessage =
+        document.getElementById("setupMessage");
+
+    const initBadge =
+        document.getElementById("initBadge");
+
+    let systemInitialized = false;
+
+    const dynamicInstitutionName =
+        document.getElementById("dynamicInstitutionName");
+
+
+    function showLoginScreen() {
+
+        entryScreen.classList.add("hidden");
+
+        setupScreen.classList.add("hidden");
+
+        loginScreen.classList.remove("hidden");
+
+        backFromLoginBtn.classList.toggle(
+            "hidden",
+            systemInitialized
+        );
+
+        loginMessage.style.display = "none";
+
+    }
+
+
+    function showSetupScreen() {
+
+        entryScreen.classList.add("hidden");
+
+        loginScreen.classList.add("hidden");
+
+        setupScreen.classList.remove("hidden");
+
+        setupMessage.style.display = "none";
+
+    }
+
+
+
+    // ============================================================
+    // CHECK SYSTEM INITIALIZATION
+    // ============================================================
+
+    async function checkSystemInitialization() {
+
+        try {
+
+            const systemRef =
+                doc(
+                    db,
+                    "SystemSettings",
+                    "system"
+                );
+
+
+            const systemSnap =
+                await getDoc(systemRef);
+
+
+            if (systemSnap.exists()) {
+
+                const systemData = systemSnap.data();
+                const institutionName = String(
+                    systemData.institutionName || ""
+                ).trim();
+
+                if (institutionName) {
+                    dynamicInstitutionName.textContent = institutionName;
+                    dynamicInstitutionName.hidden = false;
+                }
+
+                if (systemData.initialized === true) {
+
+                    systemInitialized = true;
+
+                    showSetupBtn.disabled = true;
+
+                    showSetupBtn.style.opacity = "0.6";
+
+                    showSetupBtn.style.cursor =
+                        "not-allowed";
+
+                    initBadge.classList.remove("hidden");
+
+                    // An initialized institution should open directly on the
+                    // official sign-in form, not an extra choice screen.
+                    showLoginScreen();
+
+                    return;
+                }
+
+            }
+
+            // No completed system setup exists yet. The first visitor must
+            // create the Principal account before anyone can sign in.
+            showSetupScreen();
+
+        } catch (error) {
+
+            console.warn(
+                "System initialization check failed:",
+                error
+            );
+
+        }
+
+    }
+
+
+    await checkSystemInitialization();
+
+
+
+    // ============================================================
+    // SHOW LOGIN
+    // ============================================================
+
+    showLoginBtn.addEventListener(
+        "click",
+        () => {
+
+            showLoginScreen();
+
+        }
+    );
+
+
+
+    // ============================================================
+    // SHOW INITIAL SETUP
+    // ============================================================
+
+    showSetupBtn.addEventListener(
+        "click",
+        () => {
+
+            if (showSetupBtn.disabled) {
+
+                alert(
+                    "System is already initialized. Please Sign In."
+                );
+
+                return;
+
+            }
+
+
+            showSetupScreen();
+
+        }
+    );
+
+
+
+    // ============================================================
+    // BACK FROM LOGIN
+    // ============================================================
+
+    backFromLoginBtn.addEventListener(
+        "click",
+        () => {
+
+            loginScreen.classList.add("hidden");
+
+            entryScreen.classList.remove("hidden");
+
+            loginMessage.style.display = "none";
+
+        }
+    );
+
+
+
+    // ============================================================
+    // BACK FROM SETUP
+    // ============================================================
+
+    backFromSetupBtn.addEventListener(
+        "click",
+        () => {
+
+            setupScreen.classList.add("hidden");
+
+            entryScreen.classList.remove("hidden");
+
+            setupMessage.style.display = "none";
+
+        }
+    );
+
+
+
+    // ============================================================
+    // INITIAL SYSTEM SETUP
+    // ============================================================
+
+    setupBtn.addEventListener(
+        "click",
+        async () => {
+
+
+            const institutionName =
+                document
+                    .getElementById("institutionName")
+                    .value
+                    .trim();
+
+
+            const principalName =
+                document
+                    .getElementById("principalName")
+                    .value
+                    .trim();
+
+
+            const principalEmail =
+                document
+                    .getElementById("principalEmail")
+                    .value
+                    .trim();
+
+
+            const password =
+                document
+                    .getElementById("principalPassword")
+                    .value;
+
+
+            const confirmPassword =
+                document
+                    .getElementById("confirmPassword")
+                    .value;
+
+
+
+            // ----------------------------------------------------
+            // VALIDATION
+            // ----------------------------------------------------
+
+            if (
+                !institutionName ||
+                !principalName ||
+                !principalEmail ||
+                !password ||
+                !confirmPassword
+            ) {
+
+                showSetupMessage(
+                    "Please fill in all fields.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            if (password !== confirmPassword) {
+
+                showSetupMessage(
+                    "Passwords do not match.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            if (password.length < 8) {
+
+                showSetupMessage(
+                    "Password must be at least 8 characters.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+
+            try {
+
+
+                setupBtn.disabled = true;
+
+                setupBtn.textContent =
+                    "Creating Account...";
+
+
+
+                // ------------------------------------------------
+                // CHECK INITIALIZATION AGAIN
+                // ------------------------------------------------
+
+                const systemRef =
+                    doc(
+                        db,
+                        "SystemSettings",
+                        "system"
+                    );
+
+
+                const systemSnap =
+                    await getDoc(systemRef);
+
+
+                if (
+                    systemSnap.exists() &&
+                    systemSnap.data().initialized === true
+                ) {
+
+                    showSetupMessage(
+                        "System is already initialized. Please Sign In.",
+                        "error"
+                    );
+
+                    setupBtn.disabled = false;
+
+                    setupBtn.textContent =
+                        "Create Principal Account";
+
+                    return;
+
+                }
+
+
+
+                // ------------------------------------------------
+                // CREATE AUTH ACCOUNT
+                // ------------------------------------------------
+
+                const userCredential =
+                    await createUserWithEmailAndPassword(
+                        auth,
+                        principalEmail,
+                        password
+                    );
+
+
+                const user =
+                    userCredential.user;
+
+
+
+                // ------------------------------------------------
+                // CREATE THE FIRST PRINCIPAL AND SYSTEM RECORD
+                // AS ONE ATOMIC FIRESTORE WRITE.
+                // ------------------------------------------------
+
+                const setupBatch = writeBatch(db);
+
+                setupBatch.set(
+                    doc(db, "Users", user.uid),
+                    {
+                        name: principalName,
+                        email: principalEmail,
+                        role: "principal",
+                        institutionName: institutionName,
+                        status: "active",
+                        createdAt: new Date()
+                    }
+                );
+
+                setupBatch.set(
+                    systemRef,
+                    {
+                        initialized: true,
+                        institutionName: institutionName,
+                        principalUid: user.uid,
+                        initializedAt: new Date()
+                    }
+                );
+
+                await setupBatch.commit();
+
+
+
+                // ------------------------------------------------
+                // SUCCESS
+                // ------------------------------------------------
+
+                showSetupMessage(
+                    "Principal account created successfully. Redirecting to Sign In...",
+                    "success"
+                );
+
+
+                setTimeout(
+                    () => {
+
+                        setupScreen.classList.add(
+                            "hidden"
+                        );
+
+                        loginScreen.classList.remove(
+                            "hidden"
+                        );
+
+
+                        document
+                            .getElementById(
+                                "loginEmail"
+                            )
+                            .value =
+                            principalEmail;
+
+
+                        setupBtn.disabled = false;
+
+                        setupBtn.textContent =
+                            "Create Principal Account";
+
+                    },
+                    1500
+                );
+
+
+            } catch (error) {
+
+
+                console.error(
+                    "Setup Error:",
+                    error
+                );
+
+
+                let message =
+                    "Unable to create the Principal account.";
+
+
+                if (
+                    error.code ===
+                    "auth/email-already-in-use"
+                ) {
+
+                    message =
+                        "This email address is already in use.";
+
+                } else if (
+                    error.code ===
+                    "auth/invalid-email"
+                ) {
+
+                    message =
+                        "Please enter a valid email address.";
+
+                } else if (
+                    error.code ===
+                    "auth/weak-password"
+                ) {
+
+                    message =
+                        "Password is too weak.";
+
+                } else if (
+                    error.code ===
+                    "permission-denied"
+                ) {
+
+                    message =
+                        "You do not have permission to initialize the system.";
+
+                }
+
+
+                showSetupMessage(
+                    message,
+                    "error"
+                );
+
+
+                setupBtn.disabled = false;
+
+                setupBtn.textContent =
+                    "Create Principal Account";
+
+            }
+
+        }
+    );
+
+
+
+    // ============================================================
+    // LOGIN
+    // ============================================================
+
+    loginBtn.addEventListener(
+        "click",
+        async () => {
+
+
+            const email =
+                document
+                    .getElementById("loginEmail")
+                    .value
+                    .trim();
+
+
+            const password =
+                document
+                    .getElementById("loginPassword")
+                    .value;
+
+
+
+            // ----------------------------------------------------
+            // VALIDATION
+            // ----------------------------------------------------
+
+            if (!email || !password) {
+
+                showLoginMessage(
+                    "Please enter your email and password.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+
+            try {
+
+
+                loginBtn.disabled = true;
+
+                loginBtn.textContent =
+                    "Signing In...";
+
+
+
+                // ------------------------------------------------
+                // SIGN IN
+                // ------------------------------------------------
+
+                const userCredential =
+                    await signInWithEmailAndPassword(
+                        auth,
+                        email,
+                        password
+                    );
+
+
+                const user =
+                    userCredential.user;
+
+
+
+                // ------------------------------------------------
+                // GET USER PROFILE
+                // ------------------------------------------------
+
+                const userRef =
+                    doc(
+                        db,
+                        "Users",
+                        user.uid
+                    );
+
+
+                const userSnap =
+                    await getDoc(userRef);
+
+
+
+                if (!userSnap.exists()) {
+
+                    await signOut(auth);
+
+                    showLoginMessage(
+                        "User profile not found. Please contact the system administrator.",
+                        "error"
+                    );
+
+                    loginBtn.disabled = false;
+
+                    loginBtn.textContent =
+                        "Sign In";
+
+                    return;
+
+                }
+
+
+
+                const userData =
+                    userSnap.data();
+
+
+
+                // ------------------------------------------------
+                // CHECK ACCOUNT STATUS
+                // ------------------------------------------------
+
+                if (
+                    userData.status !== "active"
+                ) {
+
+                    await signOut(auth);
+
+                    showLoginMessage(
+                        "Your account is not active. Please contact the system administrator.",
+                        "error"
+                    );
+
+                    loginBtn.disabled = false;
+
+                    loginBtn.textContent =
+                        "Sign In";
+
+                    return;
+
+                }
+
+
+
+                // ------------------------------------------------
+                // CHECK ROLE
+                // ------------------------------------------------
+
+                if (!userData.role) {
+
+                    await signOut(auth);
+
+                    showLoginMessage(
+                        "Your account role is not configured.",
+                        "error"
+                    );
+
+                    loginBtn.disabled = false;
+
+                    loginBtn.textContent =
+                        "Sign In";
+
+                    return;
+
+                }
+
+
+
+                // ------------------------------------------------
+                // SUCCESS
+                // ------------------------------------------------
+
+                goToDashboard(userData.role);
+
+
+            } catch (error) {
+
+
+                console.error(
+                    "Login Error:",
+                    error
+                );
+
+
+                let message =
+                    "Login failed. Please check your email and password.";
+
+
+                if (
+                    error.code ===
+                    "auth/invalid-credential"
+                ) {
+
+                    message =
+                        "Incorrect email or password.";
+
+                } else if (
+                    error.code ===
+                    "auth/user-not-found"
+                ) {
+
+                    message =
+                        "No account was found with this email.";
+
+                } else if (
+                    error.code ===
+                    "auth/wrong-password"
+                ) {
+
+                    message =
+                        "Incorrect password.";
+
+                } else if (
+                    error.code ===
+                    "auth/too-many-requests"
+                ) {
+
+                    message =
+                        "Too many failed attempts. Please try again later.";
+
+                }
+
+
+                showLoginMessage(
+                    message,
+                    "error"
+                );
+
+
+                loginBtn.disabled = false;
+
+                loginBtn.textContent =
+                    "Sign In";
+
+            }
+
+        }
+    );
+
+
+
+    // ============================================================
+    // FORGOT PASSWORD
+    // ============================================================
+
+    forgotPasswordBtn.addEventListener(
+        "click",
+        async () => {
+
+
+            const email =
+                document
+                    .getElementById("loginEmail")
+                    .value
+                    .trim();
+
+
+            if (!email) {
+
+                showLoginMessage(
+                    "Please enter your email address first.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+
+            try {
+
+
+                await sendPasswordResetEmail(
+                    auth,
+                    email
+                );
+
+
+                showLoginMessage(
+                    "Password reset email sent. Please check your inbox.",
+                    "success"
+                );
+
+
+            } catch (error) {
+
+
+                console.error(
+                    "Reset Error:",
+                    error
+                );
+
+
+                showLoginMessage(
+                    "Unable to send the password reset email. Please check the email address.",
+                    "error"
+                );
+
+            }
+
+        }
+    );
+
+
+
+    // ============================================================
+    // MESSAGE HELPERS
+    // ============================================================
+
+    function showSetupMessage(
+        message,
+        type
+    ) {
+
+        setupMessage.textContent =
+            message;
+
+        setupMessage.className =
+            "message " + type;
+
+        setupMessage.style.display =
+            "block";
+
+    }
+
+
+    function showLoginMessage(
+        message,
+        type
+    ) {
+
+        loginMessage.textContent =
+            message;
+
+        loginMessage.className =
+            "message " + type;
+
+        loginMessage.style.display =
+            "block";
+
+    }
+
+
+</script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Firebase Test</title>
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+</head>
+
+<body>
+
+    <h1>Firebase Test</h1>
+
+    <p id="status">Checking Firebase...</p>
+
+
+    <script type="module">
+
+        import {
+            auth,
+            db
+        } from "./js/firebase.js";
+
+
+        const status =
+            document.getElementById("status");
+
+
+        if (auth && db) {
+
+            status.textContent =
+                "Firebase initialized successfully.";
+
+        } else {
+
+            status.textContent =
+                "Firebase initialization failed.";
+
+        }
+
+    </script>
+
+</body>
+
+</html>

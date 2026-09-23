@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Create Election Commission Member</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6f8;
+            color: #222;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #1976d2;
+            color: white;
+            padding: 20px 30px;
+        }
+
+        .header h1 {
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #1976d2;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow:
+                0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-card h2 {
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
+        .field-note {
+            margin-top: 6px;
+            color: #777;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        button {
+            padding: 11px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .invite-btn {
+            background: #1976d2;
+            color: white;
+        }
+
+        .invite-btn:hover {
+            background: #1565c0;
+        }
+
+        .cancel-btn {
+            background: #777;
+            color: white;
+        }
+
+        .cancel-btn:hover {
+            background: #666;
+        }
+
+        #message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 6px;
+            display: none;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        #message.success {
+            display: block;
+            background: #e5f7e5;
+            color: #146b14;
+            border: 1px solid #c8e6c9;
+        }
+
+        #message.error {
+            display: block;
+            background: #ffe5e5;
+            color: #b00020;
+            border: 1px solid #ffcdd2;
+        }
+
+        .access-message {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 600px) {
+
+            .container {
+                margin: 20px auto;
+            }
+
+            .form-card {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .button-group button {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+        <link rel="stylesheet" href="assets/css/navigation.css?v=20260913-nav">
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+</head>
+
+
+<body>
+
+
+    <div class="header">
+
+        <h1>
+            Election Commission Member
+        </h1>
+
+        <p>
+            Controlled Institutional Election Management System
+        </p>
+
+    </div>
+
+
+    <div class="container">
+
+
+        <nav class="page-navigation" aria-label="Page navigation">
+            <a
+                href="#"
+                class="back-link back-dashboard-button"
+                id="backLink"
+            >
+                Back to Dashboard
+            </a>
+        </nav>
+
+
+        <div
+            class="form-card"
+            id="formCard"
+        >
+
+            <h2>
+                Create Election Commission Member
+            </h2>
+
+            <p class="description">
+                Enter the member's name and email address
+                to send an invitation. The member will set
+                their own password after accepting the invitation.
+            </p>
+
+
+            <div id="message"></div>
+
+
+            <form id="ecMemberForm">
+
+
+                <div class="form-group">
+
+                    <label for="name">
+                        Full Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="name"
+                        placeholder="Enter full name"
+                        autocomplete="name"
+                        required
+                    >
+
+                    <p class="field-note">
+                        Enter the member's full name.
+                    </p>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        placeholder="Enter email address"
+                        autocomplete="email"
+                        required
+                    >
+
+                    <p class="field-note">
+                        An invitation link will be sent to this email.
+                    </p>
+
+                </div>
+
+
+                <div class="button-group">
+
+                    <button
+                        type="submit"
+                        id="sendInvitationBtn"
+                        class="invite-btn"
+                    >
+                        Send Invitation
+                    </button>
+
+                    <button
+                        type="button"
+                        id="cancelBtn"
+                        class="cancel-btn"
+                    >
+                        Cancel
+                    </button>
+
+                </div>
+
+
+            </form>
+
+        </div>
+
+
+        <div
+            class="form-card"
+            id="accessDeniedCard"
+            style="display:none;"
+        >
+
+            <div class="access-message">
+
+                You are not authorized to create
+                Election Commission members.
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <script type="module">
+
+    import { auth, db } from "./js/firebase.js";
+
+    import {
+        onAuthStateChanged
+    } from
+    "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+    import {
+        doc,
+        getDoc
+    } from
+    "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+    import {
+        checkAdminPermission
+    } from "./admin-permissions.js";
+
+    import {
+        createInvitation
+    } from "./invitation-service.js";
+
+    import {
+        getDashboardForRole
+    } from "./js/navigation.js";
+
+
+    /* =====================================================
+       ELEMENTS
+    ===================================================== */
+
+    const form =
+        document.getElementById("ecMemberForm");
+
+    const nameInput =
+        document.getElementById("name");
+
+    const emailInput =
+        document.getElementById("email");
+
+    const sendInvitationBtn =
+        document.getElementById("sendInvitationBtn");
+
+    const cancelBtn =
+        document.getElementById("cancelBtn");
+
+    const backLink =
+        document.getElementById("backLink");
+
+    const messageBox =
+        document.getElementById("message");
+
+    const formCard =
+        document.getElementById("formCard");
+
+    const accessDeniedCard =
+        document.getElementById("accessDeniedCard");
+
+
+    /* =====================================================
+       AUTHENTICATION STATE
+    ===================================================== */
+
+    let currentUser = null;
+
+    let currentUserData = null;
+
+    let currentUserRole = null;
+
+    let pageAuthorized = false;
+
+    let authCheckCompleted = false;
+
+
+    /* =====================================================
+       WAIT UNTIL AUTHORIZATION IS COMPLETELY CHECKED
+    ===================================================== */
+
+    sendInvitationBtn.disabled = true;
+
+    cancelBtn.disabled = true;
+
+    backLink.style.pointerEvents = "none";
+
+    backLink.style.opacity = "0.6";
+
+
+    /* =====================================================
+       AUTHENTICATION + PERMISSION CHECK
+    ===================================================== */
+
+    onAuthStateChanged(
+        auth,
+        async (user) => {
+
+            /*
+             * No authenticated Firebase user.
+             */
+
+            if (!user) {
+
+                authCheckCompleted = true;
+
+                window.location.href = "login.html";
+
+                return;
+
+            }
+
+
+            try {
+
+                /* -----------------------------------------
+                   GET USER PROFILE
+                ----------------------------------------- */
+
+                const userRef =
+                    doc(
+                        db,
+                        "Users",
+                        user.uid
+                    );
+
+
+                const userSnapshot =
+                    await getDoc(userRef);
+
+
+                if (!userSnapshot.exists()) {
+
+                    authCheckCompleted = true;
+
+                    alert(
+                        "Your user profile could not be found."
+                    );
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+
+                }
+
+
+                const userData =
+                    userSnapshot.data();
+
+
+                /* -----------------------------------------
+                   CHECK ACCOUNT STATUS
+                ----------------------------------------- */
+
+                if (
+                    userData.status !==
+                    "active"
+                ) {
+
+                    authCheckCompleted = true;
+
+                    alert(
+                        "Your account is not active."
+                    );
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+
+                }
+
+
+                /* -----------------------------------------
+                   CHECK CREATE EC PERMISSION
+                   
+                   Principal:
+                   Always allowed.
+
+                   Sub-Admin:
+                   Must have Create EC Member duty.
+                ----------------------------------------- */
+
+                const permission =
+                    await checkAdminPermission(
+                        db,
+                        user,
+                        "Create EC Member"
+                    );
+
+
+                if (!permission.allowed) {
+
+                    authCheckCompleted = true;
+
+                    pageAuthorized = false;
+
+                    formCard.style.display =
+                        "none";
+
+                    accessDeniedCard.style.display =
+                        "block";
+
+                    return;
+
+                }
+
+
+                /* -----------------------------------------
+                   AUTHORIZATION SUCCESSFUL
+                ----------------------------------------- */
+
+                currentUser =
+                    user;
+
+                currentUserData =
+                    userData;
+
+                currentUserRole =
+                    userData.role;
+
+                pageAuthorized =
+                    true;
+
+                authCheckCompleted =
+                    true;
+
+
+                formCard.style.display =
+                    "block";
+
+                accessDeniedCard.style.display =
+                    "none";
+
+
+                /* -----------------------------------------
+                   ENABLE CONTROLS
+                ----------------------------------------- */
+
+                sendInvitationBtn.disabled =
+                    false;
+
+                cancelBtn.disabled =
+                    false;
+
+                backLink.style.pointerEvents =
+                    "auto";
+
+                backLink.style.opacity =
+                    "1";
+
+
+            } catch (error) {
+
+                console.error(
+                    "Access check error:",
+                    error
+                );
+
+
+                authCheckCompleted =
+                    true;
+
+                pageAuthorized =
+                    false;
+
+                formCard.style.display =
+                    "none";
+
+                accessDeniedCard.style.display =
+                    "block";
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       BACK TO DASHBOARD
+    ===================================================== */
+
+    backLink.addEventListener(
+        "click",
+        (event) => {
+
+            event.preventDefault();
+
+            if (!authCheckCompleted) {
+
+                return;
+
+            }
+
+
+            redirectToDashboard();
+
+        }
+    );
+
+
+    /* =====================================================
+       CANCEL
+    ===================================================== */
+
+    cancelBtn.addEventListener(
+        "click",
+        () => {
+
+            if (!authCheckCompleted) {
+
+                return;
+
+            }
+
+
+            redirectToDashboard();
+
+        }
+    );
+
+
+    /* =====================================================
+       DASHBOARD REDIRECT
+    ===================================================== */
+
+    function redirectToDashboard() {
+
+        if (!currentUser) {
+
+            window.location.href =
+                "login.html";
+
+            return;
+
+        }
+
+
+        if (!currentUserRole) {
+
+            window.location.href =
+                "login.html";
+
+            return;
+
+        }
+
+
+        const dashboard =
+            getDashboardForRole(
+                currentUserRole
+            );
+
+
+        if (
+            !dashboard ||
+            dashboard === "login.html"
+        ) {
+
+            window.location.href =
+                "login.html";
+
+            return;
+
+        }
+
+
+        window.location.href =
+            dashboard;
+
+    }
+
+
+    /* =====================================================
+       SEND INVITATION
+    ===================================================== */
+
+    form.addEventListener(
+        "submit",
+        async (event) => {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+
+            /* ---------------------------------------------
+               AUTH CHECK MUST BE COMPLETE
+            --------------------------------------------- */
+
+            if (!authCheckCompleted) {
+
+                showMessage(
+                    "Please wait while your account is being verified.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            /* ---------------------------------------------
+               USER MUST BE AUTHORIZED
+            --------------------------------------------- */
+
+            if (
+                !pageAuthorized ||
+                !currentUser
+            ) {
+
+                showMessage(
+                    "Your session is not authorized. Please sign in again.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            /* ---------------------------------------------
+               GET FORM VALUES
+            --------------------------------------------- */
+
+            const name =
+                nameInput.value.trim();
+
+
+            const email =
+                emailInput.value
+                    .trim()
+                    .toLowerCase();
+
+
+            /* ---------------------------------------------
+               VALIDATION
+            --------------------------------------------- */
+
+            if (!name) {
+
+                showMessage(
+                    "Please enter the member's full name.",
+                    "error"
+                );
+
+                nameInput.focus();
+
+                return;
+
+            }
+
+
+            if (!email) {
+
+                showMessage(
+                    "Please enter the member's email address.",
+                    "error"
+                );
+
+                emailInput.focus();
+
+                return;
+
+            }
+
+
+            /* ---------------------------------------------
+               DISABLE SEND BUTTON
+            --------------------------------------------- */
+
+            sendInvitationBtn.disabled =
+                true;
+
+            sendInvitationBtn.textContent =
+                "Sending Invitation...";
+
+
+            hideMessage();
+
+
+            try {
+
+                console.log(
+                    "Creating EC invitation..."
+                );
+
+
+                const invitation =
+                    await createInvitation({
+
+                        db:
+                            db,
+
+                        auth:
+                            auth,
+
+                        name:
+                            name,
+
+                        email:
+                            email,
+
+                        role:
+                            "election_commission",
+
+                        createdBy:
+                            currentUser.uid
+
+                    });
+
+
+                console.log(
+                    "Invitation result:",
+                    invitation
+                );
+
+
+                showMessage(
+                    "Invitation sent successfully to " +
+                    invitation.email +
+                    ".",
+                    "success"
+                );
+
+
+                /* -----------------------------------------
+                   CLEAR FORM AFTER SUCCESS
+                ----------------------------------------- */
+
+                nameInput.value = "";
+
+                emailInput.value = "";
+
+
+            } catch (error) {
+
+                console.error(
+                    "Send EC invitation error:",
+                    error
+                );
+
+
+                let errorMessage =
+                    "Unable to send the invitation. Please try again.";
+
+
+                if (
+                    error &&
+                    error.code ===
+                    "auth/invalid-email"
+                ) {
+
+                    errorMessage =
+                        "The email address is invalid. Please check it and try again.";
+
+                }
+
+                else if (
+                    error &&
+                    error.code ===
+                    "auth/quota-exceeded"
+                ) {
+
+                    errorMessage =
+                        "The Firebase email-link limit has been reached. Please try again later.";
+
+                }
+
+                else if (
+                    error &&
+                    error.code ===
+                    "auth/unauthorized-continue-uri"
+                ) {
+
+                    errorMessage =
+                        "The invitation link domain is not allowed. Check Firebase Authorized Domains.";
+
+                }
+
+                else if (
+                    error &&
+                    error.code ===
+                    "auth/network-request-failed"
+                ) {
+
+                    errorMessage =
+                        "Network error. Please check your internet connection.";
+
+                }
+
+                else if (
+                    error &&
+                    (
+                        error.code ===
+                        "permission-denied" ||
+                        error.code ===
+                        "firestore/permission-denied"
+                    )
+                ) {
+
+                    errorMessage =
+                        "Permission denied while creating the invitation. Check the Firestore Invitations rule.";
+
+                }
+
+                else if (
+                    error &&
+                    error.message
+                ) {
+
+                    errorMessage =
+                        error.message;
+
+                }
+
+
+                showMessage(
+                    errorMessage,
+                    "error"
+                );
+
+            } finally {
+
+                sendInvitationBtn.disabled =
+                    false;
+
+                sendInvitationBtn.textContent =
+                    "Send Invitation";
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       MESSAGE FUNCTIONS
+    ===================================================== */
+
+    function showMessage(
+        text,
+        type
+    ) {
+
+        messageBox.textContent =
+            text;
+
+        messageBox.className =
+            type;
+
+        messageBox.style.display =
+            "block";
+
+    }
+
+
+    function hideMessage() {
+
+        messageBox.textContent =
+            "";
+
+        messageBox.className =
+            "";
+
+        messageBox.style.display =
+            "none";
+
+    }
+
+</script>
+
+
+</body>
+
+</html>

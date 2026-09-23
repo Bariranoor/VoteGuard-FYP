@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "517908315987",
+    "project_id": "college-election-system-4d7bd",
+    "storage_bucket": "college-election-system-4d7bd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:517908315987:android:123d86b3b6163899c9aba6",
+        "android_client_info": {
+          "package_name": "com.awan.collegeelectionmanagement"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARwiIb0-Wey3NmB8QvEAE_Qrdt9EKZAOU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

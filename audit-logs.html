@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Logs</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            color: #222;
+        }
+        .header {
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+            padding: 18px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+        .header h1 { margin: 0 0 5px; font-size: 23px; }
+        .header p { margin: 0; color: #666; font-size: 14px; }
+        button {
+            border: 0;
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .secondary { background: #e9ecef; color: #222; }
+        .primary { background: #1f6feb; color: #fff; }
+        .container {
+            width: min(1180px, calc(100% - 32px));
+            margin: 28px auto;
+        }
+        .info-box {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+        .info-box h2 { margin: 0 0 6px; font-size: 18px; }
+        .info-box p { margin: 0; color: #666; line-height: 1.5; }
+        .filters {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 18px;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr auto;
+            gap: 12px;
+            align-items: end;
+        }
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px 11px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background: #fff;
+            font-size: 14px;
+        }
+        .table-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .table-header {
+            padding: 16px 18px;
+            border-bottom: 1px solid #e5e5e5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .table-header h2 { margin: 0; font-size: 18px; }
+        .count { color: #666; font-size: 13px; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        th, td {
+            text-align: left;
+            padding: 12px 14px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+            font-size: 13px;
+        }
+        th { background: #f8f9fb; color: #555; }
+        tbody tr:last-child td { border-bottom: 0; }
+        .action-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #eef4ff;
+            color: #174ea6;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .actor-name { font-weight: 700; }
+        .muted { color: #777; font-size: 12px; margin-top: 3px; }
+        .message {
+            padding: 16px;
+            text-align: center;
+            color: #666;
+        }
+        .error { color: #842029; background: #f8d7da; }
+        @media (max-width: 850px) {
+            .filters { grid-template-columns: 1fr; }
+            .header { align-items: flex-start; flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <h1>Audit Logs</h1>
+        <p>Principal-only record of important administrative election actions.</p>
+    </div>
+    <button id="backBtn" class="secondary" type="button">Back to Dashboard</button>
+</div>
+
+<div class="container">
+    <div class="info-box">
+        <h2>Administrative Audit Trail</h2>
+        <p>
+            These records are read-only. They identify who performed an important action,
+            what happened, when it happened, and which election was affected. Vote choices
+            and voter-to-candidate relationships are never stored here.
+        </p>
+    </div>
+
+    <div class="filters">
+        <div>
+            <label for="searchInput">Search</label>
+            <input id="searchInput" type="search" placeholder="Actor, action, election or details">
+        </div>
+        <div>
+            <label for="electionFilter">Election</label>
+            <select id="electionFilter">
+                <option value="">All elections</option>
+            </select>
+        </div>
+        <div>
+            <label for="actionFilter">Action</label>
+            <select id="actionFilter">
+                <option value="">All actions</option>
+            </select>
+        </div>
+        <button id="refreshBtn" class="primary" type="button">Refresh</button>
+    </div>
+
+    <div class="table-card">
+        <div class="table-header">
+            <h2>Recent Activity</h2>
+            <span id="logCount" class="count">0 records</span>
+        </div>
+        <div id="loadingMessage" class="message">Loading audit records...</div>
+        <div id="tableWrap" class="table-wrap" hidden>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date &amp; Time</th>
+                        <th>Actor</th>
+                        <th>Action</th>
+                        <th>Election</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody id="auditTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { db } from "./Web-Admin/js/firebase.js";
+    import { requireRole } from "./Web-Admin/js/auth.js";
+    import {
+        collection,
+        query,
+        orderBy,
+        limit,
+        getDocs
+    } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+    const authResult = await requireRole("principal", "Web-Admin/login.html");
+    if (!authResult) {
+        throw new Error("Unauthorized access.");
+    }
+
+    const searchInput = document.getElementById("searchInput");
+    const electionFilter = document.getElementById("electionFilter");
+    const actionFilter = document.getElementById("actionFilter");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const loadingMessage = document.getElementById("loadingMessage");
+    const tableWrap = document.getElementById("tableWrap");
+    const auditTableBody = document.getElementById("auditTableBody");
+    const logCount = document.getElementById("logCount");
+
+    let auditLogs = [];
+
+    const ACTION_LABELS = {
+        ELECTION_FINALIZED: "Election Finalized",
+        VOTING_STARTED: "Voting Started",
+        VOTING_RESUMED: "Voting Resumed",
+        VOTING_STOPPED: "Voting Stopped",
+        ELECTION_CLOSED: "Election Closed",
+        NOMINATION_FORM_CLOSED: "Nomination Form Closed",
+        NOMINATION_APPLICATION_APPROVED: "Application Approved",
+        NOMINATION_APPLICATION_REJECTED: "Application Rejected",
+        CANDIDATE_LIST_FINALIZED: "Candidate List Finalized",
+        RESULT_PUBLISHED: "Result Published"
+    };
+
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    function formatTimestamp(value) {
+        if (!value) return "—";
+        try {
+            const date = typeof value.toDate === "function"
+                ? value.toDate()
+                : new Date(value);
+            return date.toLocaleString();
+        } catch {
+            return "—";
+        }
+    }
+
+    function actionLabel(action) {
+        return ACTION_LABELS[action] || String(action || "Unknown Action")
+            .replaceAll("_", " ")
+            .toLowerCase()
+            .replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function rebuildFilters() {
+        const currentElection = electionFilter.value;
+        const currentAction = actionFilter.value;
+
+        const elections = [...new Map(
+            auditLogs
+                .filter(log => log.electionId)
+                .map(log => [log.electionId, log.electionName || log.electionId])
+        ).entries()]
+            .sort((a, b) => a[1].localeCompare(b[1]));
+
+        electionFilter.innerHTML = '<option value="">All elections</option>' +
+            elections.map(([id, name]) =>
+                `<option value="${escapeHtml(id)}">${escapeHtml(name)}</option>`
+            ).join("");
+
+        const actions = [...new Set(auditLogs.map(log => log.action).filter(Boolean))]
+            .sort((a, b) => actionLabel(a).localeCompare(actionLabel(b)));
+
+        actionFilter.innerHTML = '<option value="">All actions</option>' +
+            actions.map(action =>
+                `<option value="${escapeHtml(action)}">${escapeHtml(actionLabel(action))}</option>`
+            ).join("");
+
+        if ([...electionFilter.options].some(option => option.value === currentElection)) {
+            electionFilter.value = currentElection;
+        }
+        if ([...actionFilter.options].some(option => option.value === currentAction)) {
+            actionFilter.value = currentAction;
+        }
+    }
+
+    function renderLogs() {
+        const term = searchInput.value.trim().toLowerCase();
+        const electionId = electionFilter.value;
+        const action = actionFilter.value;
+
+        const filtered = auditLogs.filter(log => {
+            if (electionId && log.electionId !== electionId) return false;
+            if (action && log.action !== action) return false;
+
+            if (!term) return true;
+
+            const haystack = [
+                log.actorName,
+                log.actorRole,
+                log.action,
+                actionLabel(log.action),
+                log.electionName,
+                log.details,
+                log.targetType,
+                log.targetId
+            ].join(" ").toLowerCase();
+
+            return haystack.includes(term);
+        });
+
+        logCount.textContent = `${filtered.length} record${filtered.length === 1 ? "" : "s"}`;
+
+        if (!filtered.length) {
+            tableWrap.hidden = true;
+            loadingMessage.hidden = false;
+            loadingMessage.className = "message";
+            loadingMessage.textContent = auditLogs.length
+                ? "No audit records match the selected filters."
+                : "No audit records have been created yet.";
+            return;
+        }
+
+        loadingMessage.hidden = true;
+        tableWrap.hidden = false;
+
+        auditTableBody.innerHTML = filtered.map(log => `
+            <tr>
+                <td>${escapeHtml(formatTimestamp(log.createdAt))}</td>
+                <td>
+                    <div class="actor-name">${escapeHtml(log.actorName || "Unnamed User")}</div>
+                    <div class="muted">${escapeHtml((log.actorRole || "unknown").replaceAll("_", " "))}</div>
+                </td>
+                <td><span class="action-badge">${escapeHtml(actionLabel(log.action))}</span></td>
+                <td>
+                    <div>${escapeHtml(log.electionName || "Unnamed Election")}</div>
+                    <div class="muted">${escapeHtml(log.electionId || "")}</div>
+                </td>
+                <td>${escapeHtml(log.details || "—")}</td>
+            </tr>
+        `).join("");
+    }
+
+    async function loadAuditLogs() {
+        loadingMessage.hidden = false;
+        loadingMessage.className = "message";
+        loadingMessage.textContent = "Loading audit records...";
+        tableWrap.hidden = true;
+        refreshBtn.disabled = true;
+
+        try {
+            const snapshot = await getDocs(
+                query(
+                    collection(db, "AuditLogs"),
+                    orderBy("createdAt", "desc"),
+                    limit(200)
+                )
+            );
+
+            auditLogs = snapshot.docs.map(item => ({
+                id: item.id,
+                ...item.data()
+            }));
+
+            rebuildFilters();
+            renderLogs();
+        } catch (error) {
+            console.error("Audit log load error:", error);
+            loadingMessage.hidden = false;
+            loadingMessage.className = "message error";
+            loadingMessage.textContent =
+                "Unable to load audit records: " + error.message;
+            tableWrap.hidden = true;
+        } finally {
+            refreshBtn.disabled = false;
+        }
+    }
+
+    searchInput.addEventListener("input", renderLogs);
+    electionFilter.addEventListener("change", renderLogs);
+    actionFilter.addEventListener("change", renderLogs);
+    refreshBtn.addEventListener("click", loadAuditLogs);
+    document.getElementById("backBtn").addEventListener("click", () => {
+        window.location.href = "Web-Admin/principal-dashboard.html";
+    });
+
+    await loadAuditLogs();
+</script>
+</body>
+</html>

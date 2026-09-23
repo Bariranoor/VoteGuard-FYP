@@ -1,0 +1,1957 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nominations and Candidates</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+body{background:#f4f6f8;color:#222;min-height:100vh}
+.header{background:#1976d2;color:#fff;padding:20px 30px;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.header h1{margin-bottom:5px;font-size:25px}
+.header p{opacity:.9}
+.header-right{display:flex;align-items:center;gap:18px}
+.back-link{color:#fff;text-decoration:none;font-size:14px}
+.back-link:hover{text-decoration:underline}
+.profile-area{position:relative}
+.profile-btn{background:transparent;border:0;color:#fff;padding:0;display:flex;align-items:center;gap:9px;font-size:14px}
+.profile-avatar{width:34px;height:34px;border-radius:50%;background:#fff;color:#1976d2;display:flex;align-items:center;justify-content:center;font-weight:bold}
+.profile-dropdown{display:none;position:absolute;right:0;top:44px;width:230px;background:#fff;color:#222;border:1px solid #ddd;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.12);z-index:20}
+.profile-dropdown.open{display:block}
+.profile-dropdown .profile-info{padding:14px;border-bottom:1px solid #eee}
+.profile-dropdown .name{font-weight:bold;margin-bottom:4px}
+.profile-dropdown .role{font-size:13px;color:#666}
+.profile-dropdown button{width:100%;text-align:left;background:#fff;color:#222;border-radius:0;padding:12px 14px}
+.profile-dropdown button:hover{background:#f4f6f8}
+.container{max-width:1250px;margin:auto;padding:28px}
+.welcome,.panel,.summary-card{background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.welcome{padding:22px;margin-bottom:20px}
+.welcome h2{margin-bottom:8px}
+.welcome p{color:#666;line-height:1.5}
+.election-readonly-notice{display:none;margin-top:14px;padding:12px 14px;border-radius:7px;background:#fff3cd;color:#664d03;border:1px solid #ffe69c;line-height:1.5}
+.toolbar{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:18px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:220px}
+.field label{font-weight:bold;font-size:13px}
+input,select,textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:14px;background:#fff}
+textarea{min-height:120px;resize:vertical}
+button{padding:10px 15px;border:0;border-radius:6px;background:#1976d2;color:#fff;cursor:pointer;font-size:14px}
+button:hover{background:#1565c0}
+button.secondary{background:#6c757d}
+button.secondary:hover{background:#5a6268}
+button.success{background:#2e7d32}
+button.success:hover{background:#256628}
+button.danger{background:#c62828}
+button.danger:hover{background:#a91f1f}
+button:disabled{opacity:.55;cursor:not-allowed}
+.tabs{display:flex;gap:4px;border-bottom:1px solid #ddd;margin-bottom:20px}
+.tab-btn{background:#e9eef3;color:#333;border-radius:6px 6px 0 0}
+.tab-btn:hover{background:#dde5ec}
+.tab-btn.active{background:#1976d2;color:#fff}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.panel{padding:22px;margin-bottom:20px}
+.panel h3{margin-bottom:16px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.field.full{grid-column:1/-1}
+.check-list{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}
+.check-item{border:1px solid #ddd;border-radius:6px;padding:10px;display:flex;gap:8px;align-items:center}
+.check-item input{width:auto}
+.summary-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+.summary-card{padding:16px}
+.summary-card .label{font-size:13px;color:#666;margin-bottom:7px}
+.summary-card .value{font-size:25px;font-weight:bold}
+.status{display:inline-block;padding:5px 9px;border-radius:14px;font-size:12px;font-weight:bold;background:#e8eef5;color:#245}
+.status.draft{background:#fff3cd;color:#856404}
+.status.published{background:#d4edda;color:#155724}
+.status.closed{background:#e2e3e5;color:#383d41}
+.status.submitted{background:#cfe2ff;color:#084298}
+.status.under_review{background:#fff3cd;color:#664d03}
+.status.approved{background:#d1e7dd;color:#0f5132}
+.status.rejected,.status.disqualified{background:#f8d7da;color:#842029}
+.status.finalized{background:#d1e7dd;color:#0f5132}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{padding:11px 10px;border-bottom:1px solid #eee;text-align:left;font-size:14px;vertical-align:top}
+th{background:#f7f8fa;font-size:13px}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+.actions button{padding:7px 10px;font-size:12px}
+.message{display:none;padding:11px 13px;border-radius:6px;margin-bottom:15px}
+.message.show{display:block}
+.message.success{background:#d4edda;color:#155724}
+.message.error{background:#f8d7da;color:#842029}
+.empty{padding:30px;text-align:center;color:#666;border:1px dashed #ccc;border-radius:8px}
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;padding:25px;overflow:auto}
+.modal-backdrop.open{display:flex;align-items:center;justify-content:center}
+.legacy-modal-dialog{background:#fff!important;border:1px solid #cbd5e1!important;border-radius:8px!important;box-shadow:none!important;color:#1f2937!important;margin:0!important;max-height:calc(100vh - 40px)!important;max-width:440px!important;overflow-y:auto!important;padding:22px!important;position:relative!important;width:100%!important}
+#applicationModal .legacy-modal-dialog{max-width:850px!important}
+.dialog-header{align-items:center;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;margin-bottom:18px;padding-bottom:14px}
+.legacy-modal-dialog h3{color:#173a5e;font-size:20px;margin:0}
+.dialog-close{align-items:center;background:transparent!important;border:0!important;border-radius:4px!important;color:#475569!important;display:inline-flex;height:32px;justify-content:center;padding:0!important;width:32px}
+.legacy-modal-dialog p{line-height:1.5;margin:0}
+.modal-note{border-left:3px solid #a65e00;color:#475569;font-size:14px;margin-top:16px!important;padding-left:10px}
+.modal-actions{border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px}
+#applicationModal .detail-grid{align-items:start}
+#applicationModal .detail-box{align-self:start}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.detail-box{background:#f7f8fa;border-radius:6px;padding:12px}
+.detail-box strong{display:block;font-size:12px;color:#666;margin-bottom:5px}
+.hint{font-size:12px;color:#777;line-height:1.4;margin-top:5px}
+@media(max-width:900px){
+ .summary-grid{grid-template-columns:repeat(2,1fr)}
+ .grid-2,.detail-grid{grid-template-columns:1fr}
+ .check-list{grid-template-columns:1fr}
+ .header{align-items:flex-start;flex-direction:column}
+ .header-right{width:100%;justify-content:space-between}
+}
+@media(max-width:600px){
+ .container{padding:16px}
+ .summary-grid{grid-template-columns:1fr}
+ .tabs{overflow-x:auto}
+ .tab-btn{white-space:nowrap}
+ .legacy-modal-dialog{max-height:calc(100vh - 24px)!important;padding:18px!important}
+ .modal-actions{align-items:stretch;flex-direction:column-reverse}
+ .modal-actions button{width:100%}
+}
+.review-symbol {
+    max-width: 180px;
+    max-height: 180px;
+    display: block;
+    margin-top: 8px;
+    object-fit: contain;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+</style>
+<link rel="stylesheet" href="assets/css/navigation.css?v=20260913-nav">
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+</head>
+
+<body>
+<header class="header">
+    <div>
+        <h1>Nominations and Candidates</h1>
+        <p id="institutionHeader">Institutional Election Management System</p>
+    </div>
+
+    <div class="header-right">
+        <div class="profile-area">
+            <button id="profileBtn" class="profile-btn" type="button">
+                <span id="profileAvatar" class="profile-avatar">EC</span>
+                <span id="profileName">Election Commission</span>
+            </button>
+
+            <div id="profileDropdown" class="profile-dropdown">
+                <div class="profile-info">
+                    <div id="dropdownName" class="name">Election Commission</div>
+                    <div id="dropdownRole" class="role">Election Commission</div>
+                </div>
+                <button id="logoutBtn" type="button">Logout</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <nav class="page-navigation" aria-label="Page navigation">
+        <a href="ec-dashboard.html" class="back-link back-dashboard-button">Back to Dashboard</a>
+    </nav>
+    <section class="welcome">
+        <h2>Nominations and Candidates</h2>
+        <p>Create the student form, review applications, and finalize approved candidates.</p>
+    </section>
+
+    <div id="pageMessage" class="message"></div>
+
+    <section class="panel">
+        <div class="toolbar">
+            <div class="field" style="min-width:340px">
+                <label for="electionSelect">Election</label>
+                <select id="electionSelect">
+                    <option value="">Loading elections...</option>
+                </select>
+            </div>
+            <div>
+                <button id="refreshBtn" type="button" class="secondary">Refresh</button>
+            </div>
+        </div>
+
+        <div id="electionSummary" class="hint">Select an election to manage its form and candidates.</div>
+        <div id="electionReadOnlyNotice" class="election-readonly-notice"></div>
+    </section>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="formTab" type="button">Student Form</button>
+        <button class="tab-btn" data-tab="applicationsTab" type="button">Applications</button>
+        <button class="tab-btn" data-tab="candidatesTab" type="button">Approved Candidates</button>
+    </div>
+
+   <!-- =====================================================
+     TAB 1: NOMINATION FORM MANAGEMENT
+====================================================== -->
+<section id="formTab" class="tab-content active">
+    <div class="panel">
+        <h3>Student Nomination Form</h3>
+
+        <div id="formStatusArea" class="hint" style="margin-bottom:18px">
+            Select an election first.
+        </div>
+
+        <div class="grid-2">
+            <div class="detail-box">
+                <strong>Election</strong>
+                <div id="formElectionName">—</div>
+            </div>
+
+            <div class="detail-box">
+                <strong>Form Status</strong>
+                <div id="formManagementStatus">—</div>
+            </div>
+
+            <div class="detail-box">
+                <strong>Nomination Period</strong>
+                <div id="nominationPeriodDisplay">—</div>
+            </div>
+
+            <div class="detail-box">
+                <strong>Positions Students Can Apply For</strong>
+                <div id="allowedPositionsDisplay">—</div>
+            </div>
+        </div>
+
+        <div class="message" id="voterListRequirementMessage" style="margin-top:18px">
+        </div>
+
+        <div
+            id="noFormArea"
+            class="empty"
+            style="margin-top:20px;display:none"
+        >
+            No student nomination form has been created for this election.
+        </div>
+
+        <div
+            id="formManagementActions"
+            class="actions"
+            style="margin-top:20px"
+        >
+            <button
+                id="createConfigureFormBtn"
+                type="button"
+            >
+                Create or Edit Form
+            </button>
+
+            <button
+                id="viewStudentFormBtn"
+                type="button"
+                class="secondary"
+            >
+               View Student Form
+            </button>
+
+            <button
+                id="copyApplicationLinkBtn"
+                type="button"
+                class="secondary"
+            >
+                Copy Form Link
+            </button>
+
+            <button
+                id="shareWhatsAppBtn"
+                type="button"
+                class="success"
+            >
+                Share via WhatsApp
+            </button>
+
+            <button
+                id="closeFormBtn"
+                type="button"
+                class="danger"
+            >
+                Close Form
+            </button>
+        </div>
+
+        <div
+            id="applicationLinkArea"
+            style="margin-top:20px;display:none"
+        >
+            <div class="field">
+                <label for="applicationLink">Student Application Link</label>
+                <input
+                    id="applicationLink"
+                    type="text"
+                    readonly
+                >
+                <div class="hint">
+                    Share this link with students who want to apply for a position.
+                </div>
+            </div>
+        </div>
+
+        <div
+            id="formLockedNotice"
+            class="hint"
+            style="margin-top:18px;display:none"
+        >
+            This finalized form is locked. Its fields cannot be changed.
+        </div>
+    </div>
+</section>
+
+    <!-- =====================================================
+         TAB 2: APPLICATIONS
+    ====================================================== -->
+    <section id="applicationsTab" class="tab-content">
+        <div class="summary-grid">
+            <div class="summary-card"><div class="label">Total Applications</div><div id="totalApplications" class="value">0</div></div>
+            <div class="summary-card"><div class="label">Submitted</div><div id="submittedApplications" class="value">0</div></div>
+            <div class="summary-card"><div class="label">Under Review</div><div id="reviewApplications" class="value">0</div></div>
+            <div class="summary-card"><div class="label">Approved</div><div id="approvedApplications" class="value">0</div></div>
+            <div class="summary-card"><div class="label">Rejected</div><div id="rejectedApplications" class="value">0</div></div>
+        </div>
+
+        <div class="panel">
+            <div class="toolbar">
+                <div class="field">
+                    <label for="applicationStatusFilter">Status</label>
+                    <select id="applicationStatusFilter">
+                        <option value="">All</option>
+                        <option value="submitted">Submitted</option>
+                        <option value="under_review">Under Review</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+
+                <div class="field" style="min-width:280px">
+                    <label for="applicationSearch">Search</label>
+                    <input id="applicationSearch" type="search" placeholder="Name or roll number">
+                </div>
+            </div>
+
+            <div id="applicationsEmpty" class="empty">
+                No candidate applications have been submitted yet.
+            </div>
+
+            <div id="applicationsTableWrap" class="table-wrap" style="display:none">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Applicant</th>
+                            <th>Roll Number</th>
+                            <th>Position</th>
+                            <th>Submitted</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="applicationsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================
+         TAB 3: CANDIDATES
+    ====================================================== -->
+    <section id="candidatesTab" class="tab-content">
+        <div class="panel">
+            <h3>Approved Candidates</h3>
+            <p class="hint" style="margin-bottom:15px">
+                Review applications in the Applications tab. This list shows students who have been approved.
+            </p>
+
+            <div id="candidateFinalizeArea" class="actions" style="margin-bottom:18px">
+                <button id="finalizeCandidatesBtn" type="button" class="success">Finalize Candidate List</button>
+            </div>
+
+            <div id="candidatesEmpty" class="empty">
+                No approved candidates are available for this election.
+            </div>
+
+            <div id="candidatesTableWrap" class="table-wrap" style="display:none">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Candidate</th>
+                            <th>Roll Number</th>
+                            <th>Position</th>
+                            <th>Status</th>
+                            <th>Application</th>
+                        </tr>
+                    </thead>
+                    <tbody id="candidatesTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- APPLICATION DETAIL MODAL -->
+<div id="applicationModal" class="modal-backdrop">
+    <div class="legacy-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="applicationModalTitle">
+        <div class="dialog-header">
+            <h3 id="applicationModalTitle">Review application</h3>
+            <button id="applicationModalCloseIcon" class="dialog-close" type="button" aria-label="Close review application">×</button>
+        </div>
+        <div id="applicationDetail"></div>
+
+        <div class="field" style="margin-top:16px">
+            <label for="reviewNote">Note or Rejection Reason</label>
+            <textarea id="reviewNote" maxlength="2000" placeholder="Add a reason if rejecting. This is optional when approving."></textarea>
+        </div>
+
+        <div class="modal-actions">
+            <button id="modalCloseBtn" type="button" class="secondary">Cancel</button>
+            <button id="markReviewBtn" type="button" class="secondary">Mark Under Review</button>
+            <button id="rejectApplicationBtn" type="button" class="danger">Reject</button>
+            <button id="approveApplicationBtn" type="button" class="success">Approve</button>
+        </div>
+    </div>
+</div>
+
+<!-- FINALIZE MODAL -->
+<div id="finalizeModal" class="modal-backdrop">
+    <div class="legacy-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="finalizeCandidateTitle">
+        <h3 id="finalizeCandidateTitle">Finalize candidate list?</h3>
+        <p>This locks the approved candidate list. You cannot change it later from this page.</p>
+        <div class="modal-actions">
+            <button id="cancelFinalizeBtn" type="button" class="secondary">Cancel</button>
+            <button id="confirmFinalizeBtn" type="button" class="success">Finalize</button>
+        </div>
+    </div>
+</div>
+<!-- CLOSE APPLICATION FORM MODAL -->
+<div id="closeFormModal" class="modal-backdrop">
+    <div class="legacy-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="closeFormTitle">
+        <h3 id="closeFormTitle">Close nomination form?</h3>
+        <p>Students will no longer be able to submit a new application.</p>
+        <p class="modal-note">This cannot be undone. You can still review existing applications.</p>
+
+        <div class="modal-actions">
+            <button
+                id="cancelCloseFormBtn"
+                type="button"
+                class="secondary"
+            >
+                Cancel
+            </button>
+
+            <button
+                id="confirmCloseFormBtn"
+                type="button"
+                class="danger"
+            >
+                Close Form
+            </button>
+        </div>
+    </div>
+</div>
+<script type="module">
+import { auth, db } from "./js/firebase.js";
+import { getDashboardForRole } from "./js/navigation.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import {
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    query,
+    where,
+    orderBy,
+    limit,
+    writeBatch,
+    serverTimestamp,
+    Timestamp
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+const EC_DUTY = "Nomination & Candidate Management";
+const MAX_ORIGINAL_IMAGE_BYTES = 2 * 1024 * 1024;
+const MAX_FINAL_DATA_URL_BYTES = 150 * 1024;
+
+let currentUser = null;
+let currentUserData = null;
+let ecData = null;
+let elections = [];
+let selectedElectionId = "";
+let selectedElection = null;
+let positions = [];
+let nominationForm = null;
+let applications = [];
+let candidates = [];
+let selectedApplication = null;
+const $ = (id) => document.getElementById(id);
+
+function addAuditLogToBatch(
+    batch,
+    { action, targetType, targetId, details }
+) {
+    if (!currentUser || !currentUserData || !selectedElectionId || !selectedElection) {
+        throw new Error("Audit context is incomplete.");
+    }
+
+    const auditRef = doc(collection(db, "AuditLogs"));
+
+    batch.set(auditRef, {
+        action,
+        actorUid: currentUser.uid,
+        actorName: currentUserData.name || "",
+        actorRole: currentUserData.role || "",
+        electionId: selectedElectionId,
+        electionName: selectedElection.electionName || "",
+        targetType,
+        targetId,
+        details,
+        createdAt: serverTimestamp()
+    });
+}
+
+function showMessage(text, type = "success") {
+    const el = $("pageMessage");
+    el.textContent = text;
+    el.className = `message show ${type}`;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function clearMessage() {
+    $("pageMessage").className = "message";
+    $("pageMessage").textContent = "";
+}
+
+function formatDate(value) {
+    if (!value) return "—";
+    try {
+        if (value.toDate) return value.toDate().toLocaleString();
+        return new Date(value).toLocaleString();
+    } catch {
+        return "—";
+    }
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function normalizeStatus(status) {
+    return String(status || "").replaceAll(" ", "_").toLowerCase();
+}
+
+function statusBadge(status) {
+    const normalized = normalizeStatus(status);
+    return `<span class="status ${normalized}">${escapeHtml(String(status || "Unknown").replaceAll("_", " "))}</span>`;
+}
+
+async function loadCurrentUser() {
+    return new Promise((resolve) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            unsubscribe();
+
+            if (!user) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            currentUser = user;
+
+            const userSnap = await getDoc(doc(db, "Users", user.uid));
+
+            if (!userSnap.exists()) {
+                await signOut(auth);
+                window.location.href = "login.html";
+                return;
+            }
+
+            currentUserData = userSnap.data();
+
+            if (
+                currentUserData.status !== "active" ||
+                currentUserData.role !== "election_commission"
+            ) {
+                alert("You are not authorized to access this page.");
+                window.location.href = getDashboardForRole(currentUserData.role);
+                return;
+            }
+
+            const ecSnap = await getDoc(doc(db, "ElectionCommission", user.uid));
+
+            if (
+                !ecSnap.exists() ||
+                ecSnap.data().status !== "active" ||
+                !Array.isArray(ecSnap.data().duties) ||
+                !ecSnap.data().duties.includes(EC_DUTY)
+            ) {
+                alert("You are not authorized to access Nomination & Candidate Management.");
+                window.location.href = "ec-dashboard.html";
+                return;
+            }
+
+            ecData = ecSnap.data();
+            resolve();
+        });
+    });
+}
+
+async function loadInstitutionInformation() {
+    try {
+        const institutionSnap = await getDoc(doc(db, "Institutions", "main"));
+        const institutionData = institutionSnap.exists() ? institutionSnap.data() : {};
+        const name =
+            institutionData.name ||
+            currentUserData.collegeName ||
+            currentUserData.institutionName ||
+            "Institutional Election Management System";
+
+        $("institutionHeader").textContent = name;
+    } catch (error) {
+        console.error("Institution information error:", error);
+        $("institutionHeader").textContent =
+            currentUserData.collegeName ||
+            currentUserData.institutionName ||
+            "Institutional Election Management System";
+    }
+}
+
+function renderProfile() {
+    const name = currentUserData?.name || ecData?.name || "Election Commission";
+    $("profileName").textContent = name;
+    $("dropdownName").textContent = name;
+    $("dropdownRole").textContent = "Election Commission";
+
+    const initials = name
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(part => part[0].toUpperCase())
+        .join("");
+
+    $("profileAvatar").textContent = initials || "EC";
+}
+
+function isNominationWriteAllowed() {
+    return selectedElection?.status === "finalized";
+}
+
+function renderElectionAccessMode() {
+    const notice = $("electionReadOnlyNotice");
+
+    if (!notice) return;
+
+    if (!selectedElection || isNominationWriteAllowed()) {
+        notice.style.display = "none";
+        notice.textContent = "";
+        return;
+    }
+
+    notice.style.display = "block";
+    notice.textContent =
+        "This election has moved beyond preparation. Nomination forms, applications and candidate records are now read-only. Existing data remains available for review.";
+}
+
+async function refreshSelectedElectionState() {
+    if (!selectedElectionId) {
+        return null;
+    }
+
+    const snap = await getDoc(
+        doc(db, "Elections", selectedElectionId)
+    );
+
+    if (!snap.exists()) {
+        selectedElection = null;
+        return null;
+    }
+
+    selectedElection = {
+        id: snap.id,
+        ...snap.data()
+    };
+
+    const index = elections.findIndex(
+        election => election.id === selectedElectionId
+    );
+
+    if (index >= 0) {
+        elections[index] = selectedElection;
+    }
+
+    renderElectionAccessMode();
+    return selectedElection;
+}
+
+async function requireFreshNominationWriteAccess(actionLabel) {
+    const freshElection = await refreshSelectedElectionState();
+
+    if (!freshElection) {
+        showMessage(
+            "The selected election could not be loaded.",
+            "error"
+        );
+        return false;
+    }
+
+    if (freshElection.status !== "finalized") {
+        showMessage(
+            `${actionLabel} is locked because the election status is ${String(freshElection.status || "unknown").replaceAll("_", " ")}.`,
+            "error"
+        );
+
+        renderNominationFormManagement();
+        renderApplications();
+        renderCandidates();
+        return false;
+    }
+
+    return true;
+}
+
+async function loadElections() {
+    const snap = await getDocs(
+        query(collection(db, "Elections"), orderBy("createdAt", "desc"))
+    );
+
+    elections = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    const visibleStatuses = new Set([
+        "finalized",
+        "voting_active",
+        "voting_stopped",
+        "closed"
+    ]);
+
+    elections = elections.filter(
+        election => visibleStatuses.has(election.status)
+    );
+    const select = $("electionSelect");
+    select.innerHTML = "";
+
+    if (!elections.length) {
+
+    select.innerHTML =
+        `<option value="">No elections available</option>`;
+
+    selectedElectionId = "";
+    selectedElection = null;
+
+    resetElectionData();
+
+    showMessage(
+        "No finalized or completed elections are available for nomination and candidate management.",
+        "warning"
+    );
+
+    return;
+}
+
+    for (const election of elections) {
+        const option = document.createElement("option");
+        option.value = election.id;
+        option.textContent = `${election.electionName || "Unnamed Election"} (${election.status || "unknown"})`;
+        select.appendChild(option);
+    }
+
+    const previous = elections.find(e => e.id === selectedElectionId);
+    selectedElectionId = previous ? previous.id : elections[0].id;
+    select.value = selectedElectionId;
+
+    await loadSelectedElection();
+}
+
+async function loadSelectedElection() {
+    selectedElectionId = $("electionSelect").value;
+    selectedElection = elections.find(e => e.id === selectedElectionId) || null;
+
+    if (!selectedElection) {
+        resetElectionData();
+        return;
+    }
+
+    $("electionSummary").textContent =
+        `${selectedElection.electionName || "Election"} • Status: ${selectedElection.status || "unknown"} • Voting: ${formatDate(selectedElection.votingStart)} to ${formatDate(selectedElection.votingEnd)}`;
+
+    renderElectionAccessMode();
+
+    await Promise.all([
+        loadPositions(),
+        loadNominationForm(),
+        loadApplications(),
+        loadCandidates()
+    ]);
+}
+
+function resetElectionData() {
+    positions = [];
+    nominationForm = null;
+    applications = [];
+    candidates = [];
+    renderElectionAccessMode();
+    renderPositions();
+    renderNominationFormManagement();
+    renderApplications();
+    renderCandidates();
+}
+
+async function loadPositions() {
+    const snap = await getDocs(
+        query(collection(db, "Positions"), where("electionId", "==", selectedElectionId))
+    );
+
+    positions = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
+
+    renderPositions();
+}
+
+async function loadNominationForm() {
+    if (!selectedElectionId) {
+        nominationForm = null;
+        renderNominationFormManagement();
+        return;
+    }
+
+    const ref = doc(db, "NominationForms", selectedElectionId);
+    const snap = await getDoc(ref);
+
+    nominationForm = snap.exists()
+        ? { id: snap.id, ...snap.data() }
+        : null;
+
+    renderNominationFormManagement();
+}
+
+function renderPositions() {
+    const container = $("allowedPositionsDisplay");
+
+    if (!container) return;
+
+    if (!positions.length) {
+        container.textContent = "No positions created.";
+        return;
+    }
+
+    const allowedIds = new Set(
+        nominationForm?.allowedPositionIds || []
+    );
+
+    const allowedPositions = positions.filter(
+        position => allowedIds.has(position.id)
+    );
+
+    if (!allowedPositions.length) {
+        container.textContent = "No positions selected.";
+        return;
+    }
+
+    container.textContent = allowedPositions
+        .map(position =>
+            `${position.name || "Unnamed Position"} (${Number(position.seats || 1)} seat${Number(position.seats || 1) === 1 ? "" : "s"})`
+        )
+        .join(", ");
+}
+
+/* =====================================================
+   STUDENT APPLICATION LINK
+===================================================== */
+
+function getStudentApplicationLink() {
+
+    if (!selectedElectionId) {
+        return "";
+    }
+
+    const url = new URL(
+        "student-nomination-form.html",
+        window.location.href
+    );
+
+    url.searchParams.set(
+        "electionId",
+        selectedElectionId
+    );
+
+    return url.toString();
+}
+
+function renderNominationFormManagement() {
+    if (!selectedElection) {
+        $("formStatusArea").textContent =
+            "Select an election to manage its nomination form.";
+
+        $("formElectionName").textContent = "—";
+        $("formManagementStatus").textContent = "—";
+        $("nominationPeriodDisplay").textContent = "—";
+        $("allowedPositionsDisplay").textContent = "—";
+
+        $("noFormArea").style.display = "none";
+        $("applicationLinkArea").style.display = "none";
+        $("formLockedNotice").style.display = "none";
+
+        $("createConfigureFormBtn").disabled = true;
+        $("viewStudentFormBtn").disabled = true;
+        $("copyApplicationLinkBtn").disabled = true;
+        $("shareWhatsAppBtn").disabled = true;
+        $("closeFormBtn").disabled = true;
+
+        return;
+    }
+
+    const status = nominationForm?.formStatus || "draft";
+
+    $("formElectionName").textContent =
+        selectedElection.electionName || "Unnamed Election";
+
+    $("formManagementStatus").innerHTML =
+        statusBadge(status);
+
+    $("nominationPeriodDisplay").textContent =
+        `${formatDate(selectedElection.nominationStart)} to ${formatDate(selectedElection.nominationEnd)}`;
+
+    const allowedIds = new Set(
+        nominationForm?.allowedPositionIds || []
+    );
+
+    const allowedPositions = positions.filter(
+        position => allowedIds.has(position.id)
+    );
+
+    $("allowedPositionsDisplay").textContent =
+        allowedPositions.length
+            ? allowedPositions
+                .map(position =>
+                    `${position.name || "Unnamed Position"} (${Number(position.seats || 1)} seat${Number(position.seats || 1) === 1 ? "" : "s"})`
+                )
+                .join(", ")
+            : "Not configured";
+
+    $("formStatusArea").innerHTML =
+        `Form status: ${statusBadge(status)}`;
+
+    $("noFormArea").style.display =
+        nominationForm ? "none" : "block";
+
+    const hasFinalizedForm = nominationForm?.formStatus === "finalized";
+    const hasClosedForm =
+        nominationForm?.formStatus === "closed";
+    const electionReadOnly = !isNominationWriteAllowed();
+
+    $("createConfigureFormBtn").disabled =
+        electionReadOnly || hasFinalizedForm || hasClosedForm;
+
+    $("viewStudentFormBtn").disabled =
+        !nominationForm;
+
+    $("copyApplicationLinkBtn").disabled =
+        electionReadOnly || !hasFinalizedForm;
+
+    $("shareWhatsAppBtn").disabled =
+        electionReadOnly || !hasFinalizedForm;
+
+    $("closeFormBtn").disabled =
+        electionReadOnly || !hasFinalizedForm;
+
+    $("applicationLinkArea").style.display =
+        hasFinalizedForm ? "block" : "none";
+
+    $("formLockedNotice").style.display =
+        hasFinalizedForm || hasClosedForm
+            ? "block"
+            : "none";
+
+    if (hasFinalizedForm) {
+        const link = getStudentApplicationLink();
+
+        $("applicationLink").value = link;
+    } else {
+        $("applicationLink").value = "";
+    }
+
+    renderPositions();
+}
+
+function renderLogoPreview() {
+    const preview = $("logoPreview");
+
+    if (!logoData?.base64) {
+        preview.textContent = "No logo";
+        return;
+    }
+
+    preview.innerHTML = `<img src="${logoData.base64}" alt="Nomination form logo">`;
+}
+
+function collectFormData() {
+    const allowedPositionIds = Array.from(
+        document.querySelectorAll(".position-checkbox:checked")
+    ).map(input => input.value);
+
+    const requirements = $("requirements").value
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean);
+
+    return {
+        electionId: selectedElectionId,
+        title: $("formTitle").value.trim(),
+        instructions: $("formInstructions").value.trim(),
+        requirements,
+        allowedPositionIds,
+        applicationStart: fromDateTimeLocal($("applicationStart").value),
+        applicationEnd: fromDateTimeLocal($("applicationEnd").value),
+        declarationText: $("declarationText").value.trim()
+    };
+}
+
+function validateFormData(data, forPublish = false) {
+    if (!selectedElectionId) {
+        throw new Error("Select an election first.");
+    }
+
+    if (!data.title) {
+        throw new Error("Form title is required.");
+    }
+
+    if (data.allowedPositionIds.length === 0 && forPublish) {
+        throw new Error("Select at least one allowed position before publishing.");
+    }
+
+    if (!data.applicationStart || !data.applicationEnd) {
+        if (forPublish) {
+            throw new Error("Application start and end dates are required before publishing.");
+        }
+    }
+
+    if (data.applicationStart && data.applicationEnd &&
+        data.applicationEnd.toDate() <= data.applicationStart.toDate()) {
+        throw new Error("Application end must be later than application start.");
+    }
+
+    const invalidPosition = data.allowedPositionIds.some(
+        id => !positions.some(position => position.id === id)
+    );
+
+    if (invalidPosition) {
+        throw new Error("The selected position list contains an invalid position.");
+    }
+
+    if (forPublish && !data.declarationText) {
+        throw new Error("Applicant declaration is required before publishing.");
+    }
+}
+
+async function saveNominationForm(mode) {
+    if (!selectedElectionId) {
+        showMessage("Select an election first.", "error");
+        return;
+    }
+
+    if (!(await requireFreshNominationWriteAccess("Nomination form editing"))) {
+        return;
+    }
+
+    if (nominationForm?.formStatus === "published" || nominationForm?.formStatus === "closed") {
+        showMessage("This nomination form is locked.", "error");
+        return;
+    }
+
+    try {
+        clearMessage();
+
+        const data = collectFormData();
+        validateFormData(data, mode === "publish");
+
+        const payload = {
+            ...data,
+            formStatus: mode === "publish" ? "published" : "draft",
+            updatedBy: currentUser.uid,
+            updatedAt: serverTimestamp()
+        };
+
+        if (logoData?.base64) {
+            payload.logoBase64 = logoData.base64;
+            payload.logoMimeType = logoData.mimeType;
+        }
+
+        if (!nominationForm) {
+            payload.createdBy = currentUser.uid;
+            payload.createdAt = serverTimestamp();
+
+            if (mode === "publish") {
+                payload.publishedBy = currentUser.uid;
+                payload.publishedAt = serverTimestamp();
+            }
+
+            await setNominationFormDocument(payload);
+        } else {
+            if (mode === "publish") {
+                payload.publishedBy = currentUser.uid;
+                payload.publishedAt = serverTimestamp();
+            }
+
+            await setNominationFormDocument(payload);
+        }
+
+        await loadNominationForm();
+        showMessage(mode === "publish"
+            ? "Nomination form published successfully."
+            : "Nomination form draft saved successfully."
+        );
+    } catch (error) {
+        console.error(error);
+        showMessage(error.message || "Unable to save the nomination form.", "error");
+    }
+}
+
+async function setNominationFormDocument(payload) {
+    const formRef = doc(db, "NominationForms", selectedElectionId);
+    const batch = writeBatch(db);
+    batch.set(formRef, payload, { merge: true });
+    await batch.commit();
+}
+
+async function closeNominationForm() {
+
+    if (!nominationForm || nominationForm.formStatus !== "finalized") {
+        return;
+    }
+
+    if (!(await requireFreshNominationWriteAccess("Closing the nomination form"))) {
+        return;
+    }
+
+    $("closeFormModal").classList.add("open");
+}
+
+async function confirmCloseNominationForm() {
+
+    if (!nominationForm || nominationForm.formStatus !== "finalized") {
+        $("closeFormModal").classList.remove("open");
+        return;
+    }
+
+    try {
+
+        $("confirmCloseFormBtn").disabled = true;
+
+        if (!(await requireFreshNominationWriteAccess("Closing the nomination form"))) {
+            $("closeFormModal").classList.remove("open");
+            return;
+        }
+
+        const batch = writeBatch(db);
+
+        batch.update(
+            doc(db, "NominationForms", selectedElectionId),
+            {
+                formStatus: "closed",
+                closedBy: currentUser.uid,
+                closedAt: serverTimestamp(),
+                updatedBy: currentUser.uid,
+                updatedAt: serverTimestamp()
+            }
+        );
+
+        addAuditLogToBatch(batch, {
+            action: "NOMINATION_FORM_CLOSED",
+            targetType: "NominationForms",
+            targetId: selectedElectionId,
+            details: "Nomination form closed to further applications."
+        });
+
+        await batch.commit();
+
+        $("closeFormModal").classList.remove("open");
+
+        await loadNominationForm();
+
+        showMessage("Nomination form closed successfully.");
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            error.message || "Unable to close the nomination form.",
+            "error"
+        );
+
+    } finally {
+
+        $("confirmCloseFormBtn").disabled = false;
+
+    }
+}
+
+async function loadApplications() {
+    if (!selectedElectionId) {
+        applications = [];
+        renderApplications();
+        return;
+    }
+
+    const snap = await getDocs(
+        query(
+            collection(db, "NominationApplications"),
+            where("electionId", "==", selectedElectionId)
+        )
+    );
+
+    applications = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => {
+            const aTime = a.submittedAt?.toMillis?.() || 0;
+            const bTime = b.submittedAt?.toMillis?.() || 0;
+            return bTime - aTime;
+        });
+
+    renderApplications();
+}
+
+function getPositionName(positionId) {
+    return positions.find(p => p.id === positionId)?.name || "Unknown Position";
+}
+
+function renderApplications() {
+    const filter = $("applicationStatusFilter").value;
+    const search = $("applicationSearch").value.trim().toLowerCase();
+
+    const filtered = applications.filter(app => {
+        const matchesStatus = !filter || app.status === filter;
+        const text = `${app.name || ""} ${app.rollNumber || ""}`.toLowerCase();
+        return matchesStatus && (!search || text.includes(search));
+    });
+
+    $("totalApplications").textContent = applications.length;
+    $("submittedApplications").textContent =
+        applications.filter(a => a.status === "submitted").length;
+    $("reviewApplications").textContent =
+        applications.filter(a => a.status === "under_review").length;
+    $("approvedApplications").textContent =
+        applications.filter(a => a.status === "approved").length;
+    $("rejectedApplications").textContent =
+        applications.filter(a => a.status === "rejected").length;
+
+    if (!filtered.length) {
+        $("applicationsEmpty").style.display = "block";
+        $("applicationsTableWrap").style.display = "none";
+        return;
+    }
+
+    $("applicationsEmpty").style.display = "none";
+    $("applicationsTableWrap").style.display = "block";
+
+    $("applicationsTableBody").innerHTML = filtered.map(app => `
+        <tr>
+            <td>${escapeHtml(app.name)}</td>
+            <td>${escapeHtml(app.rollNumber)}</td>
+            <td>${escapeHtml(getPositionName(app.positionId))}</td>
+            <td>${formatDate(app.submittedAt)}</td>
+            <td>${statusBadge(app.status)}</td>
+            <td>
+                <div class="actions">
+                    <button type="button" class="review-app-btn" data-id="${escapeHtml(app.id)}">Review</button>
+                </div>
+            </td>
+        </tr>
+    `).join("");
+
+    document.querySelectorAll(".review-app-btn").forEach(button => {
+        button.addEventListener("click", () => openApplicationModal(button.dataset.id));
+    });
+}
+
+function openApplicationModal(applicationId) {
+    selectedApplication = applications.find(app => app.id === applicationId);
+
+    if (!selectedApplication) return;
+
+    $("reviewNote").value = "";
+
+    $("applicationDetail").innerHTML = `
+        <div class="detail-grid">
+            <div class="detail-box"><strong>Applicant</strong>${escapeHtml(selectedApplication.name)}</div>
+            <div class="detail-box"><strong>Roll Number</strong>${escapeHtml(selectedApplication.rollNumber)}</div>
+            <div class="detail-box"><strong>Class / Program</strong>${escapeHtml(selectedApplication.className)}</div>
+            <div class="detail-box"><strong>Section</strong>${escapeHtml(selectedApplication.section)}</div>
+            <div class="detail-box"><strong>Position</strong>${escapeHtml(getPositionName(selectedApplication.positionId))}</div>
+ <div class="detail-box">
+    <strong>Candidate Symbol</strong>
+    ${
+        selectedApplication.candidateSymbolBase64
+            ? `
+                <img
+    src="${selectedApplication.candidateSymbolBase64}"
+    alt="Candidate Symbol"
+    class="review-symbol"
+    id="reviewCandidateSymbol"
+>
+              `
+            : "No symbol uploaded"
+    }
+</div>
+            <div class="detail-box"><strong>Status</strong>${statusBadge(selectedApplication.status)}</div>
+            <div class="detail-box"><strong>Submitted</strong>${formatDate(selectedApplication.submittedAt)}</div>
+            <div class="detail-box"><strong>Eligibility Verification</strong>${selectedApplication.verifiedAgainstStudent ? "Verified" : "Not verified"}</div>
+            <div class="detail-box" style="grid-column:1/-1"><strong>Manifesto / Statement</strong>${escapeHtml(selectedApplication.manifesto || "—")}</div>
+            <div class="detail-box" style="grid-column:1/-1"><strong>Declaration Accepted</strong>${selectedApplication.declarationAccepted ? "Yes" : "No"}</div>
+        </div>
+    `;
+
+    const terminal = ["approved", "rejected"].includes(selectedApplication.status);
+    const electionReadOnly = !isNominationWriteAllowed();
+
+    $("reviewNote").disabled = electionReadOnly || terminal;
+    $("markReviewBtn").disabled = electionReadOnly || terminal;
+    $("approveApplicationBtn").disabled = electionReadOnly || terminal;
+    $("rejectApplicationBtn").disabled = electionReadOnly || terminal;
+
+    $("applicationModal").classList.add("open");
+}
+function closeApplicationModal() {
+    $("applicationModal").classList.remove("open");
+    selectedApplication = null;
+}
+
+async function updateApplicationStatus(newStatus) {
+    if (!selectedApplication) return;
+
+    if (!(await requireFreshNominationWriteAccess("Application review"))) {
+        return;
+    }
+
+    if (["approved", "rejected"].includes(selectedApplication.status)) {
+        showMessage("This application has already reached a terminal review status.", "error");
+        return;
+    }
+
+    const note = $("reviewNote").value.trim();
+
+    if (newStatus === "rejected" && !note) {
+        showMessage("Enter a rejection reason before rejecting the application.", "error");
+        return;
+    }
+
+    try {
+        const batch = writeBatch(db);
+
+        const applicationRef = doc(db, "NominationApplications", selectedApplication.id);
+
+        const update = {
+            status: newStatus,
+            reviewedBy: currentUser.uid,
+            reviewedAt: serverTimestamp(),
+            reviewNote: note,
+            updatedAt: serverTimestamp()
+        };
+
+        if (newStatus === "rejected") {
+            update.rejectionReason = note;
+        }
+
+        if (newStatus === "approved") {
+            if (!selectedApplication.positionId) {
+                throw new Error("Application has no valid position.");
+            }
+
+            if (!selectedApplication.electionId ||
+                selectedApplication.electionId !== selectedElectionId) {
+                throw new Error("Application election does not match the selected election.");
+            }
+
+            if (!selectedApplication.name ||
+                !selectedApplication.rollNumber) {
+                throw new Error("Application is missing required candidate identity information.");
+            }
+
+            update.approvedBy = currentUser.uid;
+            update.approvedAt = serverTimestamp();
+
+            const candidateId = selectedApplication.id;
+            const candidateRef = doc(db, "Candidates", candidateId);
+
+            batch.set(candidateRef,  {
+    electionId: selectedElectionId,
+    applicationId: selectedApplication.id,
+    positionId: selectedApplication.positionId,
+
+    applicantName: selectedApplication.name || "",
+    rollNumber: selectedApplication.rollNumber || "",
+
+    className: selectedApplication.className || "",
+    section: selectedApplication.section || "",
+
+    manifesto: selectedApplication.manifesto || "",
+
+    symbolBase64:
+        selectedApplication.candidateSymbolBase64 || "",
+
+    symbolMimeType:
+        selectedApplication.candidateSymbolMimeType || "",
+
+    status: "approved",
+
+    createdBy: currentUser.uid,
+    createdAt: serverTimestamp(),
+
+    updatedBy: currentUser.uid,
+    updatedAt: serverTimestamp()
+}, { merge: false });
+
+            update.candidateId = candidateId;
+        }
+
+        batch.update(applicationRef, update);
+
+        if (newStatus === "approved" || newStatus === "rejected") {
+            addAuditLogToBatch(batch, {
+                action: newStatus === "approved"
+                    ? "NOMINATION_APPLICATION_APPROVED"
+                    : "NOMINATION_APPLICATION_REJECTED",
+                targetType: "NominationApplications",
+                targetId: selectedApplication.id,
+                details: newStatus === "approved"
+                    ? `Application approved for ${getPositionName(selectedApplication.positionId)}.`
+                    : `Application rejected for ${getPositionName(selectedApplication.positionId)}.`
+            });
+        }
+
+        await batch.commit();
+
+closeApplicationModal();
+
+try {
+    await loadApplications();
+} catch (error) {
+    console.error("Application reload error:", error);
+}
+
+try {
+    await loadCandidates();
+} catch (error) {
+    console.error("Candidate reload error:", error);
+}
+
+showMessage(
+    `Application ${newStatus.replace("_", " ")} successfully.`
+);
+    } catch (error) {
+        console.error(error);
+        showMessage(error.message || "Unable to update the application.", "error");
+    }
+}
+
+async function loadCandidates() {
+    if (!selectedElectionId) {
+        candidates = [];
+        renderCandidates();
+        return;
+    }
+
+    const snap = await getDocs(
+        query(collection(db, "Candidates"), where("electionId", "==", selectedElectionId))
+    );
+
+    candidates = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => {
+            const positionA = getPositionName(a.positionId);
+            const positionB = getPositionName(b.positionId);
+            return positionA.localeCompare(positionB) ||
+                String(a.applicantName || "").localeCompare(String(b.applicantName || ""));
+        });
+
+    renderCandidates();
+}
+
+function renderCandidates() {
+    const approvedCandidates = candidates.filter(
+        candidate => ["approved", "finalized"].includes(candidate.status)
+    );
+
+    $("finalizeCandidatesBtn").disabled =
+        !isNominationWriteAllowed() ||
+        !approvedCandidates.length ||
+        approvedCandidates.every(candidate => candidate.status === "finalized");
+
+    if (!approvedCandidates.length) {
+        $("candidatesEmpty").style.display = "block";
+        $("candidatesTableWrap").style.display = "none";
+        return;
+    }
+
+    $("candidatesEmpty").style.display = "none";
+    $("candidatesTableWrap").style.display = "block";
+
+    $("candidatesTableBody").innerHTML = approvedCandidates.map(candidate => `
+        <tr>
+            <td>${escapeHtml(candidate.applicantName)}</td>
+            <td>${escapeHtml(candidate.rollNumber)}</td>
+            <td>${escapeHtml(getPositionName(candidate.positionId))}</td>
+            <td>${statusBadge(candidate.status)}</td>
+            <td>${escapeHtml(candidate.applicationId || "—")}</td>
+        </tr>
+    `).join("");
+}
+
+async function finalizeCandidateList() {
+    if (!(await requireFreshNominationWriteAccess("Candidate finalization"))) {
+        return;
+    }
+
+    const approvedCandidates = candidates.filter(candidate => candidate.status === "approved");
+
+    if (!approvedCandidates.length) {
+        showMessage("There are no approved candidates available for finalization.", "error");
+        return;
+    }
+
+   if (selectedElection?.status !== "finalized") {
+    showMessage(
+        "Candidate finalization is allowed only after the election has been finalized.",
+        "error"
+    );
+    return;
+}
+
+if (selectedElection?.voterListFinalized !== true) {
+    showMessage(
+        "The voter list must be finalized before candidates can be finalized.",
+        "error"
+    );
+    return;
+}
+
+    $("finalizeModal").classList.add("open");
+}
+
+async function confirmFinalizeCandidateList() {
+    if (!(await requireFreshNominationWriteAccess("Candidate finalization"))) {
+        $("finalizeModal").classList.remove("open");
+        return;
+    }
+
+    const approvedCandidates = candidates.filter(candidate => candidate.status === "approved");
+
+    if (!approvedCandidates.length) {
+        showMessage("There are no approved candidates to finalize.", "error");
+        return;
+    }
+
+    try {
+        const batch = writeBatch(db);
+
+        for (const candidate of approvedCandidates) {
+            batch.update(doc(db, "Candidates", candidate.id), {
+                status: "finalized",
+                finalizedBy: currentUser.uid,
+                finalizedAt: serverTimestamp(),
+                updatedBy: currentUser.uid,
+                updatedAt: serverTimestamp()
+            });
+        }
+
+        addAuditLogToBatch(batch, {
+            action: "CANDIDATE_LIST_FINALIZED",
+            targetType: "Candidates",
+            targetId: approvedCandidates[0].id,
+            details: `Finalized ${approvedCandidates.length} approved candidate${approvedCandidates.length === 1 ? "" : "s"}.`
+        });
+
+        await batch.commit();
+
+        $("finalizeModal").classList.remove("open");
+        await loadCandidates();
+        showMessage("Candidate list finalized successfully.");
+    } catch (error) {
+        console.error(error);
+        showMessage(error.message || "Unable to finalize candidate list.", "error");
+    }
+}
+
+async function handleLogo(file) {
+    if (!file) return;
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.type)) {
+        throw new Error("Only JPEG, PNG, and WebP images are allowed.");
+    }
+
+    if (file.size > MAX_ORIGINAL_IMAGE_BYTES) {
+        throw new Error("The original logo must be 2 MB or smaller.");
+    }
+
+    const image = await loadImage(file);
+
+    const maxDimension = 400;
+    const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+    const width = Math.max(1, Math.round(image.naturalWidth * scale));
+    const height = Math.max(1, Math.round(image.naturalHeight * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d", { alpha: true });
+    if (!ctx) throw new Error("Your browser could not process the selected image.");
+
+    ctx.drawImage(image, 0, 0, width, height);
+
+    let quality = 0.75;
+    let blob = await canvasToBlob(canvas, "image/webp", quality);
+
+    while (blob.size > 105 * 1024 && quality > 0.35) {
+        quality -= 0.08;
+        blob = await canvasToBlob(canvas, "image/webp", quality);
+    }
+
+    if (blob.size > 105 * 1024) {
+        throw new Error("The logo could not be compressed below the allowed size. Choose a simpler/smaller image.");
+    }
+
+    const dataUrl = await blobToDataUrl(blob);
+
+    if (new TextEncoder().encode(dataUrl).length > MAX_FINAL_DATA_URL_BYTES) {
+        throw new Error("The final logo is still too large. Choose a smaller image.");
+    }
+
+    logoData = {
+        base64: dataUrl,
+        mimeType: "image/webp"
+    };
+
+    renderLogoPreview();
+}
+
+function loadImage(file) {
+    return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const image = new Image();
+
+        image.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve(image);
+        };
+
+        image.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error("The selected file could not be decoded as an image."));
+        };
+
+        image.src = url;
+    });
+}
+
+function canvasToBlob(canvas, type, quality) {
+    return new Promise((resolve, reject) => {
+        canvas.toBlob(blob => {
+            if (!blob) reject(new Error("Image compression failed."));
+            else resolve(blob);
+        }, type, quality);
+    });
+}
+
+function blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Image conversion failed."));
+
+        reader.readAsDataURL(blob);
+    });
+}
+
+function setupTabs() {
+    document.querySelectorAll(".tab-btn").forEach(button => {
+        button.addEventListener("click", () => {
+            document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+            document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+
+            button.classList.add("active");
+            $(button.dataset.tab).classList.add("active");
+        });
+    });
+}
+async function openNominationFormEditor() {
+    if (!selectedElectionId) {
+        showMessage(
+            "Please select an election first.",
+            "error"
+        );
+        return;
+    }
+
+    if (!selectedElection) {
+        showMessage(
+            "The selected election could not be loaded.",
+            "error"
+        );
+        return;
+    }
+
+    if (!(await requireFreshNominationWriteAccess("Nomination form configuration"))) {
+        return;
+    }
+
+    window.location.href =
+        "nomination-form-editor.html?electionId=" +
+        encodeURIComponent(selectedElectionId);
+}
+
+function viewStudentForm() {
+
+    if (!selectedElectionId) {
+
+        showMessage(
+            "Please select an election first.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if (!selectedElection) {
+
+        showMessage(
+            "The selected election could not be loaded.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    window.location.href =
+        "student-nomination-form.html?electionId=" +
+        encodeURIComponent(
+            selectedElectionId
+        );
+
+}
+
+/* =====================================================
+   COPY APPLICATION LINK
+===================================================== */
+
+async function copyApplicationLink() {
+
+    if (!selectedElectionId) {
+        showMessage("Please select an election first.", "error");
+        return;
+    }
+
+    if (nominationForm?.formStatus !== "finalized") {
+        showMessage("The nomination form must be finalized before the application link can be copied.", "error");
+        return;
+    }
+
+    if (!isNominationWriteAllowed()) {
+        showMessage("Application-link sharing is locked after voting preparation has ended.", "error");
+        return;
+    }
+
+    const link = getStudentApplicationLink();
+
+    if (!link) {
+        showMessage("The application link could not be generated.", "error");
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(link);
+        showMessage("Application link copied to clipboard.");
+    } catch (error) {
+        console.error("Copy link error:", error);
+        showMessage(
+            "Could not copy the link automatically. You can copy it manually from the field above.",
+            "error"
+        );
+    }
+}
+
+/* =====================================================
+   SHARE VIA WHATSAPP
+===================================================== */
+
+function shareApplicationViaWhatsApp() {
+
+    if (!selectedElectionId) {
+        showMessage("Please select an election first.", "error");
+        return;
+    }
+
+    if (nominationForm?.formStatus !== "finalized") {
+        showMessage("The nomination form must be finalized before it can be shared.", "error");
+        return;
+    }
+
+    if (!isNominationWriteAllowed()) {
+        showMessage("Application-link sharing is locked after voting preparation has ended.", "error");
+        return;
+    }
+
+    const link = getStudentApplicationLink();
+
+    if (!link) {
+        showMessage("The application link could not be generated.", "error");
+        return;
+    }
+
+    const electionName = selectedElection?.electionName || "the election";
+
+    const message =
+        `Apply as a candidate for ${electionName}. Use this link to submit your nomination application: ${link}`;
+
+    window.open(
+        "https://wa.me/?text=" + encodeURIComponent(message),
+        "_blank"
+    );
+}
+function setupEvents() {
+    $("electionSelect").addEventListener("change", loadSelectedElection);
+    $("refreshBtn").addEventListener("click", async () => {
+        try {
+            clearMessage();
+            await loadElections();
+            showMessage("Election data refreshed.");
+        } catch (error) {
+            console.error(error);
+            showMessage(error.message || "Unable to refresh data.", "error");
+        }
+    });
+
+   $("createConfigureFormBtn").addEventListener(
+    "click",
+    openNominationFormEditor
+);
+
+$("viewStudentFormBtn").addEventListener(
+    "click",
+    viewStudentForm
+);
+
+$("copyApplicationLinkBtn").addEventListener(
+    "click",
+    copyApplicationLink
+);
+
+$("shareWhatsAppBtn").addEventListener(
+    "click",
+    shareApplicationViaWhatsApp
+);
+
+$("closeFormBtn").addEventListener(
+    "click",
+    closeNominationForm
+);
+    
+
+    $("applicationStatusFilter").addEventListener("change", renderApplications);
+    $("applicationSearch").addEventListener("input", renderApplications);
+
+    $("modalCloseBtn").addEventListener("click", closeApplicationModal);
+    $("applicationModalCloseIcon").addEventListener("click", closeApplicationModal);
+    $("markReviewBtn").addEventListener("click", () => updateApplicationStatus("under_review"));
+    $("rejectApplicationBtn").addEventListener("click", () => updateApplicationStatus("rejected"));
+    $("approveApplicationBtn").addEventListener("click", () => updateApplicationStatus("approved"));
+
+    $("finalizeCandidatesBtn").addEventListener("click", finalizeCandidateList);
+    $("cancelFinalizeBtn").addEventListener("click", () => $("finalizeModal").classList.remove("open"));
+    $("confirmFinalizeBtn").addEventListener("click", confirmFinalizeCandidateList);
+$("cancelCloseFormBtn").addEventListener(
+    "click",
+    () => $("closeFormModal").classList.remove("open")
+);
+
+$("confirmCloseFormBtn").addEventListener(
+    "click",
+    confirmCloseNominationForm
+);
+    $("profileBtn").addEventListener("click", () => {
+        $("profileDropdown").classList.toggle("open");
+    });
+
+    document.addEventListener("click", event => {
+        if (!event.target.closest(".profile-area")) {
+            $("profileDropdown").classList.remove("open");
+        }
+    });
+
+    $("logoutBtn").addEventListener("click", async () => {
+        await signOut(auth);
+        window.location.href = "login.html";
+    });
+
+    setupTabs();
+}
+
+document.addEventListener("click", (event) => {
+    const symbol = event.target.closest("#reviewCandidateSymbol");
+
+    if (!symbol) return;
+
+    const src = symbol.getAttribute("src");
+    if (!src) return;
+
+    const overlay = document.createElement("div");
+
+    overlay.style.position = "fixed";
+    overlay.style.top = "0";
+    overlay.style.left = "0";
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+    overlay.style.background = "rgba(0,0,0,0.85)";
+    overlay.style.display = "flex";
+    overlay.style.alignItems = "center";
+    overlay.style.justifyContent = "center";
+    overlay.style.zIndex = "99999";
+    overlay.style.padding = "30px";
+    overlay.style.cursor = "pointer";
+
+    const image = document.createElement("img");
+
+    image.src = src;
+    image.alt = "Candidate Symbol";
+    image.style.maxWidth = "90%";
+    image.style.maxHeight = "90%";
+    image.style.objectFit = "contain";
+    image.style.background = "#fff";
+    image.style.padding = "10px";
+    image.style.borderRadius = "8px";
+
+    overlay.appendChild(image);
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener("click", () => {
+        overlay.remove();
+    });
+});
+
+(async function init() {
+    try {
+        setupEvents();
+        await loadCurrentUser();
+        await loadInstitutionInformation();
+        renderProfile();
+        await loadElections();
+    } catch (error) {
+        console.error("Page initialization error:", error);
+        showMessage(error.message || "Unable to initialize the page.", "error");
+    }
+})();
+</script>
+</body>
+</html>

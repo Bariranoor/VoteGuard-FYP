@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Election Results</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        .header {
+            background: #1976d2;
+            color: white;
+            padding: 20px 30px;
+        }
+
+        .header h1 {
+            margin-bottom: 5px;
+            font-size: 25px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .card h2 {
+            margin-bottom: 8px;
+            font-size: 20px;
+        }
+
+        .description {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+
+        .message {
+            display: none;
+            padding: 13px 15px;
+            border-radius: 7px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .message.error {
+            display: block;
+            background: #ffe5e5;
+            color: #a61f1f;
+        }
+
+        .message.info {
+            display: block;
+            background: #e8f1ff;
+            color: #174a8b;
+        }
+
+        .selector-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        select {
+            flex: 1;
+            min-width: 260px;
+            padding: 11px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            background: #1976d2;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #1565c0;
+        }
+
+        .secondary {
+            background: #666;
+        }
+
+        .secondary:hover {
+            background: #555;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .summary-item {
+            background: #f7f8fa;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .summary-label {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 7px;
+        }
+
+        .summary-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .election-heading {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .election-heading h2 {
+            margin: 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 7px 11px;
+            border-radius: 5px;
+            background: #e2e3e5;
+            color: #383d41;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .position-card {
+            background: white;
+            border-radius: 10px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .position-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .position-header h3 {
+            font-size: 19px;
+            margin-bottom: 5px;
+        }
+
+        .outcome {
+            font-size: 14px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .outcome.tie {
+            color: #a05a00;
+        }
+
+        .outcome.none {
+            color: #666;
+        }
+
+        .candidate-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .candidate-row {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 14px;
+            padding: 14px;
+            background: #f7f8fa;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+        }
+
+        .candidate-row.winner {
+            border-color: #9ccc9c;
+            background: #f2fbf2;
+        }
+
+        .candidate-symbol {
+            width: 54px;
+            height: 54px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            background: white;
+        }
+
+        .candidate-symbol-placeholder {
+            width: 54px;
+            height: 54px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #777;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .candidate-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .candidate-meta {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .vote-count {
+            min-width: 90px;
+            text-align: right;
+        }
+
+        .vote-count strong {
+            display: block;
+            font-size: 20px;
+        }
+
+        .vote-count span {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .empty {
+            background: #f7f8fa;
+            color: #666;
+            padding: 16px;
+            border-radius: 7px;
+            line-height: 1.5;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 25px;
+        }
+
+        .footer-actions {
+            margin-top: 20px;
+        }
+
+        .publication-card {
+            border-left: 4px solid #1976d2;
+        }
+
+        .publication-status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .publication-status.published {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .publication-link-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .publication-link {
+            flex: 1;
+            min-width: 260px;
+            padding: 11px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background: #f7f8fa;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .success-button {
+            background: #2e7d32;
+        }
+
+        .success-button:hover {
+            background: #256628;
+        }
+
+        #resultsSection[hidden],
+        #summarySection[hidden],
+        #publicationSection[hidden],
+        #publishedLinkArea[hidden],
+        #publishActionArea[hidden] {
+            display: none;
+        }
+
+        @media (max-width: 850px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 16px 20px;
+            }
+
+            .container {
+                padding: 0 15px 30px;
+                margin-top: 20px;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .candidate-row {
+                grid-template-columns: auto 1fr;
+            }
+
+            .vote-count {
+                grid-column: 1 / -1;
+                text-align: left;
+                padding-left: 68px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+    <link rel="stylesheet" href="assets/css/navigation.css?v=20260913-nav">
+    <style>
+        /* Page-level VoteGuard overrides for the legacy results screen. */
+        body { background: #f5f7fa; color: #1f2937; }
+        .header { background: #173a5e; border-bottom: 1px solid #102c49; padding: 22px 24px; }
+        .header h1, .header p { margin-left: auto; margin-right: auto; max-width: 1240px; }
+        .header h1 { color: #fff; font-size: 1.55rem; margin-bottom: 3px; }
+        .header p { color: #edf3f8; font-size: .95rem; }
+        .container { max-width: 1240px; margin: 32px auto; padding: 0 24px 44px; }
+        .card, .position-card { border: 1px solid #d0d5dd; border-radius: 10px; box-shadow: none; padding: 24px; }
+        .card h2, .position-header h3 { color: #173a5e; }
+        .description, .candidate-meta, .summary-label { color: #667085; }
+        select, .publication-link { border-color: #cfd8e3; border-radius: 8px; color: #1f2937; font-size: .95rem; min-height: 46px; }
+        button { background: #173a5e; border: 1px solid #173a5e; border-radius: 8px; font-weight: 700; min-height: 42px; padding: 9px 15px; }
+        button:hover, button:focus { background: #173a5e; }
+        .secondary { background: #fff; border-color: #cfd8e3; color: #173a5e; }
+        .secondary:hover, .secondary:focus { background: #fff; color: #173a5e; }
+        .success-button { background: #24704a; border-color: #24704a; }
+        .success-button:hover, .success-button:focus { background: #24704a; }
+        .summary-item, .candidate-row, .empty { background: #f8fafc; border: 1px solid #eaecf0; border-radius: 8px; }
+        .candidate-row.winner { background: #f1f8f4; border-color: #b7d9c5; }
+        .review-winner-showcase { background: #f4fbf6; border: 1px solid #b7d9c5; border-top: 3px solid #24704a; border-radius: 10px; display: grid; gap: 20px; grid-template-columns: 118px minmax(0, 1fr) auto; margin: 0 0 14px; padding: 20px; }
+        .review-winner-symbol, .review-winner-symbol-placeholder { align-items: center; background: #fff; border: 1px solid #b7d9c5; border-radius: 8px; display: flex; height: 118px; justify-content: center; object-fit: contain; overflow: hidden; width: 118px; }
+        .review-winner-symbol-placeholder { color: #173a5e; font-size: 2.3rem; font-weight: 800; }
+        .review-winner-label { color: #1b603d; font-size: .8rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+        .review-winner-name { color: #173a5e; font-size: 1.4rem; font-weight: 800; line-height: 1.2; margin: 5px 0 10px; }
+        .review-winner-details { color: #4b5563; display: flex; flex-wrap: wrap; font-size: .92rem; gap: 6px 14px; }
+        .review-winner-details span { white-space: nowrap; }
+        .review-winner-manifesto { border-top: 1px solid #cfe4d7; color: #4b5563; line-height: 1.55; margin-top: 14px; padding-top: 12px; }
+        .review-winner-manifesto strong { color: #173a5e; display: block; margin-bottom: 3px; }
+        .review-winner-votes { align-self: start; color: #173a5e; min-width: 108px; text-align: right; }
+        .review-winner-votes strong { display: block; font-size: 1.35rem; }
+        .review-winner-votes span { color: #4b5563; font-size: .88rem; }
+        .publication-card { border-left: 1px solid #d0d5dd; }
+        .publication-status { background: #fff7e8; color: #8a4b08; border: 1px solid #f3d6aa; border-radius: 999px; }
+        .publication-status.published { background: #edf8f1; color: #1b603d; border-color: #b7d9c5; }
+        .message { background: #fff; border: 1px solid #cfd8e3; box-shadow: none; }
+        .message.error { background: #fff; border-color: #e3b7b7; color: #9f1f1f; }
+        .message.info { background: #fff; border-color: #b8cbe0; color: #173a5e; }
+        .app-modal[hidden] { display: none; }
+        .app-modal { align-items: center; background: rgba(16, 44, 73, .48); display: flex; inset: 0; justify-content: center; padding: 20px; position: fixed; z-index: 1000; }
+        .app-modal-card { background: #fff; border: 1px solid #cfd8e3; border-radius: 10px; box-shadow: none; max-width: 480px; padding: 26px; width: 100%; }
+        .app-modal-card h2 { color: #173a5e; font-size: 1.25rem; margin: 0 0 10px; }
+        .app-modal-card p { color: #4b5563; line-height: 1.55; margin: 0; }
+        .app-modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+        .app-modal-actions button { min-width: 112px; }
+        @media (max-width: 700px) { .review-winner-showcase { grid-template-columns: 84px minmax(0, 1fr); padding: 16px; } .review-winner-symbol, .review-winner-symbol-placeholder { height: 84px; width: 84px; } .review-winner-votes { grid-column: 1 / -1; text-align: left; } }
+        @media (max-width: 600px) { .container { margin-top: 24px; padding: 0 16px 32px; } .header { padding: 18px 16px; } .app-modal-actions { flex-direction: column-reverse; } .app-modal-actions button { width: 100%; } }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>Review Election Results</h1>
+    <p>Final candidate totals are available only after an election has been closed.</p>
+</div>
+
+<div class="container">
+
+    <nav class="page-navigation" aria-label="Page navigation">
+        <button id="backBtn" type="button" class="secondary back-dashboard-button">
+            Back to Dashboard
+        </button>
+    </nav>
+
+    <div id="message" class="message"></div>
+
+    <div class="card">
+        <h2>Select Closed Election</h2>
+        <p class="description">
+            Select a permanently closed election to review its final result and voter turnout.
+        </p>
+
+        <div class="selector-row">
+            <select id="electionSelect">
+                <option value="">Loading closed elections...</option>
+            </select>
+
+            <button id="refreshBtn" type="button">
+                Refresh
+            </button>
+        </div>
+    </div>
+
+    <div id="summarySection" class="card" hidden>
+        <div class="election-heading">
+            <div>
+                <h2 id="selectedElectionName">Election</h2>
+                <div id="selectedElectionSession" class="description" style="margin: 5px 0 0;"></div>
+            </div>
+
+            <span class="status-badge">Closed</span>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-item">
+                <div class="summary-label">Eligible Voters</div>
+                <div id="eligibleVoters" class="summary-value">0</div>
+            </div>
+
+            <div class="summary-item">
+                <div class="summary-label">Voters Participated</div>
+                <div id="votersParticipated" class="summary-value">0</div>
+            </div>
+
+            <div class="summary-item">
+                <div class="summary-label">Voter Turnout</div>
+                <div id="turnout" class="summary-value">0.0%</div>
+            </div>
+
+            <div class="summary-item">
+                <div class="summary-label">Positions</div>
+                <div id="positionCount" class="summary-value">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="resultsSection" hidden>
+        <div id="resultsLoading" class="card loading">
+            Loading election results...
+        </div>
+
+        <div id="resultsContainer"></div>
+    </div>
+
+    <div id="publicationSection" class="card publication-card" hidden>
+        <h2>Official Result Publication</h2>
+        <p class="description" id="publicationDescription">
+            After reviewing the final totals, the Principal can publish one official read-only result link for students and staff.
+        </p>
+
+        <div id="publicationStatus" class="publication-status">Not Published</div>
+
+        <div id="publishActionArea">
+            <button id="publishOfficialResultBtn" type="button" class="success-button">
+                Publish Official Result
+            </button>
+        </div>
+
+        <div id="publishedLinkArea" hidden>
+            <div class="publication-link-row">
+                <input id="publicResultLink" class="publication-link" type="text" readonly>
+                <button id="copyResultLinkBtn" type="button">Copy Link</button>
+                <button id="shareWhatsAppBtn" type="button" class="success-button">Share via WhatsApp</button>
+            </div>
+            <p id="publishedAtText" class="description" style="margin: 12px 0 0;"></p>
+
+        </div>
+    </div>
+
+</div>
+
+<div id="publishConfirmModal" class="app-modal" role="dialog" aria-modal="true" aria-labelledby="publishConfirmTitle" hidden>
+    <div class="app-modal-card">
+        <h2 id="publishConfirmTitle">Publish official result?</h2>
+        <p id="publishConfirmText">This will create the final public result link. Check the totals first because the published result cannot be changed.</p>
+        <div class="app-modal-actions">
+            <button id="cancelPublishBtn" type="button" class="secondary">Cancel</button>
+            <button id="confirmPublishBtn" type="button" class="success-button">Publish Result</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import {
+        db
+    } from "./js/firebase.js";
+
+    import {
+        requireAuth
+    } from "./js/auth.js";
+
+    import {
+        getDashboardForRole
+    } from "./js/navigation.js";
+
+    import {
+        collection,
+        query,
+        where,
+        getDocs,
+        doc,
+        getDoc,
+        setDoc,
+        writeBatch,
+        serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+
+    const REVIEW_RESULTS_PERMISSION =
+        "Review Results";
+
+    let currentUser = null;
+    let currentUserData = null;
+    let closedElections = [];
+    let selectedElection = null;
+    let currentResultSnapshot = null;
+    let publishedResultSnapshot = null;
+    let winnerProfileSources = [];
+
+
+    function addAuditLogToBatch(
+        batch,
+        { action, targetType, targetId, details }
+    ) {
+        if (!currentUser || !currentUserData || !selectedElection) {
+            throw new Error("Audit context is incomplete.");
+        }
+
+        const auditRef = doc(collection(db, "AuditLogs"));
+
+        batch.set(auditRef, {
+            action,
+            actorUid: currentUser.uid,
+            actorName: currentUserData.name || "",
+            actorRole: currentUserData.role || "",
+            electionId: selectedElection.id,
+            electionName: selectedElection.electionName || "",
+            targetType,
+            targetId,
+            details,
+            createdAt: serverTimestamp()
+        });
+    }
+
+
+    const messageBox =
+        document.getElementById("message");
+
+    const electionSelect =
+        document.getElementById("electionSelect");
+
+    const summarySection =
+        document.getElementById("summarySection");
+
+    const resultsSection =
+        document.getElementById("resultsSection");
+
+    const resultsLoading =
+        document.getElementById("resultsLoading");
+
+    const resultsContainer =
+        document.getElementById("resultsContainer");
+
+    const publicationSection =
+        document.getElementById("publicationSection");
+
+    const publicationStatus =
+        document.getElementById("publicationStatus");
+
+    const publishActionArea =
+        document.getElementById("publishActionArea");
+
+    const publishedLinkArea =
+        document.getElementById("publishedLinkArea");
+
+    const publicResultLink =
+        document.getElementById("publicResultLink");
+
+    const publishedAtText =
+        document.getElementById("publishedAtText");
+
+    const publishConfirmModal =
+        document.getElementById("publishConfirmModal");
+
+    const publishConfirmTitle =
+        document.getElementById("publishConfirmTitle");
+
+    const publishConfirmText =
+        document.getElementById("publishConfirmText");
+
+    const cancelPublishBtn =
+        document.getElementById("cancelPublishBtn");
+
+    const confirmPublishBtn =
+        document.getElementById("confirmPublishBtn");
+
+    let publishConfirmResolver = null;
+
+
+    function showMessage(message, type = "info") {
+        messageBox.textContent = message;
+        messageBox.className = `message ${type}`;
+    }
+
+
+    function clearMessage() {
+        messageBox.textContent = "";
+        messageBox.className = "message";
+    }
+
+
+    function askForConfirmation({ title, message, confirmLabel }) {
+        publishConfirmTitle.textContent = title;
+        publishConfirmText.textContent = message;
+        confirmPublishBtn.textContent = confirmLabel;
+        publishConfirmModal.hidden = false;
+        confirmPublishBtn.focus();
+
+        return new Promise(resolve => {
+            publishConfirmResolver = resolve;
+        });
+    }
+
+
+    function closePublishConfirmation(confirmed) {
+        publishConfirmModal.hidden = true;
+
+        if (publishConfirmResolver) {
+            publishConfirmResolver(confirmed);
+            publishConfirmResolver = null;
+        }
+    }
+
+
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+
+    function getTimestampMilliseconds(value) {
+        if (!value) {
+            return 0;
+        }
+
+        if (typeof value.toMillis === "function") {
+            return value.toMillis();
+        }
+
+        if (typeof value.toDate === "function") {
+            return value.toDate().getTime();
+        }
+
+        const parsed = new Date(value).getTime();
+        return Number.isNaN(parsed) ? 0 : parsed;
+    }
+
+
+    function formatPublishedDate(value) {
+        if (!value) {
+            return "";
+        }
+
+        let date;
+
+        if (typeof value.toDate === "function") {
+            date = value.toDate();
+        } else {
+            date = new Date(value);
+        }
+
+        if (Number.isNaN(date.getTime())) {
+            return "";
+        }
+
+        return date.toLocaleString();
+    }
+
+
+    function getPublicResultUrl(electionId) {
+        const url = new URL("public-results.html", window.location.href);
+        url.search = "";
+        url.hash = "";
+        url.searchParams.set("result", electionId);
+        return url.toString();
+    }
+
+
+    function getCandidateName(candidate) {
+        return candidate.applicantName ||
+            candidate.name ||
+            "Unnamed Candidate";
+    }
+
+
+    function getCandidateSymbol(candidate) {
+        const raw =
+            typeof candidate.symbolBase64 === "string"
+                ? candidate.symbolBase64.trim()
+                : "";
+
+        if (!raw) {
+            return "";
+        }
+
+        if (raw.startsWith("data:image/")) {
+            return raw;
+        }
+
+        const mime =
+            typeof candidate.symbolMimeType === "string" &&
+            candidate.symbolMimeType.startsWith("image/")
+                ? candidate.symbolMimeType
+                : "image/png";
+
+        return `data:${mime};base64,${raw}`;
+    }
+
+
+    async function verifyAccess() {
+        const result =
+            await requireAuth("login.html");
+
+        if (!result) {
+            return false;
+        }
+
+        currentUser = result.user;
+        currentUserData = result.data;
+
+        if (!currentUserData || currentUserData.status !== "active") {
+            alert("Your account is not active.");
+            window.location.href = "login.html";
+            return false;
+        }
+
+        if (currentUserData.role === "principal") {
+            return true;
+        }
+
+        if (currentUserData.role !== "sub_admin") {
+            alert("You are not authorized to review election results.");
+            window.location.href = getDashboardForRole(currentUserData.role);
+            return false;
+        }
+
+        const subAdminSnapshot =
+            await getDoc(
+                doc(
+                    db,
+                    "SubAdmins",
+                    currentUser.uid
+                )
+            );
+
+        if (!subAdminSnapshot.exists()) {
+            alert("Your Sub-Admin profile could not be found.");
+            window.location.href = getDashboardForRole(currentUserData.role);
+            return false;
+        }
+
+        const subAdminData =
+            subAdminSnapshot.data();
+
+        const duties =
+            Array.isArray(subAdminData.duties)
+                ? subAdminData.duties
+                : [];
+
+        if (
+            subAdminData.status !== "active" ||
+            !duties.includes(REVIEW_RESULTS_PERMISSION)
+        ) {
+            alert("You do not have the Review Results permission.");
+            window.location.href = getDashboardForRole(currentUserData.role);
+            return false;
+        }
+
+        return true;
+    }
+
+
+    async function loadClosedElections() {
+        clearMessage();
+
+        electionSelect.disabled = true;
+        electionSelect.innerHTML =
+            '<option value="">Loading closed elections...</option>';
+
+        try {
+            const snapshot =
+                await getDocs(
+                    query(
+                        collection(db, "Elections"),
+                        where("status", "==", "closed")
+                    )
+                );
+
+            closedElections =
+                snapshot.docs
+                    .map(item => ({
+                        id: item.id,
+                        ...item.data()
+                    }))
+                    .sort(
+                        (a, b) =>
+                            getTimestampMilliseconds(b.closedAt) -
+                            getTimestampMilliseconds(a.closedAt)
+                    );
+
+            electionSelect.innerHTML =
+                '<option value="">Select a closed election</option>';
+
+            if (!closedElections.length) {
+                electionSelect.innerHTML =
+                    '<option value="">No closed elections available</option>';
+
+                showMessage(
+                    "No closed election is available yet. Stop voting and permanently close an election before reviewing final results.",
+                    "info"
+                );
+
+                summarySection.hidden = true;
+                resultsSection.hidden = true;
+                return;
+            }
+
+            closedElections.forEach(election => {
+                const option =
+                    document.createElement("option");
+
+                option.value = election.id;
+                option.textContent =
+                    `${election.electionName || "Unnamed Election"}` +
+                    (election.academicSession
+                        ? ` — ${election.academicSession}`
+                        : "");
+
+                electionSelect.appendChild(option);
+            });
+
+            electionSelect.disabled = false;
+
+            const requestedElectionId =
+                new URLSearchParams(window.location.search)
+                    .get("electionId");
+
+            if (
+                requestedElectionId &&
+                closedElections.some(
+                    election => election.id === requestedElectionId
+                )
+            ) {
+                electionSelect.value = requestedElectionId;
+                await loadResults(requestedElectionId);
+            }
+
+        } catch (error) {
+            console.error("loadClosedElections error:", error);
+
+            electionSelect.innerHTML =
+                '<option value="">Unable to load elections</option>';
+
+            showMessage(
+                "Unable to load closed elections: " + error.message,
+                "error"
+            );
+        }
+    }
+
+
+    async function loadResults(electionId) {
+        clearMessage();
+
+        selectedElection =
+            closedElections.find(
+                election => election.id === electionId
+            ) || null;
+
+        if (!selectedElection) {
+            summarySection.hidden = true;
+            resultsSection.hidden = true;
+            return;
+        }
+
+        if (selectedElection.status !== "closed") {
+            summarySection.hidden = true;
+            resultsSection.hidden = true;
+            showMessage(
+                "Candidate totals are locked until the election is permanently closed.",
+                "error"
+            );
+            return;
+        }
+
+        summarySection.hidden = false;
+        resultsSection.hidden = false;
+        resultsLoading.style.display = "block";
+        resultsContainer.innerHTML = "";
+
+        document.getElementById("selectedElectionName").textContent =
+            selectedElection.electionName || "Unnamed Election";
+
+        document.getElementById("selectedElectionSession").textContent =
+            selectedElection.academicSession || "";
+
+        try {
+            const [
+                positionSnapshot,
+                candidateSnapshot,
+                voteSnapshot,
+                voterSnapshot
+            ] = await Promise.all([
+                getDocs(
+                    query(
+                        collection(db, "Positions"),
+                        where("electionId", "==", electionId)
+                    )
+                ),
+
+                getDocs(
+                    query(
+                        collection(db, "Candidates"),
+                        where("electionId", "==", electionId)
+                    )
+                ),
+
+                getDocs(
+                    query(
+                        collection(db, "Votes"),
+                        where("electionId", "==", electionId)
+                    )
+                ),
+
+                getDocs(
+                    query(
+                        collection(db, "Voters"),
+                        where("electionId", "==", electionId)
+                    )
+                )
+            ]);
+
+            const positions =
+                positionSnapshot.docs
+                    .map(item => ({
+                        id: item.id,
+                        ...item.data()
+                    }))
+                    .sort((a, b) =>
+                        String(a.name || "")
+                            .localeCompare(String(b.name || ""))
+                    );
+
+            const multiSeatPosition = positions.find(
+                position => Number(position.seats ?? position.numberOfSeats ?? 1) !== 1
+            );
+
+            if (multiSeatPosition) {
+                throw new Error(
+                    `${multiSeatPosition.name || "A position"} is configured with more than one seat. ` +
+                    "This version supports one seat per position and will not calculate an incorrect result."
+                );
+            }
+
+            const candidates =
+                candidateSnapshot.docs
+                    .map(item => ({
+                        id: item.id,
+                        ...item.data()
+                    }))
+                    .filter(candidate =>
+                        candidate.status === "finalized"
+                    );
+
+            const votes =
+                voteSnapshot.docs.map(item => ({
+                    id: item.id,
+                    ...item.data()
+                }));
+
+            const voters =
+                voterSnapshot.docs.map(item => ({
+                    id: item.id,
+                    ...item.data()
+                }));
+
+            const summaryData =
+                renderSummary(positions, voters);
+
+            const positionResults =
+                renderResults(positions, candidates, votes);
+
+            currentResultSnapshot = {
+                summary: summaryData,
+                positions: positionResults
+            };
+
+            await loadPublicationStatus(electionId);
+
+        } catch (error) {
+            currentResultSnapshot = null;
+            publishedResultSnapshot = null;
+            publicationSection.hidden = true;
+
+            console.error("loadResults error:", error);
+
+            showMessage(
+                "Unable to load election results: " + error.message,
+                "error"
+            );
+
+            resultsContainer.innerHTML = `
+                <div class="card empty">
+                    The result data could not be loaded.
+                </div>
+            `;
+        } finally {
+            resultsLoading.style.display = "none";
+        }
+    }
+
+
+    function renderSummary(positions, voters) {
+        const eligibleVoters =
+            voters.filter(voter => voter.eligible === true);
+
+        const participated =
+            eligibleVoters.filter(
+                voter => voter.participationStatus === "voted"
+            ).length;
+
+        const eligibleCount =
+            eligibleVoters.length;
+
+        const turnout =
+            eligibleCount > 0
+                ? ((participated / eligibleCount) * 100).toFixed(1)
+                : "0.0";
+
+        document.getElementById("eligibleVoters").textContent =
+            String(eligibleCount);
+
+        document.getElementById("votersParticipated").textContent =
+            String(participated);
+
+        document.getElementById("turnout").textContent =
+            `${turnout}%`;
+
+        document.getElementById("positionCount").textContent =
+            String(positions.length);
+
+        return {
+            eligibleVoters: eligibleCount,
+            votersParticipated: participated,
+            turnoutPercentage: Number(turnout),
+            positionCount: positions.length
+        };
+    }
+
+
+    function renderResults(positions, candidates, votes) {
+        resultsContainer.innerHTML = "";
+        winnerProfileSources = [];
+
+        const publishedPositions = [];
+
+        if (!positions.length) {
+            resultsContainer.innerHTML = `
+                <div class="card empty">
+                    No positions were found for this election.
+                </div>
+            `;
+            return publishedPositions;
+        }
+
+        const candidateById =
+            new Map(
+                candidates.map(candidate => [
+                    candidate.id,
+                    candidate
+                ])
+            );
+
+        const validVotes =
+            votes.filter(vote => {
+                const candidate =
+                    candidateById.get(vote.candidateId);
+
+                return Boolean(
+                    candidate &&
+                    candidate.positionId === vote.positionId &&
+                    candidate.electionId === selectedElection.id
+                );
+            });
+
+        positions.forEach(position => {
+            const positionCandidates =
+                candidates
+                    .filter(
+                        candidate =>
+                            candidate.positionId === position.id
+                    )
+                    .sort((a, b) =>
+                        getCandidateName(a)
+                            .localeCompare(getCandidateName(b))
+                    );
+
+            const voteCountByCandidate =
+                new Map();
+
+            positionCandidates.forEach(candidate => {
+                voteCountByCandidate.set(candidate.id, 0);
+            });
+
+            validVotes
+                .filter(vote => vote.positionId === position.id)
+                .forEach(vote => {
+                    if (voteCountByCandidate.has(vote.candidateId)) {
+                        voteCountByCandidate.set(
+                            vote.candidateId,
+                            voteCountByCandidate.get(vote.candidateId) + 1
+                        );
+                    }
+                });
+
+            const totalPositionVotes =
+                [...voteCountByCandidate.values()]
+                    .reduce((sum, count) => sum + count, 0);
+
+            const highestVotes =
+                positionCandidates.length
+                    ? Math.max(
+                        ...positionCandidates.map(candidate =>
+                            voteCountByCandidate.get(candidate.id) || 0
+                        )
+                    )
+                    : 0;
+
+            const winners =
+                highestVotes > 0
+                    ? positionCandidates.filter(
+                        candidate =>
+                            (voteCountByCandidate.get(candidate.id) || 0) ===
+                            highestVotes
+                    )
+                    : [];
+
+            let outcomeText =
+                "No votes recorded";
+
+            let outcomeClass =
+                "none";
+
+            if (winners.length === 1) {
+                outcomeText = "Winner declared";
+                outcomeClass = "";
+            } else if (winners.length > 1) {
+                outcomeText =
+                    `Tie: ${winners.map(getCandidateName).join(" / ")}`;
+                outcomeClass = "tie";
+            }
+
+            const publishedCandidates =
+                positionCandidates.map(candidate => {
+                    const candidateVotes =
+                        voteCountByCandidate.get(candidate.id) || 0;
+
+                    const percentage =
+                        totalPositionVotes > 0
+                            ? Number(((candidateVotes / totalPositionVotes) * 100).toFixed(1))
+                            : 0;
+
+                    return {
+                        candidateId: candidate.id,
+                        name: getCandidateName(candidate),
+                        className: candidate.className || "",
+                        section: candidate.section || "",
+                        votes: candidateVotes,
+                        percentage: percentage
+                    };
+                });
+
+            const outcomeType =
+                winners.length === 1
+                    ? "winner"
+                    : winners.length > 1
+                        ? "tie"
+                        : "no_votes";
+
+            if (winners.length === 1) {
+                const winner = winners[0];
+
+                winnerProfileSources.push({
+                    id: `${selectedElection.id}_${position.id}`,
+                    electionId: selectedElection.id,
+                    positionId: position.id,
+                    candidateId: winner.id,
+                    name: getCandidateName(winner),
+                    className: winner.className || "",
+                    section: winner.section || "",
+                    manifesto: winner.manifesto || "",
+                    symbolBase64: winner.symbolBase64 || "",
+                    symbolMimeType: winner.symbolMimeType || ""
+                });
+            }
+
+            publishedPositions.push({
+                positionId: position.id,
+                positionName: position.name || "Unnamed Position",
+                totalVotes: totalPositionVotes,
+                outcomeType: outcomeType,
+                winnerCandidateIds: winners.map(candidate => candidate.id),
+                candidates: publishedCandidates
+            });
+
+            const positionCard =
+                document.createElement("section");
+
+            positionCard.className =
+                "position-card";
+
+            const winner =
+                winners.length === 1 ? winners[0] : null;
+
+            const winnerVotes =
+                winner ? voteCountByCandidate.get(winner.id) || 0 : 0;
+
+            const winnerPercentage =
+                totalPositionVotes > 0
+                    ? ((winnerVotes / totalPositionVotes) * 100).toFixed(1)
+                    : "0.0";
+
+            const winnerSymbol =
+                winner ? getCandidateSymbol(winner) : "";
+
+            const winnerDetails = winner
+                ? [
+                    winner.className
+                        ? `Class / Program: ${winner.className}`
+                        : "",
+                    winner.section
+                        ? `Section: ${winner.section}`
+                        : "",
+                    winner.rollNumber
+                        ? `Roll No: ${winner.rollNumber}`
+                        : ""
+                ].filter(Boolean)
+                : [];
+
+            const winnerShowcase = winner
+                ? `
+                    <section class="review-winner-showcase" aria-label="Elected candidate">
+                        ${
+                            winnerSymbol
+                                ? `<img class="review-winner-symbol" src="${escapeHtml(winnerSymbol)}" alt="${escapeHtml(getCandidateName(winner))} candidate symbol">`
+                                : `<div class="review-winner-symbol-placeholder">${escapeHtml(getCandidateName(winner).charAt(0).toUpperCase())}</div>`
+                        }
+                        <div>
+                            <div class="review-winner-label">Elected Candidate</div>
+                            <div class="review-winner-name">${escapeHtml(getCandidateName(winner))}</div>
+                            <div class="review-winner-details">
+                                ${winnerDetails.map(detail => `<span>${escapeHtml(detail)}</span>`).join("") || "<span>Candidate</span>"}
+                            </div>
+                            <div class="review-winner-manifesto">
+                                <strong>Manifesto</strong>
+                                ${escapeHtml(winner.manifesto || "No manifesto was provided.")}
+                            </div>
+                        </div>
+                        <div class="review-winner-votes">
+                            <strong>${winnerVotes} votes</strong>
+                            <span>${winnerPercentage}% of votes</span>
+                        </div>
+                    </section>
+                `
+                : "";
+
+            positionCard.innerHTML = `
+                <div class="position-header">
+                    <div>
+                        <h3>${escapeHtml(position.name || "Unnamed Position")}</h3>
+                        <div class="candidate-meta">
+                            Total votes for this position: ${totalPositionVotes}
+                        </div>
+                    </div>
+
+                    <div class="outcome ${outcomeClass}">
+                        ${escapeHtml(outcomeText)}
+                    </div>
+                </div>
+
+                ${winnerShowcase}
+                <div class="candidate-list"></div>
+            `;
+
+            const candidateList =
+                positionCard.querySelector(".candidate-list");
+
+            if (!positionCandidates.length) {
+                candidateList.innerHTML = `
+                    <div class="empty">
+                        No finalized candidates were found for this position.
+                    </div>
+                `;
+            } else {
+                positionCandidates.forEach(candidate => {
+                    const candidateVotes =
+                        voteCountByCandidate.get(candidate.id) || 0;
+
+                    const percentage =
+                        totalPositionVotes > 0
+                            ? ((candidateVotes / totalPositionVotes) * 100)
+                                .toFixed(1)
+                            : "0.0";
+
+                    const isWinner =
+                        winners.length === 1 &&
+                        winners[0].id === candidate.id;
+
+                    if (isWinner) {
+                        return;
+                    }
+
+                    const symbol =
+                        getCandidateSymbol(candidate);
+
+                    const row =
+                        document.createElement("div");
+
+                    row.className =
+                        `candidate-row${isWinner ? " winner" : ""}`;
+
+                    const classSection = [
+                        candidate.className || "",
+                        candidate.section
+                            ? `Section ${candidate.section}`
+                            : ""
+                    ]
+                        .filter(Boolean)
+                        .join(" • ");
+
+                    row.innerHTML = `
+                        ${
+                            symbol
+                                ? `<img class="candidate-symbol" src="${escapeHtml(symbol)}" alt="Candidate symbol">`
+                                : `<div class="candidate-symbol-placeholder">${escapeHtml(getCandidateName(candidate).charAt(0).toUpperCase())}</div>`
+                        }
+
+                        <div>
+                            <div class="candidate-name">
+                                ${escapeHtml(getCandidateName(candidate))}
+                                ${isWinner ? " • Winner" : ""}
+                            </div>
+
+                            <div class="candidate-meta">
+                                ${escapeHtml(classSection || candidate.rollNumber || "Candidate")}
+                            </div>
+                        </div>
+
+                        <div class="vote-count">
+                            <strong>${candidateVotes}</strong>
+                            <span>${percentage}%</span>
+                        </div>
+                    `;
+
+                    candidateList.appendChild(row);
+                });
+            }
+
+            resultsContainer.appendChild(positionCard);
+        });
+
+        return publishedPositions;
+    }
+
+
+    async function loadPublicationStatus(electionId) {
+        publishedResultSnapshot = null;
+
+        if (currentUserData?.role !== "principal") {
+            publicationSection.hidden = true;
+            return;
+        }
+
+        publicationSection.hidden = false;
+        publicationStatus.textContent = "Checking publication status...";
+        publicationStatus.className = "publication-status";
+        publishActionArea.hidden = true;
+        publishedLinkArea.hidden = true;
+
+        try {
+            const resultRef =
+                doc(db, "PublishedResults", electionId);
+
+            const snapshot =
+                await getDoc(resultRef);
+
+            if (!snapshot.exists()) {
+                publicationStatus.textContent = "Not Published";
+                publicationStatus.className = "publication-status";
+                publishActionArea.hidden = false;
+                return;
+            }
+
+            publishedResultSnapshot = {
+                id: snapshot.id,
+                ...snapshot.data()
+            };
+
+            showPublishedResultLink();
+        } catch (error) {
+            console.error("loadPublicationStatus error:", error);
+            publicationStatus.textContent = "Unable to check publication status";
+            publicationStatus.className = "publication-status";
+            showMessage(
+                "The result was loaded, but publication status could not be checked: " + error.message,
+                "error"
+            );
+        }
+    }
+
+
+    function showPublishedResultLink() {
+        if (!selectedElection) {
+            return;
+        }
+
+        const url =
+            getPublicResultUrl(selectedElection.id);
+
+        publicationStatus.textContent = "Official Result Published";
+        publicationStatus.className = "publication-status published";
+        publishActionArea.hidden = true;
+        publishedLinkArea.hidden = false;
+        publicResultLink.value = url;
+
+        const publishedAt =
+            formatPublishedDate(
+                publishedResultSnapshot?.publishedAt
+            );
+
+        publishedAtText.textContent =
+            publishedAt
+                ? `Published: ${publishedAt}`
+                : "The official result is published and available through this read-only link.";
+    }
+
+
+    function addWinnerProfilesToBatch(batch, sources = winnerProfileSources) {
+        sources.forEach(source => {
+            batch.set(
+                doc(db, "PublishedWinnerProfiles", source.id),
+                {
+                    electionId: source.electionId,
+                    positionId: source.positionId,
+                    candidateId: source.candidateId,
+                    name: source.name,
+                    className: source.className,
+                    section: source.section,
+                    manifesto: source.manifesto,
+                    symbolBase64: source.symbolBase64,
+                    symbolMimeType: source.symbolMimeType,
+                    publishedAt: serverTimestamp()
+                }
+            );
+        });
+    }
+
+
+    async function publishOfficialResult() {
+        if (currentUserData?.role !== "principal") {
+            showMessage(
+                "Only the Principal can publish the official result.",
+                "error"
+            );
+            return;
+        }
+
+        if (!selectedElection || selectedElection.status !== "closed") {
+            showMessage(
+                "Only a permanently closed election can be published.",
+                "error"
+            );
+            return;
+        }
+
+        if (!currentResultSnapshot) {
+            showMessage(
+                "Load and review the election result before publishing.",
+                "error"
+            );
+            return;
+        }
+
+        const confirmed = await askForConfirmation({
+            title: "Publish official result?",
+            message: "This will create the final public result link. Check the totals first because the published result cannot be changed.",
+            confirmLabel: "Publish Result"
+        });
+
+        if (!confirmed) {
+            return;
+        }
+
+        const button =
+            document.getElementById("publishOfficialResultBtn");
+
+        button.disabled = true;
+        button.textContent = "Publishing...";
+
+        try {
+            const electionSnapshot =
+                await getDoc(
+                    doc(db, "Elections", selectedElection.id)
+                );
+
+            if (
+                !electionSnapshot.exists() ||
+                electionSnapshot.data().status !== "closed"
+            ) {
+                throw new Error(
+                    "The election is no longer in the closed state."
+                );
+            }
+
+            const resultRef =
+                doc(db, "PublishedResults", selectedElection.id);
+
+            const existing =
+                await getDoc(resultRef);
+
+            if (existing.exists()) {
+                publishedResultSnapshot = {
+                    id: existing.id,
+                    ...existing.data()
+                };
+                showPublishedResultLink();
+                showMessage(
+                    "This election result has already been published.",
+                    "info"
+                );
+                return;
+            }
+
+            let institutionName = "Institution";
+
+            try {
+                const systemSettingsSnapshot =
+                    await getDoc(
+                        doc(db, "SystemSettings", "system")
+                    );
+
+                if (systemSettingsSnapshot.exists()) {
+                    institutionName =
+                        systemSettingsSnapshot.data().institutionName ||
+                        institutionName;
+                } else {
+                    const institutionSnapshot =
+                        await getDoc(
+                            doc(db, "Institutions", "main")
+                        );
+
+                    if (institutionSnapshot.exists()) {
+                        institutionName =
+                            institutionSnapshot.data().name ||
+                            institutionName;
+                    }
+                }
+            } catch (institutionError) {
+                console.warn(
+                    "Institution name could not be loaded for publication:",
+                    institutionError
+                );
+            }
+
+            const summary =
+                currentResultSnapshot.summary;
+
+            const batch = writeBatch(db);
+
+            batch.set(
+                resultRef,
+                {
+                    electionId: selectedElection.id,
+                    electionName: selectedElection.electionName || "Unnamed Election",
+                    academicSession: selectedElection.academicSession || "",
+                    description: selectedElection.description || "",
+                    institutionName: institutionName,
+                    nominationStart: selectedElection.nominationStart,
+                    nominationEnd: selectedElection.nominationEnd,
+                    votingStart: selectedElection.votingStart,
+                    votingEnd: selectedElection.votingEnd,
+                    status: "published",
+                    eligibleVoters: summary.eligibleVoters,
+                    votersParticipated: summary.votersParticipated,
+                    turnoutPercentage: summary.turnoutPercentage,
+                    positionCount: currentResultSnapshot.positions.length,
+                    positions: currentResultSnapshot.positions,
+                    publishedAt: serverTimestamp()
+                }
+            );
+
+            addWinnerProfilesToBatch(batch);
+
+            addAuditLogToBatch(batch, {
+                action: "RESULT_PUBLISHED",
+                targetType: "PublishedResults",
+                targetId: selectedElection.id,
+                details: "Official read-only election result published and shareable link generated."
+            });
+
+            await batch.commit();
+            const publishedSnapshot =
+                await getDoc(resultRef);
+
+            publishedResultSnapshot = {
+                id: publishedSnapshot.id,
+                ...publishedSnapshot.data()
+            };
+
+            showPublishedResultLink();
+            showMessage(
+                "Official result published successfully. The shareable read-only link is ready.",
+                "info"
+            );
+
+        } catch (error) {
+            console.error("publishOfficialResult error:", error);
+            showMessage(
+                "Unable to publish the official result: " + error.message,
+                "error"
+            );
+        } finally {
+            button.disabled = false;
+            button.textContent = "Publish Official Result";
+        }
+    }
+
+
+    async function copyPublicResultLink() {
+        const link =
+            publicResultLink.value.trim();
+
+        if (!link) {
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(link);
+            showMessage("Public result link copied.", "info");
+        } catch (error) {
+            publicResultLink.focus();
+            publicResultLink.select();
+            document.execCommand("copy");
+            showMessage("Public result link copied.", "info");
+        }
+    }
+
+
+    function sharePublicResultOnWhatsApp() {
+        const link =
+            publicResultLink.value.trim();
+
+        if (!link || !selectedElection) {
+            return;
+        }
+
+        const message =
+            `Official ${selectedElection.electionName || "Election"} result:\n${link}`;
+
+        window.open(
+            "https://wa.me/?text=" + encodeURIComponent(message),
+            "_blank",
+            "noopener"
+        );
+    }
+
+
+    electionSelect.addEventListener(
+        "change",
+        async () => {
+            const electionId =
+                electionSelect.value;
+
+            if (!electionId) {
+                selectedElection = null;
+                currentResultSnapshot = null;
+                publishedResultSnapshot = null;
+                summarySection.hidden = true;
+                resultsSection.hidden = true;
+                publicationSection.hidden = true;
+                return;
+            }
+
+            await loadResults(electionId);
+        }
+    );
+
+
+    document.getElementById("refreshBtn")
+        .addEventListener(
+            "click",
+            async () => {
+                const previousSelection =
+                    electionSelect.value;
+
+                await loadClosedElections();
+
+                if (
+                    previousSelection &&
+                    closedElections.some(
+                        election => election.id === previousSelection
+                    )
+                ) {
+                    electionSelect.value = previousSelection;
+                    await loadResults(previousSelection);
+                }
+            }
+        );
+
+
+    document.getElementById("publishOfficialResultBtn")
+        .addEventListener("click", publishOfficialResult);
+
+    cancelPublishBtn.addEventListener(
+        "click",
+        () => closePublishConfirmation(false)
+    );
+
+    confirmPublishBtn.addEventListener(
+        "click",
+        () => closePublishConfirmation(true)
+    );
+
+    publishConfirmModal.addEventListener(
+        "click",
+        event => {
+            if (event.target === publishConfirmModal) {
+                closePublishConfirmation(false);
+            }
+        }
+    );
+
+    document.addEventListener(
+        "keydown",
+        event => {
+            if (event.key === "Escape" && !publishConfirmModal.hidden) {
+                closePublishConfirmation(false);
+            }
+        }
+    );
+
+    document.getElementById("copyResultLinkBtn")
+        .addEventListener("click", copyPublicResultLink);
+
+    document.getElementById("shareWhatsAppBtn")
+        .addEventListener("click", sharePublicResultOnWhatsApp);
+
+
+    document.getElementById("backBtn")
+        .addEventListener(
+            "click",
+            () => {
+                if (currentUserData?.role) {
+                    window.location.href =
+                        getDashboardForRole(currentUserData.role);
+                } else {
+                    window.location.href = "login.html";
+                }
+            }
+        );
+
+
+    async function initializePage() {
+        try {
+            const allowed =
+                await verifyAccess();
+
+            if (!allowed) {
+                return;
+            }
+
+            await loadClosedElections();
+
+        } catch (error) {
+            console.error("Review Results initialization error:", error);
+            showMessage(
+                "Unable to initialize the results page: " + error.message,
+                "error"
+            );
+        }
+    }
+
+
+    initializePage();
+</script>
+
+</body>
+</html>

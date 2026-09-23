@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Principal Dashboard</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        background: #f4f6f8;
+        color: #222;
+        min-height: 100vh;
+    }
+
+    /* ================= HEADER ================= */
+
+    .header {
+        background: #1976d2;
+        color: white;
+        padding: 20px 30px;
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        gap: 20px;
+    }
+
+    .header-title {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .header h1 {
+        margin-bottom: 6px;
+        font-size: 25px;
+    }
+
+    .header p {
+        opacity: 0.9;
+        font-size: 14px;
+    }
+
+    /* ================= PROFILE AREA ================= */
+
+    .header-profile {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .header-profile-button {
+        width: auto;
+        min-width: 150px;
+
+        padding: 9px 12px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        gap: 8px;
+
+        border: none;
+        border-radius: 8px;
+
+        background: rgba(255, 255, 255, 0.12);
+        color: white;
+
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .header-avatar {
+        width: 30px;
+        height: 30px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 50%;
+
+        background: white;
+        color: #1976d2;
+
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .header-arrow {
+        font-size: 9px;
+    }
+
+    /* ================= PROFILE DROPDOWN ================= */
+
+    .header-profile-dropdown {
+        position: absolute;
+
+        top: calc(100% + 10px);
+        right: 0;
+
+        width: 230px;
+
+        background: white;
+        color: #222;
+
+        border-radius: 8px;
+
+        box-shadow:
+            0 5px 20px rgba(0, 0, 0, 0.18);
+
+        overflow: hidden;
+
+        z-index: 1000;
+    }
+
+    .header-profile-dropdown[hidden] {
+        display: none;
+    }
+
+    .profile-dropdown-info {
+        padding: 15px;
+    }
+
+    .profile-dropdown-info strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 15px;
+    }
+
+    .profile-dropdown-info span {
+        color: #777;
+        font-size: 12px;
+    }
+
+    .profile-dropdown-item {
+        width: 100%;
+
+        padding: 13px 15px;
+
+        display: block;
+
+        border: none;
+        border-radius: 0;
+
+        background: white;
+        color: #333;
+
+        text-align: left;
+        font-size: 14px;
+
+        cursor: pointer;
+    }
+
+    .logout-item {
+        margin-top: 2px;
+    }
+
+    /* ================= MAIN CONTAINER ================= */
+
+    .container {
+        width: 100%;
+        max-width: 1200px;
+
+        margin: auto;
+        padding: 30px;
+    }
+
+    /* ================= WELCOME ================= */
+
+    .welcome {
+        background: white;
+
+        padding: 25px;
+
+        border-radius: 10px;
+
+        margin-bottom: 28px;
+
+        box-shadow:
+            0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .welcome h2 {
+        margin-bottom: 8px;
+        font-size: 22px;
+    }
+
+    .institution-name {
+        color: #1976d2;
+
+        font-weight: bold;
+
+        margin-bottom: 12px;
+
+        font-size: 16px;
+    }
+
+    .welcome p {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    /* ================= SECTION TITLES ================= */
+
+    .section-title {
+        margin: 28px 0 15px;
+        font-size: 20px;
+    }
+
+    /* ================= OVERVIEW ================= */
+
+    .overview {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+
+    .overview-card {
+        background: white;
+
+        padding: 20px;
+
+        border-radius: 10px;
+
+        box-shadow:
+            0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .overview-card h3 {
+        font-size: 14px;
+        color: #666;
+
+        margin-bottom: 10px;
+    }
+
+    .overview-value {
+        font-size: 20px;
+        font-weight: bold;
+        color: #222;
+    }
+
+    .overview-description {
+        margin-top: 7px;
+
+        font-size: 12px;
+        color: #777;
+    }
+
+
+    /* ================= CARDS ================= */
+
+    .cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+    .card {
+        background: white;
+
+        padding: 22px;
+
+        border-radius: 10px;
+
+        box-shadow:
+            0 2px 10px rgba(0, 0, 0, 0.08);
+
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card h3 {
+        margin-bottom: 10px;
+        font-size: 18px;
+    }
+
+    .card p {
+        color: #666;
+
+        margin-bottom: 18px;
+
+        line-height: 1.5;
+
+        flex-grow: 1;
+    }
+
+    /* ================= CARD BUTTONS ================= */
+
+    .card button {
+        width: 100%;
+
+        padding: 11px 16px;
+
+        border: none;
+
+        border-radius: 6px;
+
+        background: #1976d2;
+        color: white;
+
+        cursor: pointer;
+
+        font-size: 14px;
+    }
+
+    /* ================= RESPONSIVE ================= */
+
+    @media (max-width: 1000px) {
+
+        .overview {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+
+        .cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 600px) {
+
+        .overview {
+            grid-template-columns: 1fr;
+        }
+
+
+        .cards {
+            grid-template-columns: 1fr;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .header {
+            padding: 15px 20px;
+
+            flex-direction: column;
+
+            align-items: stretch;
+        }
+
+        .header h1 {
+            font-size: 21px;
+        }
+
+        .header-profile {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .header-profile-button {
+            min-width: 130px;
+        }
+
+        .header-profile-dropdown {
+            width: 210px;
+        }
+    }
+</style>
+
+<!-- Dashboard-specific layout: same navy as the system header, no bright-blue actions. -->
+<style>
+    body.principal-dashboard {
+        background: #f4f7fa !important;
+        color: #243447 !important;
+        font-family: "Segoe UI", Arial, sans-serif !important;
+    }
+
+    body.principal-dashboard .header {
+        background: #173a5e !important;
+        border-bottom: 3px solid #102c49 !important;
+        box-shadow: none !important;
+        padding: 18px clamp(22px, 4vw, 52px) !important;
+    }
+
+    body.principal-dashboard .header h1 {
+        font-size: 1.45rem !important;
+        letter-spacing: -0.02em;
+        margin-bottom: 4px !important;
+    }
+
+    body.principal-dashboard .header p {
+        color: #d9e6f2 !important;
+        font-size: 0.8rem !important;
+        line-height: 1.35;
+        opacity: 1 !important;
+    }
+
+    body.principal-dashboard #institutionHeader {
+        color: #ffffff !important;
+        font-weight: 700;
+        margin-top: 3px;
+    }
+
+    body.principal-dashboard .header-profile-button {
+        background: #244d77 !important;
+        border: 1px solid #497295 !important;
+        border-radius: 7px !important;
+        color: #ffffff !important;
+        min-width: 0 !important;
+        padding: 7px 10px !important;
+    }
+
+    body.principal-dashboard .header-avatar {
+        background: #ffffff !important;
+        color: #173a5e !important;
+        height: 28px;
+        width: 28px;
+    }
+
+    body.principal-dashboard .header-profile-dropdown {
+        border: 1px solid #cedbe7 !important;
+        border-radius: 8px !important;
+        box-shadow: none !important;
+    }
+
+    body.principal-dashboard .profile-dropdown-item {
+        background: #ffffff !important;
+        color: #173a5e !important;
+    }
+
+    body.principal-dashboard .container {
+        max-width: 1280px !important;
+        padding: 28px clamp(20px, 3.5vw, 48px) 52px !important;
+    }
+
+    body.principal-dashboard .welcome {
+        background: #ffffff !important;
+        border: 1px solid #d9e3ec !important;
+        border-radius: 10px !important;
+        box-shadow: none !important;
+        margin-bottom: 28px !important;
+        padding: 24px 26px !important;
+    }
+
+    body.principal-dashboard .welcome h2 {
+        color: #173a5e !important;
+        font-size: 1.55rem !important;
+        letter-spacing: -0.025em;
+        margin-bottom: 6px !important;
+    }
+
+    body.principal-dashboard .institution-name {
+        color: #315c7f !important;
+        font-size: 0.92rem !important;
+        margin-bottom: 10px !important;
+    }
+
+    body.principal-dashboard .welcome p {
+        color: #607080 !important;
+        font-size: 0.94rem;
+        max-width: 780px;
+    }
+
+    body.principal-dashboard .section-title {
+        color: #173a5e !important;
+        font-size: 1.12rem !important;
+        letter-spacing: -0.015em;
+        margin: 30px 0 12px !important;
+    }
+
+    body.principal-dashboard .overview {
+        gap: 14px !important;
+    }
+
+    body.principal-dashboard .overview-card {
+        background: #ffffff !important;
+        border: 1px solid #d9e3ec !important;
+        border-radius: 9px !important;
+        box-shadow: none !important;
+        min-height: 138px;
+        padding: 18px !important;
+    }
+
+    body.principal-dashboard .overview-card h3 {
+        color: #647585 !important;
+        font-size: 0.74rem !important;
+        font-weight: 750 !important;
+        letter-spacing: 0.06em;
+        margin-bottom: 12px !important;
+        text-transform: uppercase;
+    }
+
+    body.principal-dashboard .overview-value {
+        color: #173a5e !important;
+        font-size: 1.23rem !important;
+        letter-spacing: -0.02em;
+        line-height: 1.25;
+    }
+
+    body.principal-dashboard .overview-description {
+        color: #718294 !important;
+        line-height: 1.35;
+        margin-top: 8px !important;
+    }
+
+    body.principal-dashboard .cards {
+        gap: 14px !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    body.principal-dashboard .card {
+        background: #ffffff !important;
+        border: 1px solid #d9e3ec !important;
+        border-radius: 9px !important;
+        box-shadow: none !important;
+        min-height: 178px;
+        padding: 21px !important;
+    }
+
+    body.principal-dashboard .card h3 {
+        color: #173a5e !important;
+        font-size: 1rem !important;
+        margin-bottom: 8px !important;
+    }
+
+    body.principal-dashboard .card p {
+        color: #607080 !important;
+        font-size: 0.91rem;
+        line-height: 1.5;
+        margin-bottom: 18px !important;
+    }
+
+    body.principal-dashboard .card button {
+        align-self: flex-start;
+        background: #173a5e !important;
+        border: 1px solid #173a5e !important;
+        border-radius: 6px !important;
+        color: #ffffff !important;
+        margin-top: auto;
+        min-height: 38px;
+        padding: 8px 13px !important;
+        width: auto !important;
+    }
+
+    body.principal-dashboard .card button:hover {
+        background: #173a5e !important;
+        color: #ffffff !important;
+    }
+
+    @media (max-width: 720px) {
+        body.principal-dashboard .cards {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+</head>
+
+<body class="principal-dashboard">
+
+<!-- ================= HEADER ================= -->
+
+<div class="header">
+
+    <div class="header-title">
+
+        <h1>
+            VoteGuard
+        </h1>
+
+        <p>
+            Controlled Institutional Election Management System with Electronic Voting
+        </p>
+
+        <p id="institutionHeader">
+            Loading institution…
+        </p>
+
+    </div>
+
+
+    <!-- PROFILE -->
+
+    <div class="header-profile">
+
+        <button
+            type="button"
+            id="profileButton"
+            class="header-profile-button"
+            aria-expanded="false"
+            aria-controls="profileDropdown"
+        >
+
+            <span
+                class="header-avatar"
+                id="headerAvatar"
+            >
+                P
+            </span>
+
+            <span id="headerProfileName">
+                Profile
+            </span>
+
+            <span class="header-arrow">
+                ▼
+            </span>
+
+        </button>
+
+
+        <div
+            id="profileDropdown"
+            class="header-profile-dropdown"
+            hidden
+        >
+
+            <div class="profile-dropdown-info">
+
+                <strong id="dropdownProfileName">
+                    Principal
+                </strong>
+
+                <span>
+                    Principal / Super Admin
+                </span>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="myProfileButton"
+                class="profile-dropdown-item"
+            >
+                My Profile
+            </button>
+
+
+            <button
+                type="button"
+                id="dashboardSignOutButton"
+                class="profile-dropdown-item logout-item"
+            >
+                Sign Out
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ================= MAIN CONTENT ================= -->
+
+<div class="container">
+
+
+    <!-- ================= WELCOME ================= -->
+
+    <div class="welcome">
+
+        <h2>
+            Welcome,
+            <span id="principalName">
+                Administrator
+            </span>
+        </h2>
+
+
+        <div
+            class="institution-name"
+            id="institutionName"
+        >
+            Loading institution...
+        </div>
+
+
+        <p>
+            Create elections, manage staff, and check results.
+        </p>
+
+    </div>
+
+    <!-- ================= ELECTION OVERVIEW ================= -->
+
+    <h2 class="section-title">
+        Election Overview
+    </h2>
+
+    <div class="overview">
+
+        <div class="overview-card">
+            <h3>Current Election</h3>
+            <div class="overview-value" id="currentElection">No Active Election</div>
+            <div class="overview-description">Election shown on this page</div>
+        </div>
+
+        <div class="overview-card">
+            <h3>Election Status</h3>
+            <div class="overview-value" id="electionStatus">Not Available</div>
+            <div class="overview-description">Current election status</div>
+        </div>
+
+        <div class="overview-card">
+            <h3>Voter Turnout</h3>
+            <div class="overview-value" id="voterTurnout">Not Available</div>
+            <div class="overview-description">Students who have voted</div>
+        </div>
+
+        <div class="overview-card">
+            <h3>Voting Activity</h3>
+            <div class="overview-value" id="votingActivity">Not Started</div>
+            <div class="overview-description">Current voting sessions</div>
+        </div>
+
+    </div>
+
+
+
+    <!-- ================= ELECTION MANAGEMENT ================= -->
+
+    <h2 class="section-title">
+        Elections
+    </h2>
+
+
+    <div class="cards">
+
+
+        <div class="card">
+
+            <h3>
+                Create Election
+            </h3>
+
+            <p>
+                Add the election name, dates, and positions.
+            </p>
+
+            <button id="createElectionBtn">
+                Create Election
+            </button>
+
+        </div>
+
+
+
+        <div class="card">
+
+            <h3>
+                Manage Elections
+            </h3>
+
+            <p>
+                Check election details and control voting status.
+            </p>
+
+            <button id="manageElectionsBtn">
+                Manage Elections
+            </button>
+
+        </div>
+
+ </div>
+
+
+       
+
+
+    <!-- ================= ADMINISTRATIVE MANAGEMENT ================= -->
+
+    <h2 class="section-title">
+        Sub-Admins
+    </h2>
+
+
+    <div class="cards">
+
+
+        <div class="card">
+
+            <h3>
+                Create Sub-Admin
+            </h3>
+
+            <p>
+                Add a Sub-Admin and select their duties.
+            </p>
+
+            <button id="createSubAdminBtn">
+                Create Sub-Admin
+            </button>
+
+        </div>
+
+
+
+        <div class="card">
+
+            <h3>
+                Manage Sub-Admins
+            </h3>
+
+            <p>
+                View Sub-Admins and update their duties.
+            </p>
+
+            <button id="manageSubAdminsBtn">
+                Manage Sub-Admins
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ================= ELECTION COMMISSION ================= -->
+
+    <h2 class="section-title">
+        Election Commission Members
+    </h2>
+
+
+    <div class="cards">
+
+
+        <div class="card">
+
+            <h3>
+                Create EC Member
+            </h3>
+
+            <p>
+                Add an Election Commission member and select duties.
+            </p>
+
+            <button id="createECBtn">
+                Create EC Member
+            </button>
+
+        </div>
+
+
+
+        <div class="card">
+
+            <h3>
+                Manage Election Commission
+            </h3>
+
+            <p>
+                View EC members and update their duties.
+            </p>
+
+            <button id="manageECBtn">
+                Manage Election Commission
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ================= RESULTS ================= -->
+
+    <h2 class="section-title">
+        Results
+    </h2>
+
+
+    <div class="cards">
+
+
+        <div class="card">
+
+            <h3>
+                Review Results
+            </h3>
+
+            <p>
+                Check final results and publish them when ready.
+            </p>
+
+            <button id="reviewResultsBtn">
+                Review Results
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+<!-- ================= JAVASCRIPT ================= -->
+
+<script type="module">
+
+    /* =================================================
+       SHARED FIREBASE
+    ================================================= */
+
+    import {
+        db,
+        auth
+    } from "./js/firebase.js";
+
+
+    /* =================================================
+       SHARED AUTHENTICATION
+    ================================================= */
+
+    import {
+        requireRole
+    } from "./js/auth.js";
+
+
+    /* =================================================
+       FIRESTORE
+    ================================================= */
+
+    import {
+        doc,
+        getDoc,
+        collection,
+        query,
+        where,
+        onSnapshot
+    } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+
+    /* =================================================
+       FIREBASE AUTH SIGN OUT
+    ================================================= */
+
+    import {
+        signOut
+    } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+
+    /* =================================================
+       AUTHENTICATE PRINCIPAL
+    ================================================= */
+
+    const result = await requireRole("principal");
+
+
+    if (!result) {
+
+        throw new Error(
+            "Unauthorized access."
+        );
+
+    }
+
+
+    const {
+        user,
+        data: userData
+    } = result;
+
+
+    /* =================================================
+       DISPLAY PRINCIPAL NAME
+    ================================================= */
+
+    const principalDisplayName =
+        userData.name ||
+        user.displayName ||
+        (user.email
+            ? user.email.split("@")[0]
+            : "Principal");
+
+
+    const principalNameElement =
+        document.getElementById(
+            "principalName"
+        );
+
+
+    principalNameElement.textContent =
+        principalDisplayName;
+
+
+    /* =================================================
+       HEADER PROFILE
+    ================================================= */
+
+    const profileButton =
+        document.getElementById(
+            "profileButton"
+        );
+
+
+    const profileDropdown =
+        document.getElementById(
+            "profileDropdown"
+        );
+
+
+    const headerProfileName =
+        document.getElementById(
+            "headerProfileName"
+        );
+
+
+    const dropdownProfileName =
+        document.getElementById(
+            "dropdownProfileName"
+        );
+
+
+    const headerAvatar =
+        document.getElementById(
+            "headerAvatar"
+        );
+
+
+    headerProfileName.textContent =
+        principalDisplayName;
+
+
+    dropdownProfileName.textContent =
+        principalDisplayName;
+
+
+    headerAvatar.textContent =
+        principalDisplayName
+            .charAt(0)
+            .toUpperCase();
+
+
+    /* =================================================
+       PROFILE DROPDOWN TOGGLE
+    ================================================= */
+
+    profileButton.addEventListener(
+        "click",
+        (event) => {
+
+            event.stopPropagation();
+
+            const isOpen =
+                !profileDropdown.hidden;
+
+            profileDropdown.hidden =
+                isOpen;
+
+            profileButton.setAttribute(
+                "aria-expanded",
+                String(!isOpen)
+            );
+
+        }
+    );
+
+
+    /* =================================================
+       CLOSE PROFILE DROPDOWN
+    ================================================= */
+
+    document.addEventListener(
+        "click",
+        (event) => {
+
+            if (
+                !profileDropdown.contains(
+                    event.target
+                ) &&
+                !profileButton.contains(
+                    event.target
+                )
+            ) {
+
+                profileDropdown.hidden =
+                    true;
+
+                profileButton.setAttribute(
+                    "aria-expanded",
+                    "false"
+                );
+
+            }
+
+        }
+    );
+
+
+    /* =================================================
+       MY PROFILE
+    ================================================= */
+
+    document
+        .getElementById(
+            "myProfileButton"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "profile.html";
+
+            }
+        );
+
+
+    /* =================================================
+       SIGN OUT
+    ================================================= */
+
+    document
+        .getElementById(
+            "dashboardSignOutButton"
+        )
+        .addEventListener(
+            "click",
+            async () => {
+
+                try {
+
+                    await signOut(auth);
+
+                    window.location.href =
+                        "login.html";
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "Sign out error:",
+                        error
+                    );
+
+                    alert(
+                        "Unable to sign out. Please try again."
+                    );
+
+                }
+
+            }
+        );
+
+
+    /* =================================================
+       LOAD INSTITUTION INFORMATION
+    ================================================= */
+
+    async function loadInstitutionInformation() {
+
+        try {
+
+            const institutionRef =
+                doc(
+                    db,
+                    "Institutions",
+                    "main"
+                );
+
+
+            const institutionSnapshot =
+                await getDoc(
+                    institutionRef
+                );
+
+
+            let institutionName =
+                userData.collegeName ||
+                userData.institutionName ||
+                "Institution not configured";
+
+
+            if (institutionSnapshot.exists()) {
+
+                const institutionData =
+                    institutionSnapshot.data();
+
+
+                institutionName =
+                    institutionData.name ||
+                    institutionName;
+
+            }
+
+
+            document
+                .getElementById(
+                    "institutionName"
+                )
+                .textContent =
+                institutionName;
+
+
+            document
+                .getElementById(
+                    "institutionHeader"
+                )
+                .textContent =
+                institutionName;
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Failed to load institution information:",
+                error
+            );
+
+        }
+
+    }
+
+
+    await loadInstitutionInformation();
+
+    /* =================================================
+       ELECTION OVERVIEW
+       =================================================
+       The dashboard shows only the operational information
+       an administrator needs at a glance. Candidate-wise
+       totals remain part of the Results module.
+    ================================================= */
+
+    let overviewElection = null;
+    let overviewElectionId = "";
+    let overviewVoters = [];
+    let overviewSessions = [];
+
+    let electionsUnsubscribe = null;
+    let votersUnsubscribe = null;
+    let sessionsUnsubscribe = null;
+
+
+    function setOverviewText(id, value) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+        }
+    }
+
+
+    function timestampToMillis(value) {
+        if (!value) return 0;
+
+        if (typeof value.toMillis === "function") {
+            return value.toMillis();
+        }
+
+        if (value instanceof Date) {
+            return value.getTime();
+        }
+
+        const parsed = new Date(value).getTime();
+        return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+
+    function electionPriority(status) {
+        return ({
+            voting_active: 50,
+            voting_stopped: 40,
+            finalized: 30,
+            draft: 20,
+            closed: 10
+        })[status] || 0;
+    }
+
+
+    function chooseOverviewElection(elections) {
+        if (!elections.length) {
+            return null;
+        }
+
+        return [...elections].sort((a, b) => {
+            const priorityDifference =
+                electionPriority(b.status) - electionPriority(a.status);
+
+            if (priorityDifference !== 0) {
+                return priorityDifference;
+            }
+
+            return timestampToMillis(b.createdAt) -
+                   timestampToMillis(a.createdAt);
+        })[0];
+    }
+
+
+    function getElectionStatusLabel(status) {
+        return ({
+            draft: "Draft",
+            finalized: "Finalized",
+            voting_active: "Voting Active",
+            voting_stopped: "Voting Stopped",
+            closed: "Closed"
+        })[status] || "Not Available";
+    }
+
+
+    function resetOverviewData() {
+        overviewVoters = [];
+        overviewSessions = [];
+    }
+
+
+    function detachOverviewListeners() {
+        if (votersUnsubscribe) votersUnsubscribe();
+        if (sessionsUnsubscribe) sessionsUnsubscribe();
+
+        votersUnsubscribe = null;
+        sessionsUnsubscribe = null;
+    }
+
+
+    function showOverviewError(source, error) {
+        console.error(`Election overview ${source} error:`, error);
+    }
+
+
+    function renderElectionOverview() {
+        const statusCard = document.getElementById("electionStatusCard");
+
+        if (statusCard) {
+            statusCard.dataset.status = overviewElection?.status || "unavailable";
+        }
+
+        if (!overviewElection) {
+            setOverviewText("currentElection", "No Active Election");
+            setOverviewText("electionStatus", "Not Available");
+            setOverviewText("voterTurnout", "Not Available");
+            setOverviewText("votingActivity", "Not Started");
+            return;
+        }
+
+        const eligibleVoters = overviewVoters.filter(
+            voter => voter.eligible === true
+        );
+
+        const votesCast = eligibleVoters.filter(
+            voter => voter.participationStatus === "voted"
+        ).length;
+
+        const eligibleCount = eligibleVoters.length;
+        const turnout = eligibleCount > 0
+            ? ((votesCast / eligibleCount) * 100).toFixed(1)
+            : "0.0";
+
+        const activeSessions = overviewSessions.filter(
+            session => ["authorized", "ballot_open"].includes(session.status)
+        ).length;
+
+        const completedSessions = overviewSessions.filter(
+            session => session.status === "submitted"
+        ).length;
+
+        let activityText = "Not Started";
+
+        if (["voting_active", "voting_stopped"].includes(overviewElection.status)) {
+            activityText = `${activeSessions} active • ${completedSessions} completed`;
+        }
+        else if (overviewElection.status === "closed") {
+            activityText = `${completedSessions} completed`;
+        }
+
+        setOverviewText(
+            "currentElection",
+            overviewElection.electionName || "Unnamed Election"
+        );
+
+        setOverviewText(
+            "electionStatus",
+            getElectionStatusLabel(overviewElection.status)
+        );
+
+        setOverviewText(
+            "voterTurnout",
+            `${votesCast} / ${eligibleCount} (${turnout}%)`
+        );
+
+        setOverviewText("votingActivity", activityText);
+    }
+
+
+    function attachOverviewListeners(electionId) {
+        detachOverviewListeners();
+        resetOverviewData();
+        renderElectionOverview();
+
+        votersUnsubscribe = onSnapshot(
+            query(
+                collection(db, "Voters"),
+                where("electionId", "==", electionId)
+            ),
+            snapshot => {
+                overviewVoters = snapshot.docs.map(item => ({
+                    id: item.id,
+                    ...item.data()
+                }));
+                renderElectionOverview();
+            },
+            error => showOverviewError("voter data", error)
+        );
+
+        sessionsUnsubscribe = onSnapshot(
+            query(
+                collection(db, "VotingSessions"),
+                where("electionId", "==", electionId)
+            ),
+            snapshot => {
+                overviewSessions = snapshot.docs.map(item => ({
+                    id: item.id,
+                    ...item.data()
+                }));
+                renderElectionOverview();
+            },
+            error => showOverviewError("session data", error)
+        );
+    }
+
+
+    function startElectionOverview() {
+        electionsUnsubscribe = onSnapshot(
+            collection(db, "Elections"),
+            snapshot => {
+                const elections = snapshot.docs.map(item => ({
+                    id: item.id,
+                    ...item.data()
+                }));
+
+                const selected = chooseOverviewElection(elections);
+
+                if (!selected) {
+                    overviewElection = null;
+                    overviewElectionId = "";
+                    detachOverviewListeners();
+                    resetOverviewData();
+                    renderElectionOverview();
+                    return;
+                }
+
+                const electionChanged = selected.id !== overviewElectionId;
+
+                overviewElection = selected;
+                overviewElectionId = selected.id;
+                renderElectionOverview();
+
+                if (electionChanged) {
+                    attachOverviewListeners(selected.id);
+                }
+            },
+            error => showOverviewError("election data", error)
+        );
+    }
+
+
+    function stopElectionOverview() {
+        if (electionsUnsubscribe) electionsUnsubscribe();
+        electionsUnsubscribe = null;
+        detachOverviewListeners();
+    }
+
+
+
+
+
+
+    /* =================================================
+       CREATE ELECTION
+    ================================================= */
+
+    document
+        .getElementById(
+            "createElectionBtn"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "create-election.html";
+
+            }
+        );
+
+
+    /* =================================================
+       MANAGE ELECTIONS
+    ================================================= */
+
+    document
+        .getElementById(
+            "manageElectionsBtn"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "manage-elections.html";
+
+            }
+        );
+
+    /* =================================================
+       CREATE SUB-ADMIN
+    ================================================= */
+
+    document
+        .getElementById(
+            "createSubAdminBtn"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "create-sub-admin.html";
+
+            }
+        );
+
+
+    /* =================================================
+       MANAGE SUB-ADMINS
+    ================================================= */
+
+    document
+        .getElementById(
+            "manageSubAdminsBtn"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "manage-sub-admins.html";
+
+            }
+        );
+
+
+    /* =================================================
+       CREATE ELECTION COMMISSION MEMBER
+    ================================================= */
+
+    document
+        .getElementById(
+            "createECBtn"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "create-election-commission.html";
+
+            }
+        );
+
+
+    /* =================================================
+       MANAGE ELECTION COMMISSION
+    ================================================= */
+
+    document
+        .getElementById(
+            "manageECBtn"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "manage-election-commission.html";
+
+            }
+        );
+
+
+    /* =================================================
+       REVIEW RESULTS
+    ================================================= */
+
+    document
+        .getElementById(
+            "reviewResultsBtn"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "review-results.html";
+
+            }
+        );
+    startElectionOverview();
+
+    window.addEventListener("beforeunload", stopElectionOverview);
+
+</script>
+
+</body>
+
+</html>

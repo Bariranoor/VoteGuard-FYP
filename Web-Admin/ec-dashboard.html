@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Election Commission Dashboard</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6f8;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        /* ================================
+           HEADER
+        ================================= */
+
+        /* ================= HEADER ================= */
+
+.header {
+    background: #1976d2;
+    color: white;
+
+    padding: 20px 30px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 20px;
+}
+
+.header-title {
+    flex: 1;
+    min-width: 0;
+}
+
+.header h1 {
+    margin-bottom: 6px;
+
+    font-size: 25px;
+}
+
+.header p {
+    opacity: 0.9;
+
+    font-size: 14px;
+}
+
+        /* ================= PROFILE AREA ================= */
+
+.header-profile {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.header-profile-button {
+    width: auto;
+    min-width: 150px;
+
+    padding: 9px 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.header-avatar {
+    width: 30px;
+    height: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: white;
+    color: #1976d2;
+
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.header-arrow {
+    font-size: 9px;
+}
+
+/* ================= PROFILE DROPDOWN ================= */
+
+.header-profile-dropdown {
+    position: absolute;
+
+    top: calc(100% + 10px);
+    right: 0;
+
+    width: 230px;
+
+    background: white;
+    color: #222;
+
+    border-radius: 8px;
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.18);
+
+    overflow: hidden;
+
+    z-index: 1000;
+}
+
+.header-profile-dropdown[hidden] {
+    display: none;
+}
+
+.profile-dropdown-info {
+    padding: 15px;
+}
+
+.profile-dropdown-info strong {
+    display: block;
+
+    margin-bottom: 4px;
+
+    font-size: 15px;
+}
+
+.profile-dropdown-info span {
+    color: #777;
+
+    font-size: 12px;
+}
+
+.profile-dropdown-item {
+    width: 100%;
+
+    padding: 13px 15px;
+
+    display: block;
+
+    border: none;
+    border-radius: 0;
+
+    background: white;
+    color: #333;
+
+    text-align: left;
+
+    font-size: 14px;
+
+    cursor: pointer;
+}
+
+.logout-item {
+    margin-top: 2px;
+}
+
+        /* ================================
+           CONTAINER
+        ================================= */
+
+        .container {
+            max-width: 1100px;
+
+            margin: 30px auto;
+
+            padding: 0 20px;
+        }
+
+        /* ================================
+           WELCOME
+        ================================= */
+
+        .welcome {
+            background: white;
+
+            border: 1px solid #e2e8f0;
+
+            border-radius: 10px;
+
+            padding: 25px;
+
+            margin-bottom: 25px;
+
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .welcome h2 {
+            font-size: 20px;
+
+            color: #0f172a;
+
+            margin-bottom: 7px;
+        }
+
+        .welcome p {
+            color: #64748b;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+        }
+
+        /* ================================
+           SECTION
+        ================================= */
+
+        .section-title {
+            font-size: 18px;
+
+            color: #0f172a;
+
+            margin: 25px 0 14px;
+        }
+
+        /* ================================
+           CARDS
+        ================================= */
+
+        .cards {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+
+            gap: 18px;
+        }
+
+        .card {
+            background: white;
+
+            border: 1px solid #e2e8f0;
+
+            border-radius: 10px;
+
+            padding: 22px;
+
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+
+            display: flex;
+
+            flex-direction: column;
+
+            min-height: 210px;
+        }
+
+        .card h3 {
+            font-size: 17px;
+
+            color: #0f172a;
+
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: #64748b;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+
+            flex: 1;
+
+            margin-bottom: 20px;
+        }
+
+        /* ================================
+           BUTTON
+        ================================= */
+
+        .card button {
+            width: 100%;
+
+            padding: 10px 16px;
+
+            border: none;
+
+            border-radius: 6px;
+
+            background: #1976d2;
+
+            color: white;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+        .card button:focus {
+            outline: 2px solid #1976d2;
+
+            outline-offset: 2px;
+        }
+
+        /* ================================
+           MESSAGE
+        ================================= */
+
+        .message {
+            background: white;
+
+            border: 1px solid #e2e8f0;
+
+            border-radius: 8px;
+
+            padding: 18px;
+
+            color: #64748b;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+        }
+
+        .message.error {
+            background: #ffe5e5;
+
+            border-color: #ffcdd2;
+
+            color: #b00020;
+        }
+
+        /* ================================
+           MOBILE
+        ================================= */
+
+        @media (max-width: 850px) {
+
+            .cards {
+                grid-template-columns: 1fr 1fr;
+            }
+
+        }
+@media (max-width: 600px) {
+
+    .header {
+        padding: 15px 20px;
+
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .header h1 {
+        font-size: 21px;
+    }
+
+    .header-profile {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .header-profile-button {
+        min-width: 130px;
+    }
+
+    .header-profile-dropdown {
+        width: 210px;
+    }
+
+    .container {
+        margin: 20px auto;
+    }
+
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+    .welcome {
+        padding: 20px;
+    }
+
+    .card {
+        padding: 20px;
+    }
+
+}
+    </style>
+
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+</head>
+
+
+<body>
+
+
+    <!-- ================================
+         HEADER
+    ================================= -->
+
+    <div class="header">
+
+        <div class="header-title">
+
+            <h1>
+                VoteGuard
+            </h1>
+
+            <p>Election Commission</p>
+
+            <p id="institutionHeader">
+                Loading institution...
+            </p>
+
+        </div>
+
+
+        <!-- ================================
+             PROFILE MENU
+        ================================= -->
+
+        <!-- PROFILE -->
+
+<div class="header-profile">
+
+    <button
+        type="button"
+        id="profileBtn"
+        class="header-profile-button"
+        aria-expanded="false"
+        aria-controls="profileDropdown"
+    >
+
+        <span
+            class="header-avatar"
+            id="profileAvatar"
+        >
+            E
+        </span>
+
+        <span id="profileName">
+            Profile
+        </span>
+
+        <span class="header-arrow">
+            ▼
+        </span>
+
+    </button>
+
+
+    <div
+        id="profileDropdown"
+        class="header-profile-dropdown"
+        hidden
+    >
+
+        <div class="profile-dropdown-info">
+
+            <strong id="dropdownName">
+                Election Commission
+            </strong>
+
+           <span id="dropdownRole">
+                Election Commission
+            </span>
+
+        </div>
+
+
+        <button
+            type="button"
+            id="profileHomeBtn"
+            class="profile-dropdown-item"
+        >
+            My Profile
+        </button>
+
+
+        <button
+            type="button"
+            id="signOutBtn"
+            class="profile-dropdown-item logout-item"
+        >
+            Sign Out
+        </button>
+
+    </div>
+
+</div>
+
+    </div>
+
+
+    <!-- ================================
+         MAIN CONTAINER
+    ================================= -->
+
+    <div class="container">
+
+
+        <!-- ================================
+             WELCOME
+        ================================= -->
+
+        <div class="welcome">
+
+            <h2 id="welcomeTitle">
+                Your Tasks
+            </h2>
+
+            <p>
+                Use the options below for your assigned work.
+            </p>
+
+        </div>
+
+
+        <!-- ================================
+             DASHBOARD CONTENT
+        ================================= -->
+
+        <div id="dashboardContent">
+
+            <div class="message">
+                Loading your assigned functions...
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- ================================
+         JAVASCRIPT
+    ================================= -->
+
+    <script type="module">
+
+    /* =====================================================
+       IMPORTS
+    ===================================================== */
+
+    import {
+        auth,
+        db
+    } from "./js/firebase.js";
+
+    import {
+        onAuthStateChanged,
+        signOut
+    } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+    import {
+        doc,
+        getDoc
+    } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+
+    /* =====================================================
+       HTML ELEMENTS
+    ===================================================== */
+
+    const dashboardContent =
+        document.getElementById("dashboardContent");
+
+    const welcomeTitle =
+        document.getElementById("welcomeTitle");
+
+    const profileBtn =
+        document.getElementById("profileBtn");
+
+    const profileDropdown =
+        document.getElementById("profileDropdown");
+
+    const profileName =
+        document.getElementById("profileName");
+
+    const profileAvatar =
+        document.getElementById("profileAvatar");
+
+    const dropdownName =
+        document.getElementById("dropdownName");
+
+    const dropdownRole =
+        document.getElementById("dropdownRole");
+
+    const profileHomeBtn =
+        document.getElementById("profileHomeBtn");
+
+    const signOutBtn =
+        document.getElementById("signOutBtn");
+
+
+    /* =====================================================
+       EC FUNCTIONS
+    ===================================================== */
+
+    const functions = {
+
+        "Voter Management": {
+            section: "My Tasks",
+            title: "Voter List",
+            description:
+                "Add students who can vote. Check and finalise the list before voting.",
+            button: "Open Voter List",
+            page: "voter-management.html"
+        },
+
+        "Nomination & Candidate Management": {
+            section: "My Tasks",
+            title: "Nominations and Candidates",
+            description:
+                "Create the form, check student applications, and finalise candidates.",
+            button: "Open Nominations",
+            page: "nomination-candidate-management.html"
+        },
+
+        "Booth & Polling Staff Management": {
+            section: "My Tasks",
+            title: "Booths and Staff",
+            description:
+                "Create booths. Assign voters, Presiding Officers, and Assistant Presiding Officers.",
+            button: "Open Booths and Staff",
+            page: "booths-and-staff.html"
+        }
+
+    };
+
+
+    /* =====================================================
+       SHOW ERROR
+    ===================================================== */
+
+    function showDashboardError(message) {
+
+        dashboardContent.innerHTML = `
+            <div class="message error">
+                ${message}
+            </div>
+        `;
+
+    }
+
+
+    /* =====================================================
+       AUTHENTICATION
+    ===================================================== */
+
+    let authResolved = false;
+
+    onAuthStateChanged(
+        auth,
+        async function(user) {
+
+            authResolved = true;
+
+            console.log(
+                "EC Dashboard: Auth state resolved.",
+                user ? user.uid : "No user"
+            );
+
+
+            /* =========================================
+               NOT LOGGED IN
+            ========================================= */
+
+            if (!user) {
+
+                window.location.href =
+                    "login.html";
+
+                return;
+
+            }
+
+
+            try {
+
+                /* =========================================
+                   USERS PROFILE
+                ========================================= */
+
+                console.log(
+                    "EC Dashboard: Loading Users profile..."
+                );
+
+                const userRef =
+                    doc(
+                        db,
+                        "Users",
+                        user.uid
+                    );
+
+                const userSnapshot =
+                    await getDoc(userRef);
+
+
+                if (!userSnapshot.exists()) {
+
+                    showDashboardError(
+                        "Your user profile was not found."
+                    );
+
+                    return;
+
+                }
+
+
+                const userData =
+                    userSnapshot.data();
+
+
+                console.log(
+                    "EC Dashboard: Users profile loaded.",
+                    userData
+                );
+
+
+                /* =========================================
+                   ACCOUNT STATUS
+                ========================================= */
+
+                if (
+                    userData.status ===
+                    "disabled"
+                ) {
+
+                    alert(
+                        "Your account has been disabled."
+                    );
+
+                    await signOut(auth);
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+
+                }
+
+
+                /* =========================================
+                   ROLE CHECK
+                ========================================= */
+
+                if (
+                    userData.role !==
+                    "election_commission"
+                ) {
+
+                    alert(
+                        "Access denied. Election Commission access only."
+                    );
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+
+                }
+
+
+                /* =========================================
+                   ELECTION COMMISSION PROFILE
+                ========================================= */
+
+                console.log(
+                    "EC Dashboard: Loading Election Commission profile..."
+                );
+
+                const ecRef =
+                    doc(
+                        db,
+                        "ElectionCommission",
+                        user.uid
+                    );
+
+                const ecSnapshot =
+                    await getDoc(ecRef);
+
+
+                if (!ecSnapshot.exists()) {
+
+                    showDashboardError(
+                        "Your Election Commission account record was not found."
+                    );
+
+                    return;
+
+                }
+
+
+                const ecData =
+                    ecSnapshot.data();
+
+
+                console.log(
+                    "EC Dashboard: Election Commission profile loaded.",
+                    ecData
+                );
+
+
+                /* =========================================
+                   EC STATUS
+                ========================================= */
+
+                if (
+                    ecData.status ===
+                    "disabled"
+                ) {
+
+                    alert(
+                        "Your Election Commission account has been disabled."
+                    );
+
+                    await signOut(auth);
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+
+                }
+
+
+                /* =========================================
+                   NAME
+                ========================================= */
+
+                const name =
+                    ecData.name ||
+                    userData.name ||
+                    user.displayName ||
+                    user.email ||
+                    "Election Commission Member";
+/* =========================================
+   INSTITUTION INFORMATION
+========================================= */
+
+const institutionHeader =
+    document.getElementById("institutionHeader");
+
+const institutionRef =
+    doc(
+        db,
+        "Institutions",
+        "main"
+    );
+
+const institutionSnapshot =
+    await getDoc(institutionRef);
+
+let institutionName =
+    userData.collegeName ||
+    userData.institutionName ||
+    "Institutional Election Management System";
+
+if (institutionSnapshot.exists()) {
+
+    const institutionData =
+        institutionSnapshot.data();
+
+    institutionName =
+        institutionData.name ||
+        institutionName;
+
+}
+
+institutionHeader.textContent =
+    institutionName +
+    " — Institutional Election Management System";                               
+
+                /* =========================================
+                   PROFILE HEADER
+                ========================================= */
+
+                profileName.textContent =
+                    name;
+
+                profileAvatar.textContent =
+                    name.charAt(0).toUpperCase();
+
+                dropdownName.textContent =
+                    name;
+
+                dropdownRole.textContent =
+                    "Election Commission";
+
+
+                /* =========================================
+                   WELCOME
+                ========================================= */
+
+                welcomeTitle.textContent =
+                    "Welcome, " + name;
+
+
+                /* =========================================
+                   DUTIES
+                ========================================= */
+
+                const duties =
+                    Array.isArray(ecData.duties)
+                        ? ecData.duties
+                        : [];
+
+
+                console.log(
+                    "EC Dashboard: Assigned duties:",
+                    duties
+                );
+
+
+                renderDashboard(duties);
+
+
+            } catch (error) {
+
+                console.error(
+                    "Election Commission dashboard error:",
+                    error
+                );
+
+
+                showDashboardError(
+                    "Unable to load your Election Commission dashboard. Please check your account permissions and try again."
+                );
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       AUTH TIMEOUT
+       Prevents infinite loading screen
+    ===================================================== */
+
+    setTimeout(
+        function() {
+
+            if (!authResolved) {
+
+                console.error(
+                    "EC Dashboard: Firebase authentication did not resolve."
+                );
+
+                showDashboardError(
+                    "Unable to verify your login session. Please refresh the page and try again."
+                );
+
+            }
+
+        },
+        10000
+    );
+
+
+    /* =====================================================
+       RENDER DASHBOARD
+    ===================================================== */
+
+    function renderDashboard(duties) {
+
+        dashboardContent.innerHTML = "";
+
+
+        /* =========================================
+           NO DUTIES
+        ========================================= */
+
+        if (duties.length === 0) {
+
+            dashboardContent.innerHTML = `
+                <div class="message">
+                    No functions have been assigned to your account yet.
+                    Please contact the Principal.
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        /* =========================================
+           GROUP FUNCTIONS
+        ========================================= */
+
+        const sections = {};
+
+
+        duties.forEach(
+            function(duty) {
+
+                const functionData =
+                    functions[duty];
+
+
+                if (!functionData) {
+
+                    console.warn(
+                        "Unknown EC duty:",
+                        duty
+                    );
+
+                    return;
+
+                }
+
+
+                if (
+                    !sections[
+                        functionData.section
+                    ]
+                ) {
+
+                    sections[
+                        functionData.section
+                    ] = [];
+
+                }
+
+
+                sections[
+                    functionData.section
+                ].push(functionData);
+
+            }
+        );
+
+
+        /* =========================================
+           NO VALID FUNCTIONS
+        ========================================= */
+
+        if (
+            Object.keys(sections).length === 0
+        ) {
+
+            dashboardContent.innerHTML = `
+                <div class="message error">
+                    No valid functions have been assigned to your account.
+                    Please contact the Principal.
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        /* =========================================
+           CREATE SECTIONS
+        ========================================= */
+
+        Object.keys(sections).forEach(
+            function(sectionName) {
+
+                const sectionTitle =
+                    document.createElement("h2");
+
+                sectionTitle.className =
+                    "section-title";
+
+                sectionTitle.textContent =
+                    sectionName;
+
+                dashboardContent.appendChild(
+                    sectionTitle
+                );
+
+
+                const cards =
+                    document.createElement("div");
+
+                cards.className =
+                    "cards";
+
+
+                sections[sectionName].forEach(
+                    function(functionData) {
+
+                        const card =
+                            document.createElement("div");
+
+                        card.className =
+                            "card";
+
+
+                        const title =
+                            document.createElement("h3");
+
+                        title.textContent =
+                            functionData.title;
+
+
+                        const description =
+                            document.createElement("p");
+
+                        description.textContent =
+                            functionData.description;
+
+
+                        const button =
+                            document.createElement("button");
+
+                        button.type =
+                            "button";
+
+                        button.textContent =
+                            functionData.button;
+
+
+                        button.addEventListener(
+                            "click",
+                            function() {
+
+                                window.location.href =
+                                    functionData.page;
+
+                            }
+                        );
+
+
+                        card.appendChild(title);
+
+                        card.appendChild(description);
+
+                        card.appendChild(button);
+
+                        cards.appendChild(card);
+
+                    }
+                );
+
+
+                dashboardContent.appendChild(cards);
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+   PROFILE DROPDOWN
+===================================================== */
+
+profileBtn.addEventListener(
+    "click",
+    function(event) {
+
+        event.stopPropagation();
+
+        const isOpen =
+            !profileDropdown.hidden;
+
+        profileDropdown.hidden =
+            isOpen;
+
+        profileBtn.setAttribute(
+            "aria-expanded",
+            String(!isOpen)
+        );
+
+    }
+);
+
+
+/* =====================================================
+   CLOSE DROPDOWN WHEN CLICKING OUTSIDE
+===================================================== */
+
+document.addEventListener(
+    "click",
+    function(event) {
+
+        if (
+            !profileDropdown.contains(event.target) &&
+            !profileBtn.contains(event.target)
+        ) {
+
+            profileDropdown.hidden =
+                true;
+
+            profileBtn.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+        }
+
+    }
+);
+    /* =====================================================
+       MY PROFILE
+    ===================================================== */
+
+    profileHomeBtn.addEventListener(
+        "click",
+        function() {
+
+            profileDropdown.hidden =
+                true;
+
+            window.location.href =
+                "profile.html";
+
+        }
+    );
+
+
+    /* =====================================================
+       SIGN OUT
+    ===================================================== */
+
+    signOutBtn.addEventListener(
+        "click",
+        async function() {
+
+            signOutBtn.disabled = true;
+
+            try {
+
+                await signOut(auth);
+
+                window.location.href =
+                    "login.html";
+
+            } catch (error) {
+
+                console.error(
+                    "Sign out failed:",
+                    error
+                );
+
+                alert(
+                    "Unable to sign out. Please try again."
+                );
+
+                signOutBtn.disabled = false;
+
+            }
+
+        }
+    );
+
+</script>
+
+</body>
+
+</html>

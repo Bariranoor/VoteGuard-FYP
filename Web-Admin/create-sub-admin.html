@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>VoteGuard | Invite Sub-Admin</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+
+        body {
+            background: #f4f6f8;
+            color: #222;
+            min-height: 100vh;
+        }
+
+
+        /* ================================
+           HEADER
+        ================================= */
+
+        .header {
+            background: #1976d2;
+            color: white;
+            padding: 20px 30px;
+        }
+
+
+        .header h1 {
+            margin-bottom: 5px;
+        }
+
+
+        .header p {
+            opacity: 0.9;
+        }
+
+
+        /* ================================
+           CONTAINER
+        ================================= */
+
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #1976d2;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+
+        /* ================================
+           FORM CARD
+        ================================= */
+
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+
+            box-shadow:
+                0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+
+        .form-card h2 {
+            margin-bottom: 10px;
+        }
+
+
+        .description {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+
+        /* ================================
+           FORM
+        ================================= */
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+
+        .form-group label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            font-weight: bold;
+        }
+
+
+        .form-group input {
+            width: 100%;
+
+            padding: 12px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 6px;
+
+            font-size: 15px;
+        }
+
+
+        .form-group input:focus {
+            outline: none;
+
+            border-color: #1976d2;
+        }
+
+
+        .field-note {
+            margin-top: 6px;
+
+            color: #777;
+
+            font-size: 12px;
+
+            line-height: 1.4;
+        }
+
+
+        /* ================================
+           BUTTONS
+        ================================= */
+
+        .button-group {
+            display: flex;
+
+            gap: 10px;
+
+            margin-top: 25px;
+        }
+
+
+        button {
+            padding: 11px 18px;
+
+            border: none;
+
+            border-radius: 6px;
+
+            cursor: pointer;
+
+            font-size: 14px;
+        }
+
+
+        button:disabled {
+            cursor: not-allowed;
+
+            opacity: 0.7;
+        }
+
+
+        .invite-btn {
+            background: #1976d2;
+
+            color: white;
+        }
+
+
+        .invite-btn:hover {
+            background: #1565c0;
+        }
+
+
+        .cancel-btn {
+            background: #777;
+
+            color: white;
+        }
+
+
+        .cancel-btn:hover {
+            background: #666;
+        }
+
+
+        /* ================================
+           MESSAGE
+        ================================= */
+
+        #message {
+            margin-top: 20px;
+
+            padding: 12px;
+
+            border-radius: 6px;
+
+            display: none;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+        }
+
+
+        #message.success {
+            display: block;
+
+            background: #e5f7e5;
+
+            color: #146b14;
+
+            border: 1px solid #c8e6c9;
+        }
+
+
+        #message.error {
+            display: block;
+
+            background: #ffe5e5;
+
+            color: #b00020;
+
+            border: 1px solid #ffcdd2;
+        }
+
+
+        /* ================================
+           RESPONSIVE
+        ================================= */
+
+        @media (max-width: 600px) {
+
+            .container {
+                margin: 20px auto;
+            }
+
+
+            .form-card {
+                padding: 20px;
+            }
+
+
+            .button-group {
+                flex-direction: column;
+            }
+
+
+            .button-group button {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+
+        <link rel="stylesheet" href="assets/css/navigation.css?v=20260913-nav">
+</head>
+
+
+<body>
+
+
+    <!-- =================================
+         HEADER
+    ================================= -->
+
+    <div class="header">
+
+        <h1>
+            VoteGuard — Invite Sub-Admin
+        </h1>
+
+        <p>
+            Controlled Institutional Election Management System with Electronic Voting
+        </p>
+
+    </div>
+
+
+
+    <div class="container">
+
+
+        <!-- =================================
+             BACK
+        ================================= -->
+
+        <nav class="page-navigation" aria-label="Page navigation">
+            <a
+                href="principal-dashboard.html"
+                class="back-link back-dashboard-button"
+            >
+                Back to Dashboard
+            </a>
+        </nav>
+
+
+
+        <!-- =================================
+             FORM CARD
+        ================================= -->
+
+        <div class="form-card">
+
+
+            <h2>
+                Invite New Sub-Admin
+            </h2>
+
+
+           <p class="description">
+    Send an invitation to a new Sub-Admin.
+    They will set their own password after opening the email.
+</p>
+
+
+            <!-- =================================
+                 MESSAGE
+            ================================= -->
+
+            <div
+                id="message"
+            ></div>
+
+
+
+            <!-- =================================
+                 FORM
+            ================================= -->
+
+            <form
+                id="subAdminForm"
+            >
+
+
+                <!-- NAME -->
+
+                <div class="form-group">
+
+                    <label for="name">
+                        Full Name
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="name"
+                        placeholder="Enter full name"
+                        autocomplete="name"
+                        required
+                    >
+
+
+                    <p class="field-note">
+                        Enter the name of Sub-Admin.
+                    </p>
+
+                </div>
+
+
+
+                <!-- EMAIL -->
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email Address
+                    </label>
+
+
+                    <input
+                        type="email"
+                        id="email"
+                        placeholder="Enter email address"
+                        autocomplete="email"
+                        required
+                    >
+
+
+                    <p class="field-note">
+                        The invitation link will be sent to this email address.
+                    </p>
+
+                </div>
+
+
+
+                <!-- BUTTONS -->
+
+                <div class="button-group">
+
+
+                    <button
+                        type="submit"
+                        id="sendInvitationBtn"
+                        class="invite-btn"
+                    >
+                        Send Invitation
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="cancelBtn"
+                        class="cancel-btn"
+                    >
+                        Cancel
+                    </button>
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =================================
+         FIREBASE
+    ================================= -->
+
+    <script type="module">
+
+
+        /* =====================================================
+           FIREBASE IMPORTS
+        ===================================================== */
+
+        import {
+            initializeApp
+        }
+        from
+        "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+
+
+        import {
+            getAuth,
+            onAuthStateChanged
+        }
+        from
+        "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+
+        import {
+            getFirestore,
+            doc,
+            getDoc
+        }
+        from
+        "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+
+        import {
+            createInvitation
+        }
+        from
+        "./invitation-service.js";
+
+
+
+        /* =====================================================
+           FIREBASE CONFIGURATION
+        ===================================================== */
+
+       const firebaseConfig = {
+  apiKey: "AIzaSyDdYImwHeNlLbfJ-S1N4Tv3kDbaOtZVd9s",
+  authDomain: "voteguard-a6de3.firebaseapp.com",
+  projectId: "voteguard-a6de3",
+  storageBucket: "voteguard-a6de3.firebasestorage.app",
+  messagingSenderId: "97235064913",
+  appId: "1:97235064913:web:df10c7faf8149d53b88070"
+};
+
+
+
+        /* =====================================================
+           INITIALIZE FIREBASE
+        ===================================================== */
+
+        const app =
+            initializeApp(
+                firebaseConfig
+            );
+
+
+        const auth =
+            getAuth(
+                app
+            );
+
+
+        const db =
+            getFirestore(
+                app
+            );
+
+
+
+        /* =====================================================
+           ELEMENTS
+        ===================================================== */
+
+        const form =
+            document.getElementById(
+                "subAdminForm"
+            );
+
+
+        const nameInput =
+            document.getElementById(
+                "name"
+            );
+
+
+        const emailInput =
+            document.getElementById(
+                "email"
+            );
+
+
+        const sendInvitationBtn =
+            document.getElementById(
+                "sendInvitationBtn"
+            );
+
+
+        const cancelBtn =
+            document.getElementById(
+                "cancelBtn"
+            );
+
+
+        const messageBox =
+            document.getElementById(
+                "message"
+            );
+
+
+
+        /* =====================================================
+           CURRENT PRINCIPAL
+        ===================================================== */
+
+        let currentPrincipal =
+            null;
+
+
+
+        /* =====================================================
+           VERIFY LOGGED-IN PRINCIPAL
+        ===================================================== */
+
+        onAuthStateChanged(
+            auth,
+            async (user) => {
+
+                if (!user) {
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+
+                }
+
+
+                try {
+
+                    const userRef =
+                        doc(
+                            db,
+                            "Users",
+                            user.uid
+                        );
+
+
+                    const userSnapshot =
+                        await getDoc(
+                            userRef
+                        );
+
+
+                    if (
+                        !userSnapshot.exists()
+                    ) {
+
+                        alert(
+                            "Your user profile could not be found."
+                        );
+
+                        window.location.href =
+                            "login.html";
+
+                        return;
+
+                    }
+
+
+                    const userData =
+                        userSnapshot.data();
+
+
+                    if (
+                        userData.status ===
+                        "disabled"
+                    ) {
+
+                        alert(
+                            "Your account has been disabled."
+                        );
+
+                        window.location.href =
+                            "login.html";
+
+                        return;
+
+                    }
+
+
+                    if (
+                        userData.role !==
+                        "principal"
+                    ) {
+
+                        alert(
+                            "Access denied. Principal access only."
+                        );
+
+                        window.location.href =
+                            "login.html";
+
+                        return;
+
+                    }
+
+
+                    currentPrincipal =
+                        user;
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Principal verification error:",
+                        error
+                    );
+
+
+                    alert(
+                        "Unable to verify your account."
+                    );
+
+
+                    window.location.href =
+                        "login.html";
+
+                }
+
+            }
+        );
+
+
+
+        /* =====================================================
+           CANCEL
+        ===================================================== */
+
+        cancelBtn.addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "principal-dashboard.html";
+
+            }
+        );
+
+
+
+        /* =====================================================
+           SEND INVITATION
+        ===================================================== */
+
+        form.addEventListener(
+            "submit",
+            async (event) => {
+
+                event.preventDefault();
+
+
+                /* ---------------------------------------------
+                   MAKE SURE PRINCIPAL IS AUTHENTICATED
+                --------------------------------------------- */
+
+                if (!currentPrincipal) {
+
+                    showMessage(
+                        "Your session has expired. Please sign in again.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                /* ---------------------------------------------
+                   GET VALUES
+                --------------------------------------------- */
+
+                const name =
+                    nameInput.value.trim();
+
+
+                const email =
+                    emailInput.value
+                        .trim()
+                        .toLowerCase();
+
+
+
+                /* ---------------------------------------------
+                   VALIDATION
+                --------------------------------------------- */
+
+                if (!name) {
+
+                    showMessage(
+                        "Please enter the Sub-Admin's full name.",
+                        "error"
+                    );
+
+                    nameInput.focus();
+
+                    return;
+
+                }
+
+
+                if (!email) {
+
+                    showMessage(
+                        "Please enter the Sub-Admin's email address.",
+                        "error"
+                    );
+
+                    emailInput.focus();
+
+                    return;
+
+                }
+
+
+                /* ---------------------------------------------
+                   DISABLE BUTTON
+                --------------------------------------------- */
+
+                sendInvitationBtn.disabled =
+                    true;
+
+
+                sendInvitationBtn.textContent =
+                    "Sending Invitation...";
+
+
+                try {
+
+
+                    /* =========================================
+                       CREATE INVITATION
+                    ========================================= */
+
+                    const invitation =
+                        await createInvitation({
+
+                            db:
+                                db,
+
+                            auth:
+                                auth,
+
+                            name:
+                                name,
+
+                            email:
+                                email,
+
+                            role:
+                                "sub_admin",
+
+                            createdBy:
+                                currentPrincipal.uid
+
+                        });
+
+
+
+                    /* =========================================
+                       SUCCESS
+                    ========================================= */
+
+                    showMessage(
+                        "Invitation sent successfully to " +
+                        invitation.email +
+                        ".",
+                        "success"
+                    );
+
+
+                    form.reset();
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Send Sub-Admin invitation error:",
+                        error
+                    );
+
+
+                    /* -----------------------------------------
+                       FRIENDLY ERROR MESSAGES
+                    ----------------------------------------- */
+
+                    if (
+                        error.code ===
+                        "auth/invalid-email"
+                    ) {
+
+                        showMessage(
+                            "The email address is invalid. Please check it and try again.",
+                            "error"
+                        );
+
+                    }
+
+                    else if (
+                        error.code ===
+                        "auth/quota-exceeded"
+                    ) {
+
+                        showMessage(
+                            "The Firebase email-link sending limit has been reached. Please try again later.",
+                            "error"
+                        );
+
+                    }
+
+                    else if (
+                        error.code ===
+                        "auth/network-request-failed"
+                    ) {
+
+                        showMessage(
+                            "Network error. Check your internet connection and try again.",
+                            "error"
+                        );
+
+                    }
+
+                    else if (
+                        error.code ===
+                        "permission-denied"
+                    ) {
+
+                        showMessage(
+                            "Permission denied while creating the invitation. Check your Firestore rules.",
+                            "error"
+                        );
+
+                    }
+
+                    else {
+
+                        showMessage(
+                            error.message ||
+                            "Unable to send the invitation. Please try again.",
+                            "error"
+                        );
+
+                    }
+
+
+                } finally {
+
+                    sendInvitationBtn.disabled =
+                        false;
+
+
+                    sendInvitationBtn.textContent =
+                        "Send Invitation";
+
+                }
+
+            }
+        );
+
+
+
+        /* =====================================================
+           MESSAGE
+        ===================================================== */
+
+        function showMessage(
+            text,
+            type
+        ) {
+
+            messageBox.textContent =
+                text;
+
+
+            messageBox.className =
+                type;
+
+
+            messageBox.style.display =
+                "block";
+
+        }
+
+    </script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,5718 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        VoteGuard | Booth Dashboard
+    </title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            font-family:
+                Arial,
+                sans-serif;
+
+            background:
+                #f4f6f8;
+
+            color:
+                #1f2937;
+
+        }
+
+
+        button,
+        input {
+
+            font:
+                inherit;
+
+        }
+
+
+        /* ==========================================
+           TOP BAR
+        ========================================== */
+
+        .topbar {
+
+            min-height:
+                64px;
+
+            padding:
+                0 24px;
+
+            background:
+                #ffffff;
+
+            border-bottom:
+                1px solid #dfe3e8;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            gap:
+                16px;
+
+        }
+
+
+        .brand {
+
+            font-size:
+                18px;
+
+            font-weight:
+                700;
+
+            color:
+                #1565c0;
+
+        }
+
+
+        .top-actions {
+
+            display:
+                flex;
+
+            gap:
+                8px;
+
+        }
+
+
+        /* ==========================================
+           BUTTONS
+        ========================================== */
+
+        .btn {
+
+            border:
+                none;
+
+            border-radius:
+                6px;
+
+            padding:
+                9px 14px;
+
+            cursor:
+                pointer;
+
+            font-size:
+                13px;
+
+            font-weight:
+                600;
+
+        }
+
+
+        .btn-primary {
+
+            background:
+                #1565c0;
+
+            color:
+                #ffffff;
+
+        }
+
+
+        .btn-primary:hover {
+
+            background:
+                #0d55a7;
+
+        }
+
+
+        .btn-secondary {
+
+            background:
+                #ffffff;
+
+            color:
+                #374151;
+
+            border:
+                1px solid #cfd5dc;
+
+        }
+
+
+        .btn-danger {
+
+            background:
+                #ffffff;
+
+            color:
+                #b42318;
+
+            border:
+                1px solid #f0b7b1;
+
+        }
+
+
+        .btn:disabled {
+
+            opacity:
+                0.55;
+
+            cursor:
+                not-allowed;
+
+        }
+
+
+        /* ==========================================
+           MAIN LAYOUT
+        ========================================== */
+
+        .container {
+
+            max-width:
+                1180px;
+
+            margin:
+                0 auto;
+
+            padding:
+                28px 20px 40px;
+
+        }
+
+
+        /* ==========================================
+           HERO
+        ========================================== */
+
+        .hero {
+
+            background:
+                #ffffff;
+
+            border:
+                1px solid #dfe3e8;
+
+            border-radius:
+                10px;
+
+            padding:
+                22px;
+
+            margin-bottom:
+                18px;
+
+            display:
+                flex;
+
+            justify-content:
+                space-between;
+
+            align-items:
+                flex-start;
+
+            gap:
+                18px;
+
+            flex-wrap:
+                wrap;
+
+        }
+
+
+        .hero h1 {
+
+            margin:
+                0 0 8px;
+
+            font-size:
+                26px;
+
+        }
+
+
+        .hero p {
+
+            margin:
+                0;
+
+            color:
+                #667085;
+
+            line-height:
+                1.55;
+
+            font-size:
+                14px;
+
+        }
+
+
+        .identity {
+
+            min-width:
+                250px;
+
+            padding:
+                12px 14px;
+
+            border:
+                1px solid #e1e6eb;
+
+            border-radius:
+                7px;
+
+            background:
+                #f8fafc;
+
+            font-size:
+                13px;
+
+            line-height:
+                1.6;
+
+        }
+
+
+        .identity strong {
+
+            font-size:
+                14px;
+
+        }
+
+
+        /* ==========================================
+           MESSAGE
+        ========================================== */
+
+        .message {
+
+            display:
+                none;
+
+            margin-bottom:
+                16px;
+
+            padding:
+                12px 14px;
+
+            border-radius:
+                6px;
+
+            font-size:
+                14px;
+
+            line-height:
+                1.45;
+
+        }
+
+
+        .message.info {
+
+            display:
+                block;
+
+            color:
+                #175cd3;
+
+            background:
+                #eff8ff;
+
+            border:
+                1px solid #b2ddff;
+
+        }
+
+
+        .message.success {
+
+            display:
+                block;
+
+            color:
+                #067647;
+
+            background:
+                #ecfdf3;
+
+            border:
+                1px solid #abefc6;
+
+        }
+
+
+        .message.error {
+
+            display:
+                block;
+
+            color:
+                #b42318;
+
+            background:
+                #fef3f2;
+
+            border:
+                1px solid #fecdca;
+
+        }
+
+
+        /* ==========================================
+           SUMMARY
+        ========================================== */
+
+        .summary-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(
+                    4,
+                    minmax(0, 1fr)
+                );
+
+            gap:
+                14px;
+
+            margin-bottom:
+                18px;
+
+        }
+
+
+        .summary-card {
+
+            background:
+                #ffffff;
+
+            border:
+                1px solid #dfe3e8;
+
+            border-radius:
+                9px;
+
+            padding:
+                18px;
+
+        }
+
+
+        .summary-label {
+
+            color:
+                #667085;
+
+            font-size:
+                13px;
+
+            margin-bottom:
+                7px;
+
+        }
+
+
+        .summary-value {
+
+            font-size:
+                28px;
+
+            font-weight:
+                700;
+
+            color:
+                #1565c0;
+
+        }
+
+
+        /* ==========================================
+           SECTION
+        ========================================== */
+
+        .section {
+
+            background:
+                #ffffff;
+
+            border:
+                1px solid #dfe3e8;
+
+            border-radius:
+                10px;
+
+            overflow:
+                hidden;
+
+        }
+
+
+        .section-header {
+
+            padding:
+                17px 20px;
+
+            border-bottom:
+                1px solid #e5e7eb;
+
+        }
+
+
+        .section-header h2 {
+
+            margin:
+                0 0 5px;
+
+            font-size:
+                18px;
+
+        }
+
+
+        .section-header p {
+
+            margin:
+                0;
+
+            color:
+                #667085;
+
+            font-size:
+                13px;
+
+            line-height:
+                1.5;
+
+        }
+
+
+        /* ==========================================
+           BOOTH CARDS
+        ========================================== */
+
+        .booth-grid {
+
+            padding:
+                18px;
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(
+                    2,
+                    minmax(0, 1fr)
+                );
+
+            gap:
+                15px;
+
+        }
+
+
+        .booth-card {
+
+            border:
+                1px solid #dfe3e8;
+
+            border-radius:
+                8px;
+
+            padding:
+                18px;
+
+        }
+
+
+        .booth-head {
+
+            display:
+                flex;
+
+            justify-content:
+                space-between;
+
+            align-items:
+                flex-start;
+
+            gap:
+                12px;
+
+        }
+
+
+        .booth-head h3 {
+
+            margin:
+                0 0 5px;
+
+            font-size:
+                18px;
+
+        }
+
+
+        .muted {
+
+            color:
+                #667085;
+
+            font-size:
+                13px;
+
+        }
+
+
+        /* ==========================================
+           STATUS
+        ========================================== */
+
+        .status {
+
+            display:
+                inline-block;
+
+            padding:
+                5px 9px;
+
+            border-radius:
+                999px;
+
+            font-size:
+                11px;
+
+            font-weight:
+                700;
+
+            white-space:
+                nowrap;
+
+        }
+
+
+        .status-finalized {
+
+            color:
+                #854a0e;
+
+            background:
+                #fffaeb;
+
+        }
+
+
+        .status-voting_active {
+
+            color:
+                #067647;
+
+            background:
+                #ecfdf3;
+
+        }
+
+
+        .status-voting_stopped {
+
+            color:
+                #b54708;
+
+            background:
+                #fff6ed;
+
+        }
+
+
+        .status-closed {
+
+            color:
+                #475467;
+
+            background:
+                #f2f4f7;
+
+        }
+
+
+        /* ==========================================
+           DETAILS
+        ========================================== */
+
+        .detail-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap:
+                10px;
+
+            margin:
+                15px 0;
+
+        }
+
+
+        .detail {
+
+            padding:
+                10px;
+
+            border:
+                1px solid #edf0f2;
+
+            background:
+                #f8fafc;
+
+            border-radius:
+                6px;
+
+        }
+
+
+        .detail-label {
+
+            color:
+                #667085;
+
+            font-size:
+                11px;
+
+            margin-bottom:
+                4px;
+
+        }
+
+
+        .detail-value {
+
+            font-size:
+                13px;
+
+            font-weight:
+                600;
+
+            word-break:
+                break-word;
+
+        }
+
+
+        /* ==========================================
+           EMPTY STATE
+        ========================================== */
+
+        .empty {
+
+            padding:
+                36px 20px;
+
+            text-align:
+                center;
+
+            color:
+                #667085;
+
+            font-size:
+                14px;
+
+        }
+
+
+        .notice {
+
+            margin:
+                0 18px 18px;
+
+            padding:
+                12px 14px;
+
+            background:
+                #f8fafc;
+
+            border:
+                1px solid #e4e7ec;
+
+            border-radius:
+                6px;
+
+            color:
+                #475467;
+
+            font-size:
+                13px;
+
+            line-height:
+                1.5;
+
+        }
+
+
+        /* ==========================================
+           MODAL
+        ========================================== */
+
+        .modal {
+
+            display:
+                none;
+
+            position:
+                fixed;
+
+            inset:
+                0;
+
+            z-index:
+                1000;
+
+            background:
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.45
+                );
+
+            padding:
+                20px;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+        }
+
+
+        .modal.show {
+
+            display:
+                flex;
+
+        }
+
+
+        .modal-card {
+
+            width:
+                100%;
+
+            max-width:
+                980px;
+
+            max-height:
+                90vh;
+
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
+            background:
+                #ffffff;
+
+            border-radius:
+                10px;
+
+            overflow:
+                hidden;
+
+        }
+
+
+        .modal-header {
+
+            padding:
+                17px 20px;
+
+            border-bottom:
+                1px solid #e5e7eb;
+
+            display:
+                flex;
+
+            justify-content:
+                space-between;
+
+            align-items:
+                flex-start;
+
+            gap:
+                12px;
+
+        }
+
+
+        .modal-header h2 {
+
+            margin:
+                0 0 4px;
+
+            font-size:
+                19px;
+
+        }
+
+
+        .close-btn {
+
+            border:
+                none;
+
+            background:
+                transparent;
+
+            font-size:
+                25px;
+
+            cursor:
+                pointer;
+
+            color:
+                #667085;
+
+        }
+
+
+        .modal-body {
+
+            padding:
+                18px 20px;
+
+            overflow:
+                auto;
+
+        }
+
+
+        /* ==========================================
+           SEARCH
+        ========================================== */
+
+        .search-row {
+
+            display:
+                flex;
+
+            gap:
+                10px;
+
+            align-items:
+                center;
+
+            flex-wrap:
+                wrap;
+
+            margin-bottom:
+                14px;
+
+        }
+
+
+        .search-row input {
+
+            flex:
+                1;
+
+            min-width:
+                240px;
+
+            border:
+                1px solid #cfd5dc;
+
+            border-radius:
+                6px;
+
+            padding:
+                10px 12px;
+
+        }
+
+
+        /* ==========================================
+           TABLE
+        ========================================== */
+
+        .table-wrap {
+
+            overflow:
+                auto;
+
+            border:
+                1px solid #dfe3e8;
+
+            border-radius:
+                7px;
+
+        }
+
+
+        table {
+
+            width:
+                100%;
+
+            min-width:
+                940px;
+
+            border-collapse:
+                collapse;
+
+        }
+
+
+        th,
+        td {
+
+            padding:
+                11px 12px;
+
+            border-bottom:
+                1px solid #edf0f2;
+
+            text-align:
+                left;
+
+            font-size:
+                13px;
+
+            white-space:
+                nowrap;
+
+        }
+
+
+        th {
+
+            background:
+                #f8fafc;
+
+            color:
+                #475467;
+
+        }
+
+
+        tr:last-child td {
+
+            border-bottom:
+                none;
+
+        }
+
+
+
+        /* ==========================================
+           BOOTH ACTIONS / DEVICE PAIRING
+        ========================================== */
+
+        .booth-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .pairing-modal-card {
+            max-width: 520px;
+        }
+
+        .pairing-code-box {
+            margin: 20px 0;
+            padding: 22px;
+            border: 1px solid #dfe3e8;
+            border-radius: 8px;
+            background: #f8fafc;
+            text-align: center;
+        }
+
+        .pairing-code-label {
+            color: #667085;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .pairing-code {
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: 5px;
+            color: #1565c0;
+        }
+
+        .pairing-instructions {
+            color: #475467;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .action-note {
+            color: #667085;
+            font-size: 12px;
+        }
+
+        @media (max-width: 1100px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        /* ==========================================
+           MOBILE
+        ========================================== */
+
+        @media (
+            max-width:
+                800px
+        ) {
+
+            .summary-grid,
+            .booth-grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .detail-grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .topbar {
+
+                padding:
+                    10px 14px;
+
+            }
+
+
+            .container {
+
+                padding:
+                    18px 12px 30px;
+
+            }
+
+        }
+
+        .header-title p {
+            margin: 0 0 4px;
+        }
+
+        .header-title #institutionHeader {
+            color: #d9e6f2 !important;
+        }
+
+        .page-tools {
+            display: flex;
+            justify-content: flex-end;
+            margin: 0 0 16px;
+        }
+
+        /* Match the Principal dashboard shell: one static institutional header,
+           a compact profile control, and no repeated staff identity panel. */
+        body.presiding-dashboard {
+            background: #f5f7fa;
+        }
+
+        body.presiding-dashboard .header.polling-dashboard-header {
+            align-items: center;
+            background: #173a5e !important;
+            border: 0;
+            color: #ffffff;
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+            min-height: 0;
+            padding: 20px 30px;
+        }
+
+        body.presiding-dashboard .header-title {
+            flex: 1;
+            min-width: 0;
+        }
+
+        body.presiding-dashboard .header-title h1 {
+            color: #ffffff !important;
+            font-size: 1.55rem;
+            line-height: 1.2;
+            margin: 0 0 5px;
+        }
+
+        body.presiding-dashboard .header-title p {
+            color: #edf3f8 !important;
+            font-size: .84rem;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        body.presiding-dashboard #institutionHeader {
+            color: #ffffff !important;
+            font-size: .84rem;
+            font-weight: 700;
+            margin-top: 3px;
+        }
+
+        body.presiding-dashboard .header-profile {
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        body.presiding-dashboard .header-profile-button {
+            align-items: center;
+            background: #244d77 !important;
+            border: 1px solid #497295 !important;
+            border-radius: 7px !important;
+            color: #ffffff !important;
+            display: inline-flex;
+            gap: 8px;
+            justify-content: center;
+            min-height: 0;
+            padding: 7px 10px !important;
+        }
+
+        body.presiding-dashboard .header-profile-button:hover {
+            background: #244d77 !important;
+            color: #ffffff !important;
+        }
+
+        body.presiding-dashboard .header-avatar {
+            align-items: center;
+            background: #ffffff !important;
+            border-radius: 50%;
+            color: #173a5e !important;
+            display: inline-flex;
+            font-size: .82rem;
+            font-weight: 700;
+            height: 28px;
+            justify-content: center;
+            width: 28px;
+        }
+
+        body.presiding-dashboard .header-profile-dropdown {
+            background: #ffffff;
+            border: 1px solid #cedbe7 !important;
+            border-radius: 8px !important;
+            box-shadow: none !important;
+            color: #1f2937;
+            right: 0;
+            top: calc(100% + 10px);
+            width: 230px;
+        }
+
+        body.presiding-dashboard .container {
+            max-width: 1200px;
+            padding: 30px;
+        }
+
+        body.presiding-dashboard .hero {
+            background: #ffffff;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            box-shadow: none;
+            display: block;
+            margin-bottom: 20px;
+            padding: 24px;
+        }
+
+        body.presiding-dashboard .hero h1 {
+            color: #173a5e;
+            font-size: 1.35rem;
+            margin: 0 0 8px;
+        }
+
+        body.presiding-dashboard .hero p {
+            color: #526579;
+            line-height: 1.5;
+            margin: 0;
+            max-width: 760px;
+        }
+
+        @media (max-width: 760px) {
+            body.presiding-dashboard .header.polling-dashboard-header {
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 18px 20px;
+            }
+
+            body.presiding-dashboard .header-profile {
+                align-self: flex-end;
+            }
+
+            body.presiding-dashboard .container {
+                padding: 20px;
+            }
+        }
+
+    </style>
+
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+</head>
+
+
+<body class="presiding-dashboard">
+
+
+<!-- ==========================================
+     TOP BAR
+========================================== -->
+
+<header class="header polling-dashboard-header">
+
+    <div class="header-title">
+        <h1 id="brandText">VoteGuard</h1>
+        <p>Controlled Institutional Election Management System with Electronic Voting</p>
+        <p id="institutionHeader">Loading institution...</p>
+    </div>
+
+    <div class="header-profile">
+            <button
+                class="header-profile-button"
+                id="profileBtn"
+                type="button"
+                aria-controls="profileDropdown"
+                aria-expanded="false"
+            >
+                <span class="header-avatar" id="profileAvatar">P</span>
+                <span id="profileName">Profile</span>
+                <span class="header-arrow">▼</span>
+            </button>
+
+            <div id="profileDropdown" class="header-profile-dropdown" hidden>
+                <div class="profile-dropdown-info">
+                    <strong id="dropdownName">Loading...</strong>
+                    <span id="dropdownRole">Polling Staff</span>
+                </div>
+                <button type="button" id="profileHomeBtn" class="profile-dropdown-item">My Profile</button>
+                <button type="button" id="logoutBtn" class="profile-dropdown-item logout-item">Sign Out</button>
+            </div>
+    </div>
+
+</header>
+
+
+<!-- ==========================================
+     MAIN
+========================================== -->
+
+<main class="container">
+
+
+    <div
+        id="message"
+        class="message"
+    ></div>
+
+
+    <!-- ======================================
+         USER HEADER
+    ======================================= -->
+
+    <section class="hero">
+
+        <div>
+
+            <h1 id="pageTitle">
+                Booth Dashboard
+            </h1>
+
+            <p>
+                Check your assigned booth and students. Only the Presiding
+                Officer can open a student's ballot during active voting.
+            </p>
+
+        </div>
+
+
+    </section>
+
+    <div class="page-tools">
+        <button class="btn btn-secondary" id="refreshBtn" type="button">Refresh</button>
+    </div>
+
+
+    <!-- ======================================
+         SUMMARY
+    ======================================= -->
+
+    <section class="summary-grid">
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                My Booths
+            </div>
+
+            <div
+                class="summary-value"
+                id="assignedBoothCount"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Voting Completed
+            </div>
+
+            <div
+                class="summary-value"
+                id="votedVoterCount"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Assigned Students
+            </div>
+
+            <div
+                class="summary-value"
+                id="assignedVoterCount"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Booths With Voting Active
+            </div>
+
+            <div
+                class="summary-value"
+                id="activeBoothCount"
+            >
+                0
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- ======================================
+         ASSIGNED BOOTHS
+    ======================================= -->
+
+    <section class="section">
+
+
+        <div class="section-header">
+
+            <h2>
+                My Booths
+            </h2>
+
+            <p>
+                Only booths assigned to your account are shown here.
+            </p>
+
+        </div>
+
+
+        <div
+            id="boothGrid"
+            class="booth-grid"
+        ></div>
+
+
+        <div
+            id="emptyState"
+            class="empty"
+        >
+            Loading your booth assignments...
+        </div>
+
+    </section>
+
+
+</main>
+
+
+<!-- ==========================================
+     VOTER LIST MODAL
+========================================== -->
+
+<div
+    class="modal"
+    id="voterModal"
+    aria-hidden="true"
+>
+
+    <div class="modal-card">
+
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2 id="voterModalTitle">
+                    Assigned Students
+                </h2>
+
+                <div
+                    class="muted"
+                    id="voterModalSubtitle"
+                ></div>
+
+            </div>
+
+
+            <button
+                class="close-btn"
+                id="closeVoterModalBtn"
+                type="button"
+                aria-label="Close"
+            >
+                &times;
+            </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+
+    <div
+        id="voterModalMessage"
+        class="message"
+    ></div>
+
+
+    <div class="search-row">
+
+                <input
+                    id="voterSearch"
+                    type="search"
+                    placeholder="Search name, roll number, class or section"
+                >
+
+
+                <span
+                    class="muted"
+                    id="voterResultCount"
+                ></span>
+
+            </div>
+
+
+            <div
+                class="table-wrap"
+                id="voterTableWrap"
+            >
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Name
+                            </th>
+
+                            <th>
+                                Roll Number
+                            </th>
+
+                            <th>
+                                Class
+                            </th>
+
+                            <th>
+                                Section
+                            </th>
+
+                            <th>
+                                Voting Status
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="voterTableBody">
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <div
+                id="voterEmpty"
+                class="empty"
+                style="display:none;"
+            >
+                No students found.
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+<!-- ==========================================
+     VOTING DEVICE PAIRING MODAL
+========================================== -->
+
+<div
+    class="modal"
+    id="pairingModal"
+    aria-hidden="true"
+>
+
+    <div class="modal-card pairing-modal-card">
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2>
+                    Connect Voting Device
+                </h2>
+
+                <div
+                    class="muted"
+                    id="pairingModalSubtitle"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <button
+                class="close-btn"
+                id="closePairingModalBtn"
+                type="button"
+                aria-label="Close"
+            >
+                &times;
+            </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+            <div class="pairing-instructions">
+
+                Open the VoteGuard Android app on the designated
+                voting device.
+
+                <br><br>
+
+                Enter the pairing code shown below in the app.
+
+            </div>
+
+
+            <div class="pairing-code-box">
+
+                <div class="pairing-code-label">
+                    PAIRING CODE
+                </div>
+
+                <div
+                    class="pairing-code"
+                    id="pairingCodeValue"
+                >
+                    --------
+                </div>
+
+            </div>
+
+
+            <div
+                class="message info"
+                id="pairingStatus"
+            >
+                Generating secure pairing code...
+            </div>
+
+
+            <div class="pairing-instructions">
+
+                This code works for about five minutes and one device only.
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ==========================================
+     JAVASCRIPT
+========================================== -->
+
+<script type="module">
+
+
+/* ==========================================
+   SHARED FIREBASE
+========================================== */
+
+import {
+    auth,
+    db
+} from "./js/firebase.js";
+
+
+/* ==========================================
+   FIREBASE AUTH
+========================================== */
+
+import {
+
+    onAuthStateChanged,
+    signOut
+
+} from
+"https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+
+/* ==========================================
+   FIRESTORE
+========================================== */
+
+import {
+
+    collection,
+    query,
+    where,
+    getDocs,
+    getCountFromServer,
+    doc,
+    getDoc,
+    setDoc,
+    serverTimestamp,
+    Timestamp,
+    runTransaction,
+    onSnapshot
+} from
+"https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+
+/* ==========================================
+   DOM HELPER
+========================================== */
+
+const $ =
+    (id) =>
+        document.getElementById(
+            id
+        );
+
+
+/* ==========================================
+   STATE
+========================================== */
+
+let currentUser =
+    null;
+
+
+let currentUserData =
+    null;
+
+
+let assignedBooths =
+    [];
+
+
+let currentModalItem =
+    null;
+
+
+let currentModalVoters =
+    [];
+
+
+let stopAssignedVotersListener =
+    null;
+
+
+let initializationStarted =
+    false;
+const SESSION_MINUTES =
+    5;
+let expiredSessionCleanupTimer =
+    null;
+
+/* ==========================================
+   HTML ESCAPING
+========================================== */
+
+function escapeHtml(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+/* ==========================================
+   NORMALIZE TEXT
+========================================== */
+
+function normalize(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+        .trim()
+        .toLowerCase();
+
+}
+
+
+/* ==========================================
+   NATURAL SORTING
+========================================== */
+
+function naturalCompare(
+    a,
+    b
+) {
+
+    return String(
+        a ?? ""
+    )
+        .localeCompare(
+
+            String(
+                b ?? ""
+            ),
+
+            undefined,
+
+            {
+                numeric:
+                    true,
+
+                sensitivity:
+                    "base"
+            }
+
+        );
+
+}
+
+
+/* ==========================================
+   ROLE LABEL
+========================================== */
+
+function roleLabel(
+    role
+) {
+
+    if (
+        role ===
+        "presiding_officer"
+    ) {
+
+        return "Presiding Officer";
+
+    }
+
+
+    if (
+        role ===
+        "assistant_presiding_officer"
+    ) {
+
+        return "Assistant Presiding Officer";
+
+    }
+
+
+    return "Polling Officer";
+
+}
+
+
+/* ==========================================
+   ELECTION STATUS LABEL
+========================================== */
+
+function electionStatusLabel(
+    status
+) {
+
+    const labels = {
+
+        finalized:
+            "Preparation",
+
+        voting_active:
+            "Voting Active",
+
+        voting_stopped:
+            "Voting Stopped",
+
+        closed:
+            "Closed"
+
+    };
+
+
+    return (
+        labels[
+            status
+        ]
+
+        ||
+
+        "Unknown"
+    );
+
+}
+
+
+/* ==========================================
+   STATUS CSS
+========================================== */
+
+function electionStatusClass(
+    status
+) {
+
+    if (
+        [
+            "finalized",
+            "voting_active",
+            "voting_stopped",
+            "closed"
+        ]
+        .includes(
+            status
+        )
+    ) {
+
+        return `status-${status}`;
+
+    }
+
+
+    return "status-closed";
+
+}
+
+
+/* ==========================================
+   MESSAGE
+========================================== */
+
+function showMessage(
+    type,
+    text
+) {
+
+    const box =
+        $("message");
+
+
+    box.textContent =
+        text;
+
+
+    box.className =
+        `message ${type}`;
+
+}
+
+
+/* ==========================================
+   CLEAR MESSAGE
+========================================== */
+
+function clearMessage() {
+
+    const box =
+        $("message");
+
+
+    box.textContent =
+        "";
+
+
+    box.className =
+        "message";
+
+}
+
+
+/* ==========================================
+   ACCESS CHECK
+========================================== */
+
+async function checkAccess(
+    user
+) {
+
+
+    /*
+     * No Firebase user.
+     */
+
+    if (
+        !user
+    ) {
+
+        window.location.href =
+            "login.html";
+
+
+        return false;
+
+    }
+
+
+    /*
+     * Load this user's own
+     * application profile.
+     */
+
+    const userSnap =
+        await getDoc(
+
+            doc(
+                db,
+                "Users",
+                user.uid
+            )
+
+        );
+
+
+    if (
+        !userSnap.exists()
+    ) {
+
+        showMessage(
+
+            "error",
+
+            "Your application user profile was not found."
+
+        );
+
+
+        return false;
+
+    }
+
+
+    const data =
+        userSnap.data();
+
+
+    /*
+     * Only these two roles are
+     * allowed on this dashboard.
+     */
+
+    const validRole =
+
+        [
+            "presiding_officer",
+            "assistant_presiding_officer"
+        ]
+        .includes(
+            data.role
+        );
+
+
+    /*
+     * Account must also be active.
+     */
+
+    if (
+        data.status !==
+            "active"
+
+        ||
+
+        !validRole
+    ) {
+
+        showMessage(
+
+            "error",
+
+            "This page is available only to active Presiding Officer or Assistant Presiding Officer accounts."
+
+        );
+
+
+        return false;
+
+    }
+
+
+    /*
+     * Save authenticated user state.
+     */
+
+    currentUser =
+        user;
+
+
+    currentUserData =
+        data;
+
+
+    /*
+     * Display identity.
+     */
+
+    const label =
+        roleLabel(
+            data.role
+        );
+
+
+    $("brandText")
+        .textContent =
+        "VoteGuard";
+
+
+    $("pageTitle")
+        .textContent =
+        `${label} Dashboard`;
+
+
+    $("profileName")
+        .textContent =
+        data.name
+        ||
+        user.displayName
+        ||
+        label;
+
+    $("profileAvatar")
+        .textContent =
+        (data.name || user.displayName || label)
+            .charAt(0)
+            .toUpperCase();
+
+    $("dropdownName")
+        .textContent =
+        data.name
+        ||
+        user.displayName
+        ||
+        label;
+
+    $("dropdownRole")
+        .textContent =
+        label;
+
+    await loadInstitutionHeader();
+
+
+    return true;
+
+}
+
+
+async function loadInstitutionHeader() {
+
+    let institutionName =
+        currentUserData?.collegeName
+        || currentUserData?.institutionName
+        || "Institution";
+
+    try {
+
+        const institutionSnapshot =
+            await getDoc(
+                doc(db, "Institutions", "main")
+            );
+
+        if (institutionSnapshot.exists()) {
+
+            institutionName =
+                institutionSnapshot.data().name
+                || institutionName;
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Institution header load failed",
+            error
+        );
+
+    }
+
+    $("institutionHeader")
+        .textContent =
+        `${institutionName} — Institutional Election Management System`;
+
+}
+
+
+/* ==========================================
+   LOAD ASSIGNED BOOTHS
+========================================== */
+
+async function loadAssignedBooths() {
+
+
+    clearMessage();
+
+
+    $("boothGrid")
+        .innerHTML =
+        "";
+
+
+    $("emptyState")
+        .style.display =
+        "block";
+
+
+    $("emptyState")
+        .textContent =
+        "Loading your booth assignments...";
+
+
+    /*
+     * PO is matched against poUid.
+     *
+     * APO is matched against apoUid.
+     */
+
+    const assignmentField =
+
+        currentUserData.role ===
+        "presiding_officer"
+
+            ?
+
+            "poUid"
+
+            :
+
+            "apoUid";
+
+
+    /*
+     * Query ONLY the current user's
+     * BoothStaff assignments.
+     */
+
+    const assignmentSnap =
+        await getDocs(
+
+            query(
+
+                collection(
+                    db,
+                    "BoothStaff"
+                ),
+
+                where(
+                    assignmentField,
+                    "==",
+                    currentUser.uid
+                )
+
+            )
+
+        );
+
+
+    const assignments =
+
+        assignmentSnap.docs.map(
+
+            (snap) => ({
+
+                id:
+                    snap.id,
+
+                ...snap.data()
+
+            })
+
+        );
+
+
+    /*
+     * Load each assigned booth.
+     */
+
+    const loaded =
+        await Promise.all(
+
+            assignments.map(
+
+                async (
+                    assignment
+                ) => {
+
+
+                    if (
+                        !assignment.boothId
+
+                        ||
+
+                        !assignment.electionId
+                    ) {
+
+                        return null;
+
+                    }
+
+
+                    try {
+
+
+                        /*
+                         * Count only eligible voters
+                         * belonging to the exact booth
+                         * and exact election.
+                         */
+
+                        const voterQuery =
+                            query(
+
+                                collection(
+                                    db,
+                                    "Voters"
+                                ),
+
+                                where(
+                                    "boothId",
+                                    "==",
+                                    assignment.boothId
+                                ),
+
+                                where(
+                                    "electionId",
+                                    "==",
+                                    assignment.electionId
+                                ),
+
+                                where(
+                                    "eligible",
+                                    "==",
+                                    true
+                                )
+
+                            );
+
+
+                        const votedVoterQuery =
+                            query(
+
+                                collection(
+                                    db,
+                                    "Voters"
+                                ),
+
+                                where(
+                                    "boothId",
+                                    "==",
+                                    assignment.boothId
+                                ),
+
+                                where(
+                                    "electionId",
+                                    "==",
+                                    assignment.electionId
+                                ),
+
+                                where(
+                                    "eligible",
+                                    "==",
+                                    true
+                                ),
+
+                                where(
+                                    "participationStatus",
+                                    "==",
+                                    "voted"
+                                )
+
+                            );
+
+
+                        const [
+
+                            boothSnap,
+                            electionSnap,
+                            voterCountSnap,
+                            votedVoterCountSnap
+
+                        ] =
+
+                        await Promise.all([
+
+
+                            getDoc(
+
+                                doc(
+                                    db,
+                                    "Booths",
+                                    assignment.boothId
+                                )
+
+                            ),
+
+
+                            getDoc(
+
+                                doc(
+                                    db,
+                                    "Elections",
+                                    assignment.electionId
+                                )
+
+                            ),
+
+
+                            getCountFromServer(
+                                voterQuery
+                            ),
+
+
+                            getCountFromServer(
+                                votedVoterQuery
+                            )
+
+
+                        ]);
+
+
+                        /*
+                         * Ignore broken references.
+                         */
+
+                        if (
+                            !boothSnap.exists()
+
+                            ||
+
+                            !electionSnap.exists()
+                        ) {
+
+                            return null;
+
+                        }
+
+
+                        const booth =
+                            boothSnap.data();
+
+
+                        const election =
+                            electionSnap.data();
+
+
+                        /*
+                         * Protect against inconsistent
+                         * cross-election assignments.
+                         */
+
+                        if (
+                            booth.electionId !==
+                            assignment.electionId
+                        ) {
+
+                            console.warn(
+
+                                "Ignoring inconsistent booth assignment:",
+
+                                assignment.id
+
+                            );
+
+
+                            return null;
+
+                        }
+
+
+                        return {
+
+
+                            assignment:
+                                assignment,
+
+
+                            booth: {
+
+                                id:
+                                    boothSnap.id,
+
+                                ...booth
+
+                            },
+
+
+                            election: {
+
+                                id:
+                                    electionSnap.id,
+
+                                ...election
+
+                            },
+
+
+                            voterCount:
+
+                                voterCountSnap
+                                    .data()
+                                    .count
+
+                                ||
+
+                                0,
+
+
+                            votedVoterCount:
+
+                                votedVoterCountSnap
+                                    .data()
+                                    .count
+
+                                ||
+
+                                0
+
+
+                        };
+
+
+                    } catch (
+                        error
+                    ) {
+
+
+                        console.error(
+
+                            "Failed to load assigned booth:",
+
+                            assignment.id,
+
+                            error
+
+                        );
+
+
+                        throw error;
+
+                    }
+
+
+                }
+
+            )
+
+        );
+
+
+    assignedBooths =
+
+        loaded
+
+            .filter(
+                Boolean
+            )
+
+            .sort(
+
+                (
+                    a,
+                    b
+                ) =>
+
+                    naturalCompare(
+
+                        a.election
+                            .electionName,
+
+                        b.election
+                            .electionName
+
+                    )
+
+                    ||
+
+                    naturalCompare(
+
+                        a.booth
+                            .boothNumber,
+
+                        b.booth
+                            .boothNumber
+
+                    )
+
+            );
+
+
+    renderSummary();
+
+    renderBooths();
+
+}
+
+
+/* ==========================================
+   SUMMARY
+========================================== */
+
+function renderSummary() {
+
+
+    $("assignedBoothCount")
+        .textContent =
+        assignedBooths.length;
+
+
+    $("assignedVoterCount")
+        .textContent =
+
+        assignedBooths.reduce(
+
+            (
+                total,
+                item
+            ) =>
+
+                total
+
+                +
+
+                Number(
+                    item.voterCount ||
+                    0
+                ),
+
+            0
+
+        );
+
+
+
+    $("votedVoterCount")
+        .textContent =
+
+        assignedBooths.reduce(
+
+            (
+                total,
+                item
+            ) =>
+
+                total
+
+                +
+
+                Number(
+                    item.votedVoterCount ||
+                    0
+                ),
+
+            0
+
+        );
+
+
+    $("activeBoothCount")
+        .textContent =
+
+        assignedBooths.filter(
+
+            (item) =>
+
+                item.election.status ===
+                "voting_active"
+
+        ).length;
+
+}
+
+
+/* ==========================================
+   RENDER BOOTHS
+========================================== */
+
+function renderBooths() {
+
+
+    const grid =
+        $("boothGrid");
+
+
+    const empty =
+        $("emptyState");
+
+
+    grid.innerHTML =
+        "";
+
+
+    /*
+     * No assignments.
+     */
+
+    if (
+        !assignedBooths.length
+    ) {
+
+
+        empty.style.display =
+            "block";
+
+
+        empty.textContent =
+
+            "No booth is currently assigned to your account. Contact the Election Commission if this is unexpected.";
+
+
+        return;
+
+    }
+
+
+    empty.style.display =
+        "none";
+
+
+    assignedBooths.forEach(
+
+        (
+            item
+        ) => {
+
+
+            const card =
+                document.createElement(
+                    "article"
+                );
+
+
+            card.className =
+                "booth-card";
+
+
+            card.innerHTML = `
+
+
+                <div class="booth-head">
+
+
+                    <div>
+
+
+                        <h3>
+
+                            ${escapeHtml(
+                                item.booth.boothNumber
+                                ||
+                                "Unnamed Booth"
+                            )}
+
+                        </h3>
+
+
+                        <div class="muted">
+
+                            ${escapeHtml(
+                                item.election.electionName
+                                ||
+                                "Unnamed Election"
+                            )}
+
+                        </div>
+
+
+                    </div>
+
+
+                    <span
+                        class="
+                            status
+                            ${
+                                electionStatusClass(
+                                    item.election.status
+                                )
+                            }
+                        "
+                    >
+
+                        ${escapeHtml(
+                            electionStatusLabel(
+                                item.election.status
+                            )
+                        )}
+
+                    </span>
+
+
+                </div>
+
+
+                <div class="detail-grid">
+
+
+                    <div class="detail">
+
+                        <div class="detail-label">
+                            Location
+                        </div>
+
+                        <div class="detail-value">
+
+                            ${escapeHtml(
+                                item.booth.location
+                                ||
+                                "—"
+                            )}
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="detail">
+
+                        <div class="detail-label">
+                            Voting Completed
+                        </div>
+
+                        <div class="detail-value">
+
+                            ${Number(
+                                item.votedVoterCount ||
+                                0
+                            )} of ${Number(
+                                item.voterCount ||
+                                0
+                            )}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <div class="detail-label">
+                            Assigned Voters
+                        </div>
+
+                        <div class="detail-value">
+
+                            ${Number(
+                                item.voterCount ||
+                                0
+                            )}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <div class="detail-label">
+                            Academic Session
+                        </div>
+
+                        <div class="detail-value">
+
+                            ${escapeHtml(
+                                item.election.academicSession
+                                ||
+                                "—"
+                            )}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <div class="detail-label">
+                            Booth Status
+                        </div>
+
+                        <div class="detail-value">
+
+                            ${escapeHtml(
+                                item.booth.status
+                                ||
+                                "incomplete"
+                            )}
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                              <div class="booth-actions">
+
+                    <button
+                        class="btn btn-primary"
+                        type="button"
+                        data-view-voters="${
+                            escapeHtml(
+                                item.booth.id
+                            )
+                        }"
+                    >
+
+                        View Assigned Voters
+
+                    </button>
+
+
+                    ${
+                        currentUserData.role ===
+                            "presiding_officer"
+
+                        &&
+
+                        [
+                            "finalized",
+                            "voting_active",
+                            "voting_stopped"
+                        ].includes(
+                            item.election.status
+                        )
+
+                            ?
+
+                            `
+
+                            <button
+                                class="btn btn-secondary"
+                                type="button"
+                                data-pair-device="${
+                                    escapeHtml(
+                                        item.booth.id
+                                    )
+                                }"
+                            >
+
+                                Connect Voting Device
+
+                            </button>
+
+                            `
+
+                            :
+
+                            ""
+                    }
+
+                </div>
+
+
+            `;
+
+
+            grid.appendChild(
+                card
+            );
+
+
+        }
+
+    );
+
+}
+
+
+/* ==========================================
+   OPEN VOTER MODAL
+========================================== */
+
+async function openVoterModal(
+    boothId
+) {
+
+
+    /*
+     * Confirm the selected booth exists
+     * in the officer's own assignments.
+     */
+
+    const item =
+        assignedBooths.find(
+
+            (
+                entry
+            ) =>
+
+                entry.booth.id ===
+                boothId
+
+        );
+
+
+    if (
+        !item
+    ) {
+
+
+        showMessage(
+
+            "error",
+
+            "That booth is not assigned to your account."
+
+        );
+
+
+        return;
+
+    }
+
+
+    currentModalItem =
+        item;
+
+
+    stopLiveAssignedVotersListener();
+
+
+    currentModalVoters =
+        [];
+
+
+    $("voterModalMessage")
+        .textContent =
+        "";
+
+
+    $("voterModalMessage")
+        .className =
+        "message";
+
+
+    /*
+     * Set modal heading.
+     */
+
+    $("voterModalTitle")
+        .textContent =
+
+        `${
+            item.booth.boothNumber
+            ||
+            "Booth"
+        } — Assigned Voters`;
+
+
+    $("voterModalSubtitle")
+        .textContent =
+
+        `${
+            item.election.electionName
+            ||
+            "Election"
+        } | ${
+            item.booth.location
+            ||
+            "No location"
+        }`;
+
+
+    /*
+     * Reset modal.
+     */
+
+    $("voterSearch")
+        .value =
+        "";
+
+
+    $("voterTableBody")
+        .innerHTML =
+        "";
+
+
+    $("voterTableWrap")
+        .style.display =
+        "none";
+
+
+    $("voterResultCount")
+        .textContent =
+        "";
+
+
+    $("voterEmpty")
+        .style.display =
+        "block";
+
+
+    $("voterEmpty")
+        .textContent =
+        "Loading assigned voters...";
+
+
+    /*
+     * Show modal.
+     */
+
+    $("voterModal")
+        .classList
+        .add(
+            "show"
+        );
+
+
+    $("voterModal")
+        .setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+
+    startLiveAssignedVotersListener(item);
+
+}
+
+
+/* ==========================================
+   LIVE ASSIGNED-VOTER REFRESH
+========================================== */
+
+function stopLiveAssignedVotersListener() {
+    if (stopAssignedVotersListener) {
+        stopAssignedVotersListener();
+        stopAssignedVotersListener = null;
+    }
+}
+
+function showAssignedVoterLoadError(error) {
+    console.error("Failed to load assigned voters:", error);
+
+    $("voterTableWrap").style.display = "none";
+    $("voterEmpty").style.display = "block";
+    $("voterEmpty").textContent = "Assigned voters could not be loaded.";
+    $("voterResultCount").textContent = "";
+}
+
+function startLiveAssignedVotersListener(item) {
+    const voterQuery = query(
+        collection(db, "Voters"),
+        where("boothId", "==", item.booth.id),
+        where("electionId", "==", item.election.id),
+        where("eligible", "==", true)
+    );
+
+    stopAssignedVotersListener = onSnapshot(
+        voterQuery,
+        (voterSnap) => {
+            if (
+                currentModalItem?.booth?.id !== item.booth.id ||
+                currentModalItem?.election?.id !== item.election.id
+            ) {
+                return;
+            }
+
+            currentModalVoters = voterSnap.docs
+                .map(snap => ({ id: snap.id, ...snap.data() }))
+                .sort((a, b) =>
+                    naturalCompare(a.className, b.className) ||
+                    naturalCompare(a.section, b.section) ||
+                    naturalCompare(a.rollNumber, b.rollNumber) ||
+                    naturalCompare(a.name, b.name)
+                );
+
+            item.voterCount = currentModalVoters.length;
+            item.votedVoterCount = currentModalVoters.filter(
+                voter => (voter.participationStatus || "not_voted") === "voted"
+            ).length;
+
+            renderSummary();
+            renderVoters();
+        },
+        showAssignedVoterLoadError
+    );
+}
+
+
+/* ==========================================
+   RENDER VOTERS
+========================================== */
+
+function renderVoters() {
+
+
+    const search =
+        normalize(
+
+            $("voterSearch")
+                .value
+
+        );
+
+
+    const filtered =
+
+        currentModalVoters.filter(
+
+            (
+                voter
+            ) => {
+
+
+                if (
+                    !search
+                ) {
+
+                    return true;
+
+                }
+
+
+                return (
+
+                    normalize(
+                        voter.name
+                    )
+                    .includes(
+                        search
+                    )
+
+                    ||
+
+                    normalize(
+                        voter.rollNumber
+                    )
+                    .includes(
+                        search
+                    )
+
+                    ||
+
+                    normalize(
+                        voter.className
+                    )
+                    .includes(
+                        search
+                    )
+
+                    ||
+
+                    normalize(
+                        voter.section
+                    )
+                    .includes(
+                        search
+                    )
+
+                );
+
+            }
+
+        );
+
+
+    const body =
+        $("voterTableBody");
+
+
+    body.innerHTML =
+        "";
+
+
+    filtered.forEach(
+
+        (
+            voter
+        ) => {
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML = `
+
+
+                <td>
+
+                    ${escapeHtml(
+                        voter.name
+                        ||
+                        "—"
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${escapeHtml(
+                        voter.rollNumber
+                        ||
+                        "—"
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${escapeHtml(
+                        voter.className
+                        ||
+                        "—"
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${escapeHtml(
+                        voter.section
+                        ||
+                        "—"
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${escapeHtml(
+                        voter.participationStatus
+                        ||
+                        "not_voted"
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${renderVoterAction(
+                        voter
+                    )}
+
+                </td>
+
+
+            `;
+
+
+            body.appendChild(
+                row
+            );
+
+
+        }
+
+    );
+
+
+    $("voterResultCount")
+        .textContent =
+
+        `${
+            filtered.length
+        } of ${
+            currentModalVoters.length
+        } voter(s)`;
+
+
+    /*
+     * Show table when results exist.
+     */
+
+    if (
+        filtered.length
+    ) {
+
+
+        $("voterTableWrap")
+            .style.display =
+            "block";
+
+
+        $("voterEmpty")
+            .style.display =
+            "none";
+
+
+    }
+
+
+    else {
+
+
+        $("voterTableWrap")
+            .style.display =
+            "none";
+
+
+        $("voterEmpty")
+            .style.display =
+            "block";
+
+
+        $("voterEmpty")
+            .textContent =
+
+            currentModalVoters.length
+
+                ?
+
+                "No voter matches your search."
+
+                :
+
+                "No eligible voters are assigned to this booth.";
+
+    }
+
+}
+
+
+/* ==========================================
+   VOTER ACTION CELL
+========================================== */
+
+function renderVoterAction(
+    voter
+) {
+
+    const participationStatus =
+        voter.participationStatus
+        ||
+        "not_voted";
+
+
+    if (
+        currentUserData?.role !==
+        "presiding_officer"
+    ) {
+
+        return `
+            <span class="action-note">
+                PO only
+            </span>
+        `;
+
+    }
+
+
+    if (
+        currentModalItem?.election?.status !==
+        "voting_active"
+    ) {
+
+        return `
+            <span class="action-note">
+                Voting inactive
+            </span>
+        `;
+
+    }
+
+
+    if (
+        participationStatus !==
+        "not_voted"
+    ) {
+
+        return `
+            <span class="action-note">
+                Already voted
+            </span>
+        `;
+
+    }
+
+
+    return `
+        <button
+            type="button"
+            class="btn btn-primary"
+            data-authorize-voter="${escapeHtml(voter.id)}"
+        >
+            Verify &amp; Open Ballot
+        </button>
+    `;
+
+}
+
+
+/* ==========================================
+   VOTER MODAL MESSAGE
+========================================== */
+
+function showVoterModalMessage(
+    type,
+    text
+) {
+
+    const box =
+        $("voterModalMessage");
+
+
+    box.textContent =
+        text;
+
+
+    box.className =
+        `message ${type}`;
+
+}
+
+
+/* ==========================================
+   ACTIVE VOTING DEVICE CHECK
+========================================== */
+
+async function hasActiveVotingDevice(
+    item
+) {
+
+    const deviceSnap =
+        await getDocs(
+
+            query(
+
+                collection(
+                    db,
+                    "VotingDevices"
+                ),
+
+                where(
+                    "boothId",
+                    "==",
+                    item.booth.id
+                )
+
+            )
+
+        );
+
+
+    return deviceSnap.docs.some(
+
+        (snap) => {
+
+            const device =
+                snap.data();
+
+
+            return (
+                device.electionId ===
+                    item.election.id
+                &&
+                device.status ===
+                    "active"
+            );
+
+        }
+
+    );
+
+}
+
+
+/* ==========================================
+   ACTIVE BOOTH SESSION CHECK
+========================================== */
+
+async function getActiveBoothSession(
+    item
+) {
+
+    const sessionSnap =
+        await getDocs(
+
+            query(
+
+                collection(
+                    db,
+                    "VotingSessions"
+                ),
+
+                where(
+                    "boothId",
+                    "==",
+                    item.booth.id
+                )
+
+            )
+
+        );
+
+
+    const now =
+        Date.now();
+
+
+    return sessionSnap.docs.find(
+
+        (snap) => {
+
+            const session =
+                snap.data();
+
+
+            if (
+                session.electionId !==
+                item.election.id
+            ) {
+
+                return false;
+
+            }
+
+
+            if (
+                [
+                    "authorized",
+                    "ballot_open"
+                ].includes(session.status)
+                &&
+                session.expiresAt?.toMillis
+            ) {
+
+                return (
+                    session.expiresAt.toMillis()
+                    >
+                    now
+                );
+
+            }
+
+
+            return false;
+
+        }
+
+    ) || null;
+
+}
+
+
+/* ==========================================
+   EXPIRED BALLOT CLEANUP
+
+   A ballot is valid for SESSION_MINUTES only.
+   The assigned PO dashboard checks every 30 seconds and
+   atomically cancels a timed-out ballot and releases its
+   booth lock. No vote is created and the voter stays eligible.
+========================================== */
+
+function isSessionExpired(
+    session
+) {
+
+    return (
+        [
+            "authorized",
+            "ballot_open"
+        ].includes(session?.status)
+        &&
+        typeof session?.expiresAt?.toMillis ===
+        "function"
+        &&
+        session.expiresAt.toMillis()
+        <=
+        Date.now()
+    );
+
+}
+
+
+async function cancelExpiredSessionForBooth(
+    item,
+    sessionId
+) {
+
+    if (
+        currentUserData?.role !==
+        "presiding_officer"
+    ) {
+
+        return false;
+
+    }
+
+
+    const sessionRef =
+        doc(
+            db,
+            "VotingSessions",
+            sessionId
+        );
+
+    const boothStateRef =
+        doc(
+            db,
+            "BoothVotingState",
+            item.booth.id
+        );
+
+
+    let released =
+        false;
+
+
+    await runTransaction(
+        db,
+        async (transaction) => {
+
+            const sessionSnap =
+                await transaction.get(sessionRef);
+
+            const boothStateSnap =
+                await transaction.get(boothStateRef);
+
+            if (
+                !sessionSnap.exists()
+                ||
+                !isSessionExpired(sessionSnap.data())
+            ) {
+
+                return;
+
+            }
+
+
+            transaction.update(
+                sessionRef,
+                {
+                    status: "cancelled",
+                    cancelledBy: currentUser.uid,
+                    cancelledAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                }
+            );
+
+
+            if (
+                boothStateSnap.exists()
+                &&
+                boothStateSnap.data().status ===
+                "active"
+                &&
+                boothStateSnap.data().activeSessionId ===
+                sessionId
+            ) {
+
+                transaction.update(
+                    boothStateRef,
+                    {
+                        status: "idle",
+                        activeSessionId: "",
+                        activeVoterId: "",
+                        releasedBy: currentUser.uid,
+                        releasedAt: serverTimestamp(),
+                        updatedAt: serverTimestamp()
+                    }
+                );
+
+            }
+
+
+            released =
+                true;
+
+        }
+    );
+
+
+    return released;
+
+}
+
+
+async function clearExpiredSessionsForBooth(
+    item
+) {
+
+    if (
+        currentUserData?.role !==
+        "presiding_officer"
+    ) {
+
+        return 0;
+
+    }
+
+
+    const sessionSnap =
+        await getDocs(
+            query(
+                collection(db, "VotingSessions"),
+                where("boothId", "==", item.booth.id)
+            )
+        );
+
+    let releasedCount =
+        0;
+
+
+    for (
+        const sessionDocument of
+        sessionSnap.docs
+    ) {
+
+        const session =
+            sessionDocument.data();
+
+        if (
+            session.electionId === item.election.id
+            &&
+            isSessionExpired(session)
+        ) {
+
+            if (
+                await cancelExpiredSessionForBooth(
+                    item,
+                    sessionDocument.id
+                )
+            ) {
+
+                releasedCount +=
+                    1;
+
+            }
+
+        }
+
+    }
+
+
+    return releasedCount;
+
+}
+
+
+async function clearExpiredSessionsForAssignedBooths() {
+
+    let releasedCount =
+        0;
+
+
+    for (
+        const item of assignedBooths
+    ) {
+
+        releasedCount +=
+            await clearExpiredSessionsForBooth(item);
+
+    }
+
+
+    return releasedCount;
+
+}
+
+
+function startExpiredSessionCleanup() {
+
+    if (
+        expiredSessionCleanupTimer !== null
+        ||
+        currentUserData?.role !==
+        "presiding_officer"
+    ) {
+
+        return;
+
+    }
+
+
+    const cleanExpiredSessions =
+        async () => {
+
+            try {
+
+                const releasedCount =
+                    await clearExpiredSessionsForAssignedBooths();
+
+                if (releasedCount > 0) {
+
+                    await loadAssignedBooths();
+
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Expired ballot cleanup failed:",
+                    error
+                );
+
+            }
+
+        };
+
+
+    void cleanExpiredSessions();
+
+    expiredSessionCleanupTimer =
+        window.setInterval(
+            cleanExpiredSessions,
+            30000
+        );
+
+}
+
+
+/* ==========================================
+   AUTHORIZE VERIFIED VOTER
+========================================== */
+
+async function authorizeVoter(
+    voterId
+) {
+
+    if (
+        currentUserData?.role !==
+        "presiding_officer"
+    ) {
+
+        showVoterModalMessage(
+            "error",
+            "Only the Presiding Officer can authorize a voter."
+        );
+
+        return false;
+
+    }
+
+
+    const item =
+        currentModalItem;
+
+
+    if (!item) {
+
+        showVoterModalMessage(
+            "error",
+            "No booth is currently selected."
+        );
+
+        return false;
+
+    }
+
+
+    const voter =
+        currentModalVoters.find(
+
+            (entry) =>
+                entry.id ===
+                voterId
+
+        );
+
+
+    if (!voter) {
+
+        showVoterModalMessage(
+            "error",
+            "The selected voter could not be found."
+        );
+
+        return false;
+
+    }
+
+
+    showVoterModalMessage(
+        "info",
+        "Checking voter, election, voting device and booth lock..."
+    );
+
+
+    try {
+
+        /*
+         * Reload authoritative election and voter state so
+         * authorization is never based only on stale modal data.
+         */
+        const [
+            electionSnap,
+            voterSnap,
+            activeDevice
+        ] =
+        await Promise.all([
+
+            getDoc(
+                doc(
+                    db,
+                    "Elections",
+                    item.election.id
+                )
+            ),
+
+            getDoc(
+                doc(
+                    db,
+                    "Voters",
+                    voter.id
+                )
+            ),
+
+            hasActiveVotingDevice(
+                item
+            )
+
+        ]);
+
+
+        if (!electionSnap.exists()) {
+
+            showVoterModalMessage(
+                "error",
+                "The election could not be found."
+            );
+
+            return false;
+
+        }
+
+
+        const latestElection =
+            electionSnap.data();
+
+
+        if (
+            latestElection.status !==
+            "voting_active"
+        ) {
+
+            item.election.status =
+                latestElection.status;
+
+            renderVoters();
+
+            showVoterModalMessage(
+                "error",
+                "Voting is not currently active for this election."
+            );
+
+            return false;
+
+        }
+
+
+        if (
+            latestElection.voterListFinalized !==
+            true
+        ) {
+
+            showVoterModalMessage(
+                "error",
+                "The official voter list is not finalized."
+            );
+
+            return false;
+
+        }
+
+
+        if (!voterSnap.exists()) {
+
+            showVoterModalMessage(
+                "error",
+                "The selected voter no longer exists."
+            );
+
+            return false;
+
+        }
+
+
+        const latestVoter =
+            voterSnap.data();
+
+
+        if (
+            latestVoter.electionId !==
+                item.election.id
+            ||
+            latestVoter.boothId !==
+                item.booth.id
+            ||
+            latestVoter.eligible !==
+                true
+        ) {
+
+            showVoterModalMessage(
+                "error",
+                "This voter is not eligible for this booth and election."
+            );
+
+            return false;
+
+        }
+
+
+        if (
+            (
+                latestVoter.participationStatus
+                ||
+                "not_voted"
+            ) !==
+            "not_voted"
+        ) {
+
+            voter.participationStatus =
+                latestVoter.participationStatus;
+
+            renderVoters();
+
+            showVoterModalMessage(
+                "error",
+                "This voter has already completed voting."
+            );
+
+            return false;
+
+        }
+
+
+        if (!activeDevice) {
+
+            showVoterModalMessage(
+                "error",
+                "No active Android voting device is connected to this booth. Connect the voting device first."
+            );
+
+            return false;
+
+        }
+
+
+        /*
+         * Compatibility guard for sessions created before the
+         * BoothVotingState lock existed. This improves the UI,
+         * but the transaction lock below is the real race-safe
+         * protection for all newly authorized sessions.
+         */
+        await clearExpiredSessionsForBooth(item);
+
+        const activeSession =
+            await getActiveBoothSession(
+                item
+            );
+
+
+        if (activeSession) {
+
+            const activeData =
+                activeSession.data();
+
+
+            const activeVoter =
+                currentModalVoters.find(
+                    (entry) =>
+                        entry.id ===
+                        activeData.voterId
+                );
+
+
+            const activeLabel =
+                activeVoter?.name
+                ||
+                activeVoter?.rollNumber
+                ||
+                "another voter";
+
+
+            showVoterModalMessage(
+                "error",
+                `An active voting session already exists for ${activeLabel}. Complete, cancel or let that session expire before authorizing another voter.`
+            );
+
+            return false;
+
+        }
+
+
+        const sessionId =
+            `${item.election.id}_${voter.id}`;
+
+
+        const sessionRef =
+            doc(
+                db,
+                "VotingSessions",
+                sessionId
+            );
+
+
+        const boothStateRef =
+            doc(
+                db,
+                "BoothVotingState",
+                item.booth.id
+            );
+
+
+        const expiresAt =
+            Timestamp.fromMillis(
+                Date.now()
+                +
+                (
+                    SESSION_MINUTES
+                    *
+                    60
+                    *
+                    1000
+                )
+            );
+
+
+        await runTransaction(
+
+            db,
+
+            async (transaction) => {
+
+                /*
+                 * IMPORTANT:
+                 * All reads happen before any writes.
+                 * Firestore can therefore retry this transaction
+                 * safely if two PO tabs race for the same booth.
+                 */
+                const sessionSnap =
+                    await transaction.get(
+                        sessionRef
+                    );
+
+
+                const boothStateSnap =
+                    await transaction.get(
+                        boothStateRef
+                    );
+
+
+                let previousLockedSessionSnap =
+                    null;
+
+
+                if (boothStateSnap.exists()) {
+
+                    const state =
+                        boothStateSnap.data();
+
+
+                    if (
+                        state.boothId !==
+                            item.booth.id
+                        ||
+                        state.electionId !==
+                            item.election.id
+                    ) {
+
+                        throw new Error(
+                            "The booth voting lock belongs to a different election or booth."
+                        );
+
+                    }
+
+
+                    const previousSessionId =
+                        String(
+                            state.activeSessionId
+                            ||
+                            ""
+                        );
+
+
+                    if (
+                        state.status ===
+                            "active"
+                        &&
+                        previousSessionId
+                        &&
+                        previousSessionId !==
+                            sessionId
+                    ) {
+
+                        previousLockedSessionSnap =
+                            await transaction.get(
+                                doc(
+                                    db,
+                                    "VotingSessions",
+                                    previousSessionId
+                                )
+                            );
+
+                    }
+
+                }
+
+
+                /*
+                 * Decide whether this booth lock may be acquired.
+                 * A different active session blocks authorization.
+                 * Cancelled/submitted/expired sessions and locally
+                 * expired authorized sessions may be replaced.
+                 */
+                if (boothStateSnap.exists()) {
+
+                    const state =
+                        boothStateSnap.data();
+
+
+                    if (
+                        state.status ===
+                            "active"
+                        &&
+                        state.activeSessionId !==
+                            sessionId
+                    ) {
+
+                        let previousLockCanBeReplaced =
+                            false;
+
+
+                        if (
+                            previousLockedSessionSnap
+                            &&
+                            previousLockedSessionSnap.exists()
+                        ) {
+
+                            const previousSession =
+                                previousLockedSessionSnap.data();
+
+
+                            if (
+                                [
+                                    "cancelled",
+                                    "expired",
+                                    "submitted"
+                                ].includes(
+                                    previousSession.status
+                                )
+                            ) {
+
+                                previousLockCanBeReplaced =
+                                    true;
+
+                            } else if (
+                                previousSession.status ===
+                                    "authorized"
+                                &&
+                                previousSession.expiresAt?.toMillis
+                                &&
+                                previousSession.expiresAt.toMillis()
+                                    <=
+                                    Date.now()
+                            ) {
+
+                                previousLockCanBeReplaced =
+                                    true;
+
+                            }
+
+                        }
+
+
+                        if (!previousLockCanBeReplaced) {
+
+                            throw new Error(
+                                "Another voter already holds the active booth voting lock. Complete or cancel that session before authorizing another voter."
+                            );
+
+                        }
+
+                    }
+
+                }
+
+
+                let nextAttemptCount =
+                    1;
+
+
+                if (sessionSnap.exists()) {
+
+                    const existing =
+                        sessionSnap.data();
+
+
+                    const expiredAuthorization =
+                        existing.status ===
+                            "authorized"
+                        &&
+                        existing.expiresAt?.toMillis
+                        &&
+                        existing.expiresAt.toMillis()
+                            <=
+                            Date.now();
+
+
+                    const canReauthorize =
+                        existing.status ===
+                            "cancelled"
+                        ||
+                        existing.status ===
+                            "expired"
+                        ||
+                        expiredAuthorization;
+
+
+                    if (!canReauthorize) {
+
+                        throw new Error(
+                            "This voter already has an active or completed voting session."
+                        );
+
+                    }
+
+
+                    nextAttemptCount =
+                        Number(
+                            existing.attemptCount
+                            ||
+                            0
+                        )
+                        +
+                        1;
+
+                }
+
+
+                /*
+                 * Write the VotingSession and BoothVotingState in
+                 * ONE atomic transaction. Either both succeed or
+                 * neither succeeds.
+                 */
+                if (!sessionSnap.exists()) {
+
+                    transaction.set(
+
+                        sessionRef,
+
+                        {
+                            electionId:
+                                item.election.id,
+
+                            boothId:
+                                item.booth.id,
+
+                            voterId:
+                                voter.id,
+
+                            authorizedBy:
+                                currentUser.uid,
+
+                            authorizedByRole:
+                                "presiding_officer",
+
+                            status:
+                                "authorized",
+
+                            createdAt:
+                                serverTimestamp(),
+
+                            authorizedAt:
+                                serverTimestamp(),
+
+                            updatedAt:
+                                serverTimestamp(),
+
+                            expiresAt:
+                                expiresAt,
+
+                            ballotOpenedAt:
+                                null,
+
+                            submittedAt:
+                                null,
+
+                            cancelledAt:
+                                null,
+
+                            deviceId:
+                                "",
+
+                            attemptCount:
+                                nextAttemptCount
+                        }
+
+                    );
+
+                } else {
+
+                    transaction.update(
+
+                        sessionRef,
+
+                        {
+                            authorizedBy:
+                                currentUser.uid,
+
+                            authorizedByRole:
+                                "presiding_officer",
+
+                            status:
+                                "authorized",
+
+                            authorizedAt:
+                                serverTimestamp(),
+
+                            updatedAt:
+                                serverTimestamp(),
+
+                            expiresAt:
+                                expiresAt,
+
+                            ballotOpenedAt:
+                                null,
+
+                            submittedAt:
+                                null,
+
+                            cancelledAt:
+                                null,
+
+                            deviceId:
+                                "",
+
+                            attemptCount:
+                                nextAttemptCount
+                        }
+
+                    );
+
+                }
+
+
+                const lockData = {
+
+                    electionId:
+                        item.election.id,
+
+                    boothId:
+                        item.booth.id,
+
+                    status:
+                        "active",
+
+                    activeSessionId:
+                        sessionId,
+
+                    activeVoterId:
+                        voter.id,
+
+                    lockedBy:
+                        currentUser.uid,
+
+                    lockedAt:
+                        serverTimestamp(),
+
+                    releasedBy:
+                        "",
+
+                    releasedAt:
+                        null,
+
+                    updatedAt:
+                        serverTimestamp()
+
+                };
+
+
+                if (boothStateSnap.exists()) {
+
+                    transaction.update(
+                        boothStateRef,
+                        lockData
+                    );
+
+                } else {
+
+                    transaction.set(
+                        boothStateRef,
+                        lockData
+                    );
+
+                }
+
+            }
+
+        );
+
+
+        document
+            .querySelectorAll(
+                "[data-authorize-voter]"
+            )
+            .forEach(
+                (button) => {
+                    button.disabled =
+                        true;
+                }
+            );
+
+
+        showVoterModalMessage(
+            "success",
+            `${voter.name || voter.rollNumber || "Voter"} has been verified and authorized. The booth lock is secured and the session is valid for ${SESSION_MINUTES} minutes.`
+        );
+
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            "Voter authorization failed:",
+            error
+        );
+
+
+        if (
+            error?.code ===
+                "permission-denied"
+            ||
+            error?.code ===
+                "firestore/permission-denied"
+        ) {
+
+            showVoterModalMessage(
+                "error",
+                "Firestore denied voter authorization or booth-lock acquisition. Refresh the dashboard and confirm voting is active, the voter is eligible and not voted, the device is active, and this account is the assigned Presiding Officer."
+            );
+
+        } else {
+
+            showVoterModalMessage(
+                "error",
+                error?.message
+                ||
+                "The voter could not be authorized."
+            );
+
+        }
+
+
+        return false;
+
+    }
+
+}
+
+
+/* ==========================================
+   CLOSE VOTER MODAL
+========================================== */
+
+function closeVoterModal() {
+
+
+    stopLiveAssignedVotersListener();
+
+    /* Reflect the latest live count on the booth card after the modal closes. */
+    renderBooths();
+
+
+    $("voterModal")
+        .classList
+        .remove(
+            "show"
+        );
+
+
+    $("voterModal")
+        .setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+
+    currentModalItem =
+        null;
+
+
+    currentModalVoters =
+        [];
+
+
+    $("voterModalMessage")
+        .textContent =
+        "";
+
+
+    $("voterModalMessage")
+        .className =
+        "message";
+
+}
+
+/* ==========================================
+   GENERATE PAIRING CODE
+========================================== */
+
+function generatePairingCode() {
+
+    const random =
+        new Uint32Array(
+            1
+        );
+
+
+    crypto.getRandomValues(
+        random
+    );
+
+
+    const number =
+
+        10000000
+
+        +
+
+        (
+            random[0]
+            %
+            90000000
+        );
+
+
+    return String(
+        number
+    );
+
+}
+
+
+/* ==========================================
+   OPEN DEVICE PAIRING
+========================================== */
+
+async function openDevicePairing(
+    boothId
+) {
+
+    clearMessage();
+
+
+    if (
+        currentUserData?.role !==
+        "presiding_officer"
+    ) {
+
+        showMessage(
+
+            "error",
+
+            "Only the Presiding Officer can connect a voting device."
+
+        );
+
+
+        return;
+
+    }
+
+
+    const item =
+        assignedBooths.find(
+
+            (
+                entry
+            ) =>
+
+                entry.booth.id ===
+                boothId
+
+        );
+
+
+    if (
+        !item
+    ) {
+
+        showMessage(
+
+            "error",
+
+            "That booth is not assigned to your account."
+
+        );
+
+
+        return;
+
+    }
+
+
+    if (
+        ![
+            "finalized",
+            "voting_active",
+            "voting_stopped"
+        ].includes(
+            item.election.status
+        )
+    ) {
+
+        showMessage(
+
+            "error",
+
+            "A voting device cannot be connected for this election status."
+
+        );
+
+
+        return;
+
+    }
+
+
+    $("pairingModalSubtitle")
+        .textContent =
+
+        `${
+            item.booth.boothNumber
+            ||
+            "Booth"
+        } — ${
+            item.election.electionName
+            ||
+            "Election"
+        }`;
+
+
+    $("pairingCodeValue")
+        .textContent =
+        "--------";
+
+
+    $("pairingStatus")
+        .className =
+        "message info";
+
+
+    $("pairingStatus")
+        .textContent =
+        "Generating secure pairing code...";
+
+
+    $("pairingModal")
+        .classList
+        .add(
+            "show"
+        );
+
+
+    $("pairingModal")
+        .setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+
+    try {
+
+
+        const pairingCode =
+            generatePairingCode();
+
+
+        /*
+         * Client expiry is deliberately slightly below
+         * the five-minute server-rule limit.
+         */
+
+        const expiresAt =
+            Timestamp.fromMillis(
+
+                Date.now()
+
+                +
+
+                (
+                    4
+                    *
+                    60
+                    *
+                    1000
+                )
+
+                +
+
+                (
+                    30
+                    *
+                    1000
+                )
+
+            );
+
+
+        await setDoc(
+
+            doc(
+                db,
+                "DevicePairingCodes",
+                pairingCode
+            ),
+
+            {
+
+                electionId:
+                    item.election.id,
+
+                boothId:
+                    item.booth.id,
+
+                createdBy:
+                    currentUser.uid,
+
+                status:
+                    "pending",
+
+                createdAt:
+                    serverTimestamp(),
+
+                expiresAt:
+                    expiresAt,
+
+                claimedBy:
+                    "",
+
+                claimedAt:
+                    null
+
+            }
+
+        );
+
+
+        $("pairingCodeValue")
+            .textContent =
+            pairingCode;
+
+
+        $("pairingStatus")
+            .className =
+            "message success";
+
+
+        $("pairingStatus")
+            .textContent =
+            "Pairing code generated. Enter this code on the Android voting device.";
+
+
+    } catch (
+        error
+    ) {
+
+
+        console.error(
+
+            "Voting device pairing code error:",
+
+            error
+
+        );
+
+
+        $("pairingCodeValue")
+            .textContent =
+            "--------";
+
+
+        $("pairingStatus")
+            .className =
+            "message error";
+
+
+        if (
+
+            error?.code ===
+                "permission-denied"
+
+            ||
+
+            error?.code ===
+                "firestore/permission-denied"
+
+        ) {
+
+            $("pairingStatus")
+                .textContent =
+
+                "Firestore denied pairing-code creation. Confirm this account is the Presiding Officer assigned to this booth.";
+
+        }
+
+
+        else {
+
+
+            $("pairingStatus")
+                .textContent =
+
+                error?.message
+
+                ||
+
+                "The pairing code could not be generated.";
+
+        }
+
+    }
+
+}
+
+
+/* ==========================================
+   CLOSE DEVICE PAIRING
+========================================== */
+
+function closeDevicePairing() {
+
+    $("pairingModal")
+        .classList
+        .remove(
+            "show"
+        );
+
+
+    $("pairingModal")
+        .setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+
+    $("pairingCodeValue")
+        .textContent =
+        "--------";
+
+}
+/* ==========================================
+   BOOTH BUTTON EVENTS
+========================================== */
+$("boothGrid")
+    .addEventListener(
+
+        "click",
+
+        async (
+            event
+        ) => {
+
+
+            const voterButton =
+                event.target.closest(
+                    "[data-view-voters]"
+                );
+
+
+            if (
+                voterButton
+            ) {
+
+                await openVoterModal(
+
+                    voterButton.dataset
+                        .viewVoters
+
+                );
+
+
+                return;
+
+            }
+
+
+            const pairingButton =
+                event.target.closest(
+                    "[data-pair-device]"
+                );
+
+
+            if (
+                pairingButton
+            ) {
+
+                await openDevicePairing(
+
+                    pairingButton.dataset
+                        .pairDevice
+
+                );
+
+            }
+
+
+        }
+
+    );
+
+/* ==========================================
+   PAIRING MODAL EVENTS
+========================================== */
+
+$("closePairingModalBtn")
+    .addEventListener(
+
+        "click",
+
+        closeDevicePairing
+
+    );
+
+
+$("pairingModal")
+    .addEventListener(
+
+        "click",
+
+        (
+            event
+        ) => {
+
+
+            if (
+                event.target ===
+                $("pairingModal")
+            ) {
+
+                closeDevicePairing();
+
+            }
+
+
+        }
+
+    );
+/* ==========================================
+   VOTER AUTHORIZATION EVENT
+========================================== */
+
+$("voterTableBody")
+    .addEventListener(
+
+        "click",
+
+        async (event) => {
+
+            const button =
+                event.target.closest(
+                    "[data-authorize-voter]"
+                );
+
+
+            if (!button) {
+                return;
+            }
+
+
+            button.disabled =
+                true;
+
+
+            const success =
+                await authorizeVoter(
+                    button.dataset.authorizeVoter
+                );
+
+
+            if (!success) {
+                button.disabled =
+                    false;
+            }
+
+        }
+
+    );
+
+
+/* ==========================================
+   VOTER SEARCH
+========================================== */
+
+$("voterSearch")
+    .addEventListener(
+
+        "input",
+
+        renderVoters
+
+    );
+
+
+/* ==========================================
+   MODAL CLOSE BUTTON
+========================================== */
+
+$("closeVoterModalBtn")
+    .addEventListener(
+
+        "click",
+
+        closeVoterModal
+
+    );
+
+
+/* ==========================================
+   CLICK BACKDROP TO CLOSE
+========================================== */
+
+$("voterModal")
+    .addEventListener(
+
+        "click",
+
+        (
+            event
+        ) => {
+
+
+            if (
+                event.target ===
+                $("voterModal")
+            ) {
+
+
+                closeVoterModal();
+
+
+            }
+
+
+        }
+
+    );
+
+
+/* ==========================================
+   ESC KEY CLOSE
+========================================== */
+
+document.addEventListener(
+
+    "keydown",
+
+    (
+        event
+    ) => {
+
+
+        if (
+
+            event.key ===
+                "Escape"
+
+            &&
+
+            $("voterModal")
+                .classList
+                .contains(
+                    "show"
+                )
+
+        ) {
+
+
+            closeVoterModal();
+
+
+        }
+
+
+    }
+
+);
+
+
+/* ==========================================
+   REFRESH
+========================================== */
+
+$("refreshBtn")
+    .addEventListener(
+
+        "click",
+
+        async () => {
+
+
+            if (
+                !currentUser
+            ) {
+
+                return;
+
+            }
+
+
+            $("refreshBtn")
+                .disabled =
+                true;
+
+
+            try {
+
+
+                await loadAssignedBooths();
+
+
+                showMessage(
+
+                    "success",
+
+                    "Dashboard refreshed successfully."
+
+                );
+
+
+            } catch (
+                error
+            ) {
+
+
+                console.error(
+
+                    "Dashboard refresh error:",
+
+                    error
+
+                );
+
+
+                showMessage(
+
+                    "error",
+
+                    "Dashboard could not be refreshed."
+
+                );
+
+
+            } finally {
+
+
+                $("refreshBtn")
+                    .disabled =
+                    false;
+
+
+            }
+
+
+        }
+
+    );
+
+
+/* ==========================================
+   LOGOUT
+========================================== */
+
+$("profileBtn")
+    .addEventListener(
+
+        "click",
+
+        event => {
+
+            event.stopPropagation();
+            const willOpen = $("profileDropdown").hidden;
+            $("profileDropdown").hidden = !willOpen;
+            $("profileBtn").setAttribute("aria-expanded", String(willOpen));
+
+        }
+
+    );
+
+$("profileHomeBtn")
+    .addEventListener(
+
+        "click",
+
+        () => {
+
+            window.location.href =
+                "profile.html";
+
+        }
+
+    );
+
+document.addEventListener(
+
+    "click",
+
+    event => {
+
+        const dropdown = $("profileDropdown");
+        const button = $("profileBtn");
+
+        if (!dropdown.hidden && !dropdown.contains(event.target) && !button.contains(event.target)) {
+            dropdown.hidden = true;
+            button.setAttribute("aria-expanded", "false");
+        }
+
+    }
+
+);
+
+$("logoutBtn")
+    .addEventListener(
+
+        "click",
+
+        async () => {
+
+
+            $("logoutBtn")
+                .disabled =
+                true;
+
+
+            try {
+
+                if (expiredSessionCleanupTimer !== null) {
+
+                    window.clearInterval(
+                        expiredSessionCleanupTimer
+                    );
+
+                    expiredSessionCleanupTimer =
+                        null;
+
+                }
+
+
+                await signOut(
+                    auth
+                );
+
+
+                window.location.href =
+                    "login.html";
+
+
+            } catch (
+                error
+            ) {
+
+
+                console.error(
+
+                    "Sign out error:",
+
+                    error
+
+                );
+
+
+                showMessage(
+
+                    "error",
+
+                    "Sign out failed. Please try again."
+
+                );
+
+
+                $("logoutBtn")
+                    .disabled =
+                    false;
+
+
+            }
+
+
+        }
+
+    );
+
+
+/* ==========================================
+   INITIALIZE AUTHENTICATION
+========================================== */
+
+onAuthStateChanged(
+
+    auth,
+
+    async (
+        user
+    ) => {
+
+
+        /*
+         * Prevent duplicate initialization.
+         */
+
+        if (
+            initializationStarted
+        ) {
+
+            return;
+
+        }
+
+
+        initializationStarted =
+            true;
+
+
+        try {
+
+
+            /*
+             * Check authenticated user
+             * and polling role.
+             */
+
+            const allowed =
+                await checkAccess(
+                    user
+                );
+
+
+            if (
+                !allowed
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+             * Load only assigned booths.
+             */
+
+            await loadAssignedBooths();
+
+            startExpiredSessionCleanup();
+
+
+        } catch (
+            error
+        ) {
+
+
+            console.error(
+
+                "Presiding dashboard initialization error:",
+
+                error
+
+            );
+
+
+            /*
+             * Permission error.
+             */
+
+            if (
+
+                error?.code ===
+                    "permission-denied"
+
+                ||
+
+                error?.code ===
+                    "firestore/permission-denied"
+
+            ) {
+
+
+                showMessage(
+
+                    "error",
+
+                    "Firestore denied dashboard access. Confirm the latest polling-officer rules are published and that this officer is assigned to a booth."
+
+                );
+
+
+            }
+
+
+            /*
+             * Firestore index error.
+             */
+
+            else if (
+
+                error?.code ===
+                "failed-precondition"
+
+            ) {
+
+
+                showMessage(
+
+                    "error",
+
+                    "Firestore requires an index for this query. Check the browser console for Firebase's index link."
+
+                );
+
+
+            }
+
+
+            /*
+             * Other error.
+             */
+
+            else {
+
+
+                showMessage(
+
+                    "error",
+
+                    error?.message
+
+                    ||
+
+                    "The Presiding Officer dashboard could not be loaded."
+
+                );
+
+
+            }
+
+
+        }
+
+
+    }
+
+);
+
+
+</script>
+
+
+</body>
+
+</html>

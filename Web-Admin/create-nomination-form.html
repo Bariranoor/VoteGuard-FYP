@@ -1,0 +1,608 @@
+<!DOCTYPE html> <html lang="en"> <head>
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>VoteGuard | Nomination Form</title>
+
+<!-- Legacy standalone form: the maintained workflow is the NCM workspace. -->
+<script>
+    window.location.replace("nomination-candidate-management.html");
+</script>
+
+<style>
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        color: #222;
+    }
+
+    .header {
+        background: #1976d2;
+        color: white;
+
+        padding: 20px 30px;
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header h1 {
+        margin: 0 0 5px;
+    }
+
+    .header p {
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .back-link {
+        color: white;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .container {
+        max-width: 1000px;
+        margin: auto;
+        padding: 30px;
+    }
+
+    .welcome {
+        background: white;
+
+        padding: 25px;
+
+        border-radius: 10px;
+
+        margin-bottom: 25px;
+
+        box-shadow:
+            0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .welcome h2 {
+        margin-bottom: 10px;
+    }
+
+    .welcome p {
+        color: #666;
+        line-height: 1.5;
+    }
+
+    .message {
+        display: none;
+
+        padding: 12px 15px;
+
+        border-radius: 6px;
+
+        margin-bottom: 20px;
+
+        font-size: 14px;
+
+        line-height: 1.5;
+    }
+
+    .error-message {
+        background: #fdecec;
+        color: #b42318;
+        border: 1px solid #f5c2c0;
+    }
+
+    .success-message {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #c8e6c9;
+    }
+
+    .card {
+        background: white;
+
+        padding: 25px;
+
+        border-radius: 10px;
+
+        margin-bottom: 20px;
+
+        box-shadow:
+            0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .card h2 {
+        margin-bottom: 8px;
+    }
+
+    .card-description {
+        color: #666;
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    label {
+        display: block;
+
+        margin-bottom: 7px;
+
+        font-size: 14px;
+
+        font-weight: 600;
+    }
+
+    select,
+    textarea {
+        width: 100%;
+
+        border: 1px solid #ccc;
+
+        border-radius: 6px;
+
+        padding: 11px 12px;
+
+        background: white;
+
+        color: #222;
+
+        font-family: Arial, sans-serif;
+
+        font-size: 14px;
+    }
+
+    select:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #1976d2;
+    }
+
+    textarea {
+        min-height: 220px;
+        resize: vertical;
+        line-height: 1.5;
+    }
+
+    .info-grid {
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+        gap: 20px;
+    }
+
+    .info-box {
+        background: #f8fafc;
+
+        border: 1px solid #e5e7eb;
+
+        border-radius: 7px;
+
+        padding: 15px;
+    }
+
+    .info-label {
+        color: #666;
+
+        font-size: 12px;
+
+        margin-bottom: 6px;
+    }
+
+    .info-value {
+        font-size: 14px;
+
+        font-weight: 600;
+
+        line-height: 1.5;
+    }
+
+    .positions {
+        display: flex;
+
+        flex-wrap: wrap;
+
+        gap: 10px;
+    }
+
+    .position-tag {
+        background: #eff6ff;
+
+        border: 1px solid #bfdbfe;
+
+        color: #1d4ed8;
+
+        padding: 8px 12px;
+
+        border-radius: 20px;
+
+        font-size: 13px;
+
+        font-weight: 600;
+    }
+
+    .empty-box {
+        background: #f9fafb;
+
+        border: 1px solid #e5e7eb;
+
+        border-radius: 7px;
+
+        padding: 15px;
+
+        color: #666;
+
+        font-size: 13px;
+
+        line-height: 1.5;
+    }
+
+    .preview {
+        margin-top: 15px;
+
+        padding: 15px;
+
+        background: #f8fafc;
+
+        border: 1px solid #e5e7eb;
+
+        border-radius: 7px;
+    }
+
+    .preview-title {
+        font-size: 13px;
+
+        font-weight: 600;
+
+        margin-bottom: 8px;
+    }
+
+    .preview-content {
+        color: #555;
+
+        font-size: 13px;
+
+        line-height: 1.6;
+
+        white-space: pre-wrap;
+    }
+
+    .actions {
+        display: flex;
+
+        justify-content: flex-end;
+
+        gap: 10px;
+    }
+
+    button {
+        padding: 10px 16px;
+
+        border: none;
+
+        border-radius: 5px;
+
+        cursor: pointer;
+
+        font-size: 14px;
+    }
+
+    .primary-btn {
+        background: #1976d2;
+        color: white;
+    }
+
+    .primary-btn:hover {
+        background: #1565c0;
+    }
+
+    .secondary-btn {
+        background: white;
+
+        color: #444;
+
+        border: 1px solid #ccc;
+    }
+
+    .secondary-btn:hover {
+        background: #f5f5f5;
+    }
+
+    button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .loading {
+        color: #666;
+
+        font-size: 13px;
+
+        padding: 10px 0;
+    }
+
+    @media (max-width: 700px) {
+
+        .header {
+            padding: 15px 20px;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .actions {
+            flex-direction: column;
+        }
+
+        .actions button {
+            width: 100%;
+        }
+
+    }
+
+</style>
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+</head> <body> <div class="header">
+<div>
+
+    <h1>
+        Create Nomination Form
+    </h1>
+
+    <p>
+        College Election Management System
+    </p>
+
+</div>
+
+
+<a
+    href="nomination-management.html"
+    class="back-link"
+>
+    Back to Nomination Management
+</a>
+</div> <main class="container">
+<div class="welcome">
+
+    <h2 id="welcomeTitle">
+        Create Nomination Form
+    </h2>
+
+    <p>
+        Prepare the official nomination form using
+        the election schedule and positions defined
+        by the Principal.
+    </p>
+
+</div>
+
+
+<div
+    id="errorMessage"
+    class="message error-message"
+></div>
+
+
+<div
+    id="successMessage"
+    class="message success-message"
+></div>
+
+
+
+<section class="card">
+
+    <h2>
+        Election
+    </h2>
+
+    <p class="card-description">
+        Select the institutional election for which
+        the nomination form will be created.
+    </p>
+
+
+    <div class="form-group">
+
+        <label for="electionSelect">
+            Election
+        </label>
+
+        <select
+            id="electionSelect"
+            disabled
+        >
+
+            <option value="">
+                Checking authentication...
+            </option>
+
+        </select>
+
+    </div>
+
+</section>
+
+
+
+<section
+    class="card"
+    id="scheduleCard"
+    style="display:none;"
+>
+
+    <h2>
+        Nomination Schedule
+    </h2>
+
+    <p class="card-description">
+        These dates are controlled by the Principal
+        and cannot be changed by the Election Commission.
+    </p>
+
+
+    <div class="info-grid">
+
+        <div class="info-box">
+
+            <div class="info-label">
+                Nomination Opens
+            </div>
+
+            <div
+                id="openingDisplay"
+                class="info-value"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="info-box">
+
+            <div class="info-label">
+                Nomination Closes
+            </div>
+
+            <div
+                id="closingDisplay"
+                class="info-value"
+            >
+                —
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<section
+    class="card"
+    id="positionsCard"
+    style="display:none;"
+>
+
+    <h2>
+        Election Positions
+    </h2>
+
+    <p class="card-description">
+        These positions were configured by the Principal
+        for this election.
+    </p>
+
+
+    <div
+        id="positionsContainer"
+        class="positions"
+    ></div>
+
+</section>
+
+
+
+<section
+    class="card"
+    id="rulesCard"
+    style="display:none;"
+>
+
+    <h2>
+        Candidate Eligibility & Nomination Rules
+    </h2>
+
+    <p class="card-description">
+        Enter the eligibility requirements and nomination
+        rules that students must read before submitting
+        their application.
+    </p>
+
+
+    <label for="rules">
+        Rules & Requirements
+    </label>
+
+
+    <textarea
+        id="rules"
+        placeholder="Enter the eligibility requirements, nomination conditions, restrictions, declarations, and other instructions for students."
+    ></textarea>
+
+
+    <div class="preview">
+
+        <div class="preview-title">
+            Student Preview
+        </div>
+
+
+        <div
+            id="rulesPreview"
+            class="preview-content"
+        >
+            Your nomination rules will appear here.
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<section
+    class="card"
+    id="actionsCard"
+    style="display:none;"
+>
+
+    <div class="actions">
+
+        <button
+            type="button"
+            id="cancelBtn"
+            class="secondary-btn"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            type="button"
+            id="createBtn"
+            class="primary-btn"
+            disabled
+        >
+            Create Nomination Form
+        </button>
+
+    </div>
+
+</section>
+</main> <script type="module"> /* ================================================= FIREBASE IMPORTS ================================================= */ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js"; import { initializeAuth, onAuthStateChanged, indexedDBLocalPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js"; import { getFirestore, doc, getDoc, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js"; /* ================================================= FIREBASE CONFIG ================================================= */ const firebaseConfig = { apiKey: "AIzaSyDwFlPbaffKCGb0T3VAkbWt4MVIjIeBfE", authDomain: "college-election-system-4d7bd.firebaseapp.com", projectId: "college-election-system-4d7bd", storageBucket: "college-election-system-4d7bd.firebasestorage.app", messagingSenderId: "517908315987", appId: "1:517908315987:web:726044a332b8d7ecc9aba6" }; /* ================================================= INITIALIZE FIREBASE ================================================= */ const app = initializeApp( firebaseConfig ); const auth = initializeAuth( app, { persistence: [ indexedDBLocalPersistence, browserLocalPersistence ] } ); const db = getFirestore( app ); /* ================================================= ELEMENTS ================================================= */ const electionSelect = document.getElementById( "electionSelect" ); const scheduleCard = document.getElementById( "scheduleCard" ); const positionsCard = document.getElementById( "positionsCard" ); const positionsContainer = document.getElementById( "positionsContainer" ); const rulesCard = document.getElementById( "rulesCard" ); const rules = document.getElementById( "rules" ); const rulesPreview = document.getElementById( "rulesPreview" ); const actionsCard = document.getElementById( "actionsCard" ); const createBtn = document.getElementById( "createBtn" ); const cancelBtn = document.getElementById( "cancelBtn" ); const openingDisplay = document.getElementById( "openingDisplay" ); const closingDisplay = document.getElementById( "closingDisplay" ); const errorMessage = document.getElementById( "errorMessage" ); const successMessage = document.getElementById( "successMessage" ); const welcomeTitle = document.getElementById( "welcomeTitle" ); /* ================================================= STATE ================================================= */ let currentUser = null; let elections = []; let selectedElection = null; let selectedPositions = []; let accessVerified = false; /* ================================================= MESSAGE FUNCTIONS ================================================= */ function showError(message) { errorMessage.textContent = message; errorMessage.style.display = "block"; successMessage.style.display = "none"; } function hideError() { errorMessage.style.display = "none"; } function showSuccess(message) { successMessage.textContent = message; successMessage.style.display = "block"; errorMessage.style.display = "none"; } /* ================================================= DATE FUNCTIONS ================================================= */ function parseDate(value) { if (!value) { return null; } if ( typeof value.toDate === "function" ) { return value.toDate(); } if ( typeof value === "object" && value.seconds !== undefined ) { return new Date( value.seconds * 1000 ); } const date = new Date( value ); if ( Number.isNaN( date.getTime() ) ) { return null; } return date; } function formatDate(value) { const date = parseDate( value ); return date ? date.toLocaleString() : "Not specified"; } /* ================================================= LOAD ELECTIONS ================================================= */ async function loadElections() { electionSelect.disabled = true; electionSelect.innerHTML = ` <option value=""> Loading elections... </option> `; const snapshot = await getDocs( collection( db, "Elections" ) ); elections = snapshot.docs.map( item => ({ id: item.id, ...item.data() }) ); if ( elections.length === 0 ) { electionSelect.innerHTML = ` <option value=""> No elections available </option> `; return; } electionSelect.innerHTML = ` <option value=""> Select an election </option> `; elections.forEach( election => { const option = document.createElement( "option" ); option.value = election.id; option.textContent = election.electionName || election.name || "Unnamed Election"; electionSelect.appendChild( option ); } ); electionSelect.disabled = false; } /* ================================================= LOAD POSITIONS ================================================= */ async function loadPositions( electionId ) { positionsContainer.innerHTML = ` <div class="loading"> Loading positions... </div> `; selectedPositions = []; const snapshot = await getDocs( collection( db, "Positions" ) ); snapshot.forEach( positionSnapshot => { const data = positionSnapshot.data(); if ( data.electionId === electionId ) { selectedPositions.push({ id: positionSnapshot.id, name: data.name || "Unnamed Position", seats: Number( data.seats || 1 ), order: Number( data.order || 999 ) }); } } ); selectedPositions.sort( (a, b) => a.order - b.order ); renderPositions(); } /* ================================================= RENDER POSITIONS ================================================= */ function renderPositions() { positionsContainer.innerHTML = ""; if ( selectedPositions.length === 0 ) { positionsContainer.innerHTML = ` <div class="empty-box"> No positions were found for this election. Please ask the Principal to configure the election positions first. </div> `; positionsCard.style.display = "block"; rulesCard.style.display = "none"; actionsCard.style.display = "none"; createBtn.disabled = true; return; } selectedPositions.forEach( position => { const tag = document.createElement( "div" ); tag.className = "position-tag"; tag.textContent = `${position.name} — ${position.seats} seat${position.seats === 1 ? "" : "s"}`; positionsContainer.appendChild( tag ); } ); positionsCard.style.display = "block"; } /* ================================================= ELECTION SELECTION ================================================= */ electionSelect.addEventListener( "change", async () => { hideError(); scheduleCard.style.display = "none"; positionsCard.style.display = "none"; rulesCard.style.display = "none"; actionsCard.style.display = "none"; createBtn.disabled = true; selectedPositions = []; selectedElection = elections.find( election => election.id === electionSelect.value ); if ( !selectedElection ) { return; } try { const nominationStart = selectedElection.nominationStart; const nominationEnd = selectedElection.nominationEnd; if ( !nominationStart || !nominationEnd ) { throw new Error( "Nomination dates have not been configured for this election." ); } openingDisplay.textContent = formatDate( nominationStart ); closingDisplay.textContent = formatDate( nominationEnd ); scheduleCard.style.display = "block"; await loadPositions( selectedElection.id ); if ( selectedPositions.length === 0 ) { return; } rulesCard.style.display = "block"; actionsCard.style.display = "block"; createBtn.disabled = false; } catch (error) { console.error( "Election selection error:", error ); showError( error.message || "Unable to load the selected election." ); } } ); /* ================================================= RULES PREVIEW ================================================= */ rules.addEventListener( "input", () => { rulesPreview.textContent = rules.value.trim() || "Your nomination rules will appear here."; } ); /* ================================================= CREATE FORM ================================================= */ createBtn.addEventListener( "click", async () => { hideError(); if ( !accessVerified || !currentUser ) { showError( "Election Commission authentication is not ready yet." ); return; } if ( !selectedElection ) { showError( "Please select an election." ); return; } if ( selectedPositions.length === 0 ) { showError( "No positions are available for this election." ); return; } const rulesText = rules.value.trim(); if (!rulesText) { showError( "Please enter the candidate eligibility and nomination rules." ); rules.focus(); return; } createBtn.disabled = true; createBtn.textContent = "Creating..."; try { const existingSnapshot = await getDocs( collection( db, "NominationForms" ) ); const duplicate = existingSnapshot.docs.find( item => item.data().electionId === selectedElection.id ); if ( duplicate ) { throw new Error( "A nomination form already exists for this election." ); } const nominationStart = selectedElection.nominationStart; const nominationEnd = selectedElection.nominationEnd; if ( !nominationStart || !nominationEnd ) { throw new Error( "Nomination dates are missing from the selected election." ); } const formData = { electionId: selectedElection.id, electionName: selectedElection.electionName || selectedElection.name || "Unnamed Election", nominationStart: nominationStart, nominationEnd: nominationEnd, positionIds: selectedPositions.map( position => position.id ), positionNames: selectedPositions.map( position => position.name ), positionDetails: selectedPositions.map( position => ({ name: position.name, seats: position.seats, order: position.order }) ), rules: rulesText, status: "scheduled", createdBy: currentUser.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }; console.log( "Creating NominationForms document:", formData ); const formRef = await addDoc( collection( db, "NominationForms" ), formData ); console.log( "Nomination form created successfully:", formRef.id ); showSuccess( "Nomination form created successfully." ); createBtn.textContent = "Created"; setTimeout( () => { window.location.href = "nomination-form-share.html?id=" + encodeURIComponent( formRef.id ); }, 800 ); } catch (error) { console.error( "Create nomination form error:", error ); showError( error.message || "Unable to create the nomination form." ); createBtn.disabled = false; createBtn.textContent = "Create Nomination Form"; } } ); /* ================================================= CANCEL ================================================= */ cancelBtn.addEventListener( "click", () => { window.location.href = "nomination-management.html"; } ); /* ================================================= AUTHENTICATION ================================================= */ onAuthStateChanged( auth, async user => { console.log( "CREATE NOMINATION FORM AUTH STATE:", user ? user.uid : null ); if (!user) { electionSelect.disabled = true; createBtn.disabled = true; showError( "No authenticated EC user was detected on this page." ); return; } currentUser = user; try { /* ===================================== USERS ===================================== */ const userSnapshot = await getDoc( doc( db, "Users", user.uid ) ); if ( !userSnapshot.exists() ) { throw new Error( "Your Users account record was not found." ); } const userData = userSnapshot.data(); if ( userData.role !== "election_commission" ) { throw new Error( "Access denied. Election Commission access only." ); } if ( userData.status === "disabled" ) { throw new Error( "Your account is disabled." ); } /* ===================================== ELECTION COMMISSION RECORD ===================================== */ const ecSnapshot = await getDoc( doc( db, "ElectionCommission", user.uid ) ); if ( !ecSnapshot.exists() ) { throw new Error( "Your Election Commission account record was not found." ); } const ecData = ecSnapshot.data(); if ( ecData.status === "disabled" ) { throw new Error( "Your Election Commission account is disabled." ); } /* ===================================== DUTY ===================================== */ const duties = Array.isArray( ecData.duties ) ? ecData.duties : []; if ( !duties.includes( "Nomination & Candidate Management" ) ) { throw new Error( "Your account does not have the Nomination & Candidate Management duty." ); } accessVerified = true; welcomeTitle.textContent = "Welcome, " + ( ecData.name || userData.name || user.email || "Election Commission Member" ); /* ===================================== LOAD ELECTIONS ===================================== */ await loadElections(); } catch (error) { console.error( "Create Nomination Form initialization error:", error ); electionSelect.disabled = true; createBtn.disabled = true; showError( error.message || "Unable to initialize the nomination form." ); } } ); </script> </body> </html>

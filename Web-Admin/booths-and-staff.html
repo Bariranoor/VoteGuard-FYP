@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoteGuard | Booths and Staff</title>
+    <style>
+        .page-header { align-items: center; display: flex; gap: 20px; justify-content: space-between; padding: 22px 28px; }
+        .page-header h1 { margin: 0 0 8px; }
+        .page-header p { margin: 0 0 4px; color: #ffffff !important; }
+        .page-header #institutionHeader { color: #d9e6f2 !important; }
+        .header.page-header .header-profile-button { align-items: center; background: rgba(255, 255, 255, .12) !important; border-color: transparent !important; border-radius: 8px !important; color: #ffffff !important; display: inline-flex; gap: 8px; justify-content: center; min-height: 0; min-width: 150px; padding: 9px 12px !important; }
+        .header.page-header .header-profile-button:hover { background: rgba(255, 255, 255, .12) !important; color: #ffffff !important; }
+        .header.page-header .header-avatar { align-items: center; background: #ffffff !important; border-radius: 50%; color: #173a5e !important; display: inline-flex; font-size: .85rem; font-weight: 700; height: 30px; justify-content: center; width: 30px; }
+        .page-content { max-width: 1180px; margin: 0 auto; padding: 28px; }
+        .module-intro { margin: 0 0 20px; }
+        .module-intro h1 { color: #173a5e; font-size: 1.65rem; margin: 0 0 7px; }
+        .module-intro p { color: #526579; line-height: 1.5; margin: 0; }
+        .notice { border: 1px solid #d9e3ec; border-radius: 8px; background: #ffffff; color: #455a6f; line-height: 1.5; margin: 0 0 18px; padding: 12px 14px; }
+        .message { border-radius: 8px; display: none; margin: 0 0 16px; padding: 11px 13px; }
+        .message.error { background: #ffffff; border: 1px solid #e5b8b4; border-left: 4px solid #b42318; color: #7a271a; }
+        .message.success { background: #ffffff; border: 1px solid #b8d9c3; border-left: 4px solid #237a4b; color: #1d5938; }
+        #workspace { margin-top: 16px; }
+        .booth-setup-grid { align-items: stretch; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
+        .election-select-card { margin-bottom: 0; max-width: none; }
+        .election-select-card .field { max-width: 560px; }
+        .section-card { margin-bottom: 0; }
+        .setup-card { display: flex; flex-direction: column; min-width: 0; }
+        .setup-card > p { min-height: 48px; }
+        .setup-card .form-actions { margin-top: auto; padding-top: 16px; }
+        .staff-invite-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+        .section-card h2 { color: #173a5e; font-size: 1.1rem; margin: 0 0 6px; }
+        .section-card > p { color: #526579; line-height: 1.45; margin: 0 0 16px; }
+        .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field label { color: #26384a; font-size: .88rem; font-weight: 700; }
+        .form-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+        .form-actions button { width: auto; }
+        .booth-directory-head, .selected-booth-head, .assignment-panel-head { align-items: flex-start; display: flex; gap: 16px; justify-content: space-between; }
+        .booth-directory-head { margin-bottom: 16px; }
+        .booth-directory-head p, .assignment-panel-head p { margin-bottom: 0; }
+        .booth-list { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(225px, 1fr)); }
+        .booth-item { background: #ffffff; border: 1px solid #d9e3ec; border-radius: 8px; display: flex; flex-direction: column; min-height: 0; padding: 16px; }
+        .booth-item.selected { background: #f8fafc; border-color: #c3ced9; }
+        .booth-item-header { align-items: flex-start; display: flex; gap: 12px; justify-content: space-between; }
+        .booth-item h3 { color: #173a5e; font-size: 1rem; margin: 0 0 4px; }
+        .booth-item p { margin: 0; }
+        .booth-meta { color: #607080; font-size: .86rem; line-height: 1.45; margin-top: 12px !important; }
+        .booth-item button { margin-top: 16px; width: auto; }
+        .status { border-radius: 999px; display: inline-block; font-size: .75rem; font-weight: 700; padding: 4px 8px; white-space: nowrap; }
+        .status.ready { background: #edf8f0; color: #1e5a3c; }
+        .status.incomplete { background: #fff4e5; color: #8a4b08; }
+        .selected-booth-card { background: #ffffff; border: 1px solid #d9e3ec; border-radius: 8px; margin-top: 20px; padding: 22px; }
+        .selected-booth-head { border-bottom: 1px solid #e3eaf1; margin-bottom: 20px; padding-bottom: 16px; }
+        .selected-booth-head h2 { color: #173a5e; font-size: 1.3rem; margin: 4px 0 5px; }
+        .selected-booth-head p { color: #526579; margin: 0; }
+        .eyebrow { color: #607080; font-size: .76rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+        .assignment-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+        .assignment-panel { background: #f8fafc; border: 1px solid #dce5ee; border-radius: 8px; padding: 18px; }
+        .assignment-panel-head { margin-bottom: 16px; }
+        .assignment-panel h3 { color: #173a5e; font-size: 1rem; margin: 0 0 4px; }
+        .students-panel { margin-top: 16px; }
+        .student-assignment-panel { background: #ffffff; }
+        .assignment-filter-grid { display: grid; grid-template-columns: minmax(220px, 1.5fr) repeat(3, minmax(130px, .7fr)); gap: 12px; }
+        .bulk-selection-toolbar { align-items: center; border-top: 1px solid #e6edf3; color: #526579; display: flex; font-size: .86rem; gap: 12px; justify-content: space-between; margin: 18px 0 10px; padding-top: 14px; }
+        .checkbox-label { align-items: center; color: #26384a !important; cursor: pointer; display: inline-flex; font-weight: 600 !important; gap: 8px; }
+        .checkbox-label input { height: 16px; margin: 0; width: 16px; }
+        .bulk-page-note { color: #607080; font-size: .84rem; margin: 0; }
+        .assignment-table-wrap { border: 1px solid #d9e3ec; border-radius: 6px; overflow: auto; }
+        .assignment-table { border-collapse: collapse; min-width: 650px; width: 100%; }
+        .assignment-table th { background: #f5f7fa; color: #455a6f; font-size: .78rem; letter-spacing: .03em; padding: 11px 12px; text-align: left; text-transform: uppercase; }
+        .assignment-table td { border-top: 1px solid #e6edf3; color: #26384a; padding: 11px 12px; vertical-align: middle; }
+        .assignment-table th:last-child, .assignment-table td:last-child { text-align: center; width: 56px; }
+        .assignment-table input { height: 16px; margin: 0; width: 16px; }
+        .assignment-empty { color: #607080; margin: 0; padding: 14px; }
+        .bulk-pagination { align-items: center; display: flex; gap: 10px; justify-content: flex-end; margin-top: 12px; }
+        .bulk-pagination span { color: #607080; font-size: .85rem; min-width: 108px; text-align: center; }
+        .empty { color: #607080; padding: 10px 0; }
+        .voter-row { align-items: center; border-top: 1px solid #e6edf3; display: flex; gap: 10px; justify-content: space-between; padding: 12px 0; }
+        .voter-row:first-child { border-top: 0; }
+        .voter-row p { margin: 2px 0 0; }
+        .voter-row button { width: auto; min-height: 34px; }
+        .muted { color: #607080; font-size: .86rem; }
+        @media (max-width: 760px) {
+            .page-header { align-items: flex-start; flex-direction: column; }
+            .page-content { padding: 20px; }
+            .booth-setup-grid, .assignment-grid, .field-grid, .staff-invite-fields, .assignment-filter-grid { grid-template-columns: 1fr; }
+            .selected-booth-card { padding: 18px; }
+            .setup-card > p { min-height: 0; }
+            .bulk-selection-toolbar { align-items: flex-start; flex-direction: column; }
+            .bulk-pagination { justify-content: flex-start; }
+        }
+    </style>
+    <link rel="stylesheet" href="assets/css/navigation.css?v=20260913-nav">
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+</head>
+<body>
+    <header class="header page-header">
+        <div class="header-title">
+            <h1>VoteGuard</h1>
+            <p>Election Commission</p>
+            <p id="institutionHeader">Loading institution...</p>
+        </div>
+
+        <div class="header-profile">
+            <button type="button" id="profileButton" class="header-profile-button" aria-expanded="false" aria-controls="profileDropdown">
+                <span class="header-avatar" id="headerAvatar">EC</span>
+                <span id="headerProfileName">Profile</span>
+                <span class="header-arrow">▼</span>
+            </button>
+
+            <div id="profileDropdown" class="header-profile-dropdown" hidden>
+                <div class="profile-dropdown-info">
+                    <strong id="dropdownProfileName">Election Commission</strong>
+                    <span>Election Commission</span>
+                </div>
+                <button type="button" id="myProfileButton" class="profile-dropdown-item">My Profile</button>
+                <button type="button" id="dashboardSignOutButton" class="profile-dropdown-item logout-item">Sign Out</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <nav class="page-navigation" aria-label="Page navigation">
+            <button type="button" class="secondary back-dashboard-button" id="backBtn">Back to Dashboard</button>
+        </nav>
+        <section class="module-intro">
+            <h1>Booths and Staff</h1>
+            <p>Set up booths, assign polling staff, and place eligible students in their booth.</p>
+        </section>
+        <div class="notice">Use this page only after the voter list is finalised. Each booth needs at least one assigned student and one active Presiding Officer before it can be marked ready.</div>
+        <div id="pageMessage" class="message" role="status"></div>
+
+        <section class="section-card election-select-card">
+                <h2>Choose Election</h2>
+                <p>Choose the election you are preparing for polling.</p>
+                <div class="field">
+                    <label for="electionSelect">Election</label>
+                    <select id="electionSelect" disabled><option>Loading elections...</option></select>
+                </div>
+        </section>
+
+        <div id="workspace" hidden>
+            <div class="booth-setup-grid">
+                <section class="section-card setup-card">
+                    <h2>Create Booth</h2>
+                    <p>Add a booth number and its polling location.</p>
+                    <div class="field-grid">
+                        <div class="field"><label for="boothNumber">Booth Number</label><input id="boothNumber" maxlength="50" placeholder="Example: Booth 01"></div>
+                        <div class="field"><label for="boothLocation">Location</label><input id="boothLocation" maxlength="120" placeholder="Example: Hall 1"></div>
+                    </div>
+                    <div class="form-actions"><button type="button" id="createBoothBtn">Create Booth</button></div>
+                </section>
+
+                <section class="section-card setup-card">
+                    <h2>Add Polling Staff</h2>
+                    <p>Send an invitation. Assign the person to a booth after they accept it.</p>
+                    <div class="staff-invite-fields">
+                        <div class="field"><label for="staffName">Full Name</label><input id="staffName" maxlength="100" autocomplete="name" placeholder="Staff member name"></div>
+                        <div class="field"><label for="staffEmail">Email Address</label><input id="staffEmail" type="email" maxlength="160" autocomplete="email" placeholder="name@example.com"></div>
+                        <div class="field"><label for="staffRole">Role</label><select id="staffRole"><option value="presiding_officer">Presiding Officer</option><option value="assistant_presiding_officer">Assistant Presiding Officer</option></select></div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="sendStaffInviteBtn">Send Invitation</button>
+                        <button type="button" class="secondary" id="refreshOfficersBtn">Refresh Staff List</button>
+                    </div>
+                </section>
+            </div>
+
+            <section class="section-card booth-directory-card">
+                <div class="booth-directory-head">
+                    <div>
+                        <h2>Booths for This Election</h2>
+                        <p>Select a booth to manage its staff and students.</p>
+                    </div>
+                </div>
+                <div id="boothList" class="booth-list"></div>
+            </section>
+
+            <section id="selectedBoothCard" class="selected-booth-card" hidden>
+                <div class="selected-booth-head">
+                    <div>
+                        <div class="eyebrow">Booth setup</div>
+                        <h2 id="selectedBoothTitle">Selected Booth</h2>
+                        <p id="selectedBoothHelp">Choose staff and students for this booth.</p>
+                    </div>
+                    <span id="selectedBoothStatus" class="status incomplete">Incomplete</span>
+                </div>
+
+                <div class="assignment-grid">
+                    <section class="assignment-panel">
+                        <div class="assignment-panel-head">
+                            <div>
+                                <h3>Assign Staff</h3>
+                                <p>Presiding Officer is required. Assistant is optional.</p>
+                            </div>
+                        </div>
+                        <div class="field-grid">
+                            <div class="field"><label for="poSelect">Presiding Officer</label><select id="poSelect"></select></div>
+                            <div class="field"><label for="apoSelect">Assistant Presiding Officer (optional)</label><select id="apoSelect"></select></div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" id="saveStaffBtn">Save Staff</button>
+                            <button type="button" class="success" id="markReadyBtn">Mark Booth Ready</button>
+                        </div>
+                    </section>
+
+                    <section class="assignment-panel student-assignment-panel">
+                        <div class="assignment-panel-head">
+                            <div>
+                                <h3>Assign Students</h3>
+                                <p>Select one student or a group. Students are listed by roll number.</p>
+                            </div>
+                        </div>
+                        <div class="assignment-filter-grid">
+                            <div class="field">
+                                <label for="bulkVoterSearch">Search</label>
+                                <input id="bulkVoterSearch" type="search" placeholder="Name or roll number">
+                            </div>
+                            <div class="field">
+                                <label for="bulkClassFilter">Class / Program</label>
+                                <select id="bulkClassFilter"><option value="">All classes</option></select>
+                            </div>
+                            <div class="field">
+                                <label for="bulkSectionFilter">Section</label>
+                                <select id="bulkSectionFilter"><option value="">All sections</option></select>
+                            </div>
+                            <div class="field">
+                                <label for="bulkPageSize">Students per page</label>
+                                <select id="bulkPageSize"><option value="25">25</option><option value="50">50</option><option value="100">100</option></select>
+                            </div>
+                        </div>
+
+                        <div class="bulk-selection-toolbar">
+                            <label class="checkbox-label" for="selectPageVoters"><input id="selectPageVoters" type="checkbox"> Select this page</label>
+                            <p id="bulkPageInfo" class="bulk-page-note">No students found.</p>
+                            <button type="button" class="secondary" id="clearBulkSelectionBtn">Clear selection</button>
+                        </div>
+                        <div class="assignment-table-wrap">
+                            <table class="assignment-table">
+                                <thead><tr><th>Student</th><th>Roll Number</th><th>Class / Program</th><th>Section</th><th>Select</th></tr></thead>
+                                <tbody id="bulkVoterTableBody"></tbody>
+                            </table>
+                            <p id="bulkVoterEmpty" class="assignment-empty" hidden>No unassigned students match these filters.</p>
+                        </div>
+                        <div class="bulk-pagination">
+                            <button type="button" class="secondary" id="bulkPreviousPageBtn">Previous</button>
+                            <span id="bulkPaginationText">Page 1 of 1</span>
+                            <button type="button" class="secondary" id="bulkNextPageBtn">Next</button>
+                        </div>
+                        <div class="form-actions"><button type="button" id="bulkAssignVotersBtn" disabled>Assign Selected Students</button></div>
+                    </section>
+                </div>
+
+                <section class="assignment-panel students-panel">
+                    <h3>Students in This Booth</h3>
+                    <div id="assignedVoterList"></div>
+                </section>
+            </section>
+        </div>
+    </main>
+
+    <script type="module">
+        import { auth, db } from "./js/firebase.js";
+        import { createInvitation } from "./invitation-service.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+        import { addDoc, collection, doc, getDoc, getDocs, query, setDoc, serverTimestamp, updateDoc, where, writeBatch } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+        const $ = id => document.getElementById(id);
+        const BULK_ASSIGNMENT_BATCH_SIZE = 400;
+        const state = {
+            user: null,
+            userData: null,
+            ecData: null,
+            elections: [],
+            election: null,
+            booths: [],
+            staff: new Map(),
+            voters: [],
+            officers: [],
+            selectedBoothId: "",
+            bulkSelectedVoterIds: new Set(),
+            bulkPage: 1,
+            bulkPageSize: 25,
+            bulkPageVoterIds: []
+        };
+
+        function showMessage(text, type = "success") {
+            const box = $("pageMessage");
+            box.textContent = text;
+            box.className = `message ${type}`;
+            box.style.display = "block";
+        }
+
+        function renderProfile() {
+            const name = state.userData?.name || state.ecData?.name || "Election Commission";
+            const initials = name
+                .split(/\s+/)
+                .filter(Boolean)
+                .slice(0, 2)
+                .map(part => part[0].toUpperCase())
+                .join("");
+
+            $("headerProfileName").textContent = name;
+            $("dropdownProfileName").textContent = name;
+            $("headerAvatar").textContent = initials || "EC";
+        }
+
+        function clearMessage() { $("pageMessage").style.display = "none"; }
+        function escapeHtml(value) { return String(value ?? "").replace(/[&<>'"]/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[char])); }
+        function boothName(booth) { return booth?.boothNumber || "Unnamed Booth"; }
+        function staffFor(boothId) { return state.staff.get(boothId) || null; }
+        function votersFor(boothId) { return state.voters.filter(voter => voter.boothId === boothId); }
+        function officerName(uid) { const item = state.officers.find(officer => officer.id === uid); return item?.name || item?.email || "Not assigned"; }
+
+        function renderElectionOptions() {
+            const select = $("electionSelect");
+            select.innerHTML = '<option value="">Select election</option>';
+            state.elections.forEach(election => {
+                const option = document.createElement("option");
+                option.value = election.id;
+                option.textContent = election.electionName || "Unnamed Election";
+                select.appendChild(option);
+            });
+            select.disabled = false;
+        }
+
+        function renderBooths() {
+            const list = $("boothList");
+            if (!state.booths.length) {
+                list.innerHTML = '<p class="empty">No booth has been created for this election.</p>';
+                return;
+            }
+            list.innerHTML = state.booths.map(booth => {
+                const hasStaff = Boolean(staffFor(booth.id)?.poUid);
+                const students = votersFor(booth.id).length;
+                const selected = booth.id === state.selectedBoothId ? " selected" : "";
+                const ready = booth.status === "ready";
+                return `<article class="booth-item${selected}"><div class="booth-item-header"><div><h3>${escapeHtml(boothName(booth))}</h3><p>${escapeHtml(booth.location || "No location")}</p></div><span class="status ${ready ? "ready" : "incomplete"}">${ready ? "Ready" : "Incomplete"}</span></div><p class="booth-meta">Students: ${students} · PO: ${hasStaff ? escapeHtml(officerName(staffFor(booth.id).poUid)) : "Not assigned"}</p><button type="button" class="secondary" data-booth-id="${escapeHtml(booth.id)}">${selected ? "Selected" : "Select Booth"}</button></article>`;
+            }).join("");
+            list.querySelectorAll("[data-booth-id]").forEach(button => button.addEventListener("click", () => selectBooth(button.dataset.boothId)));
+        }
+
+        function renderStaffOptions() {
+            const selectedStaff = staffFor(state.selectedBoothId);
+            const po = $("poSelect");
+            const apo = $("apoSelect");
+            const unavailableOfficerIds = new Set();
+            state.staff.forEach((assignment, boothId) => {
+                if (boothId !== state.selectedBoothId && assignment.electionId === state.election?.id) {
+                    if (assignment.poUid) unavailableOfficerIds.add(assignment.poUid);
+                    if (assignment.apoUid) unavailableOfficerIds.add(assignment.apoUid);
+                }
+            });
+            const poOptions = state.officers.filter(item => item.role === "presiding_officer" && (!unavailableOfficerIds.has(item.id) || item.id === selectedStaff?.poUid));
+            const apoOptions = state.officers.filter(item => item.role === "assistant_presiding_officer" && (!unavailableOfficerIds.has(item.id) || item.id === selectedStaff?.apoUid));
+            po.innerHTML = `<option value="">${poOptions.length ? "Select Presiding Officer" : "No Presiding Officer available"}</option>` + poOptions.map(item => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.name || item.email || "Officer")}</option>`).join("");
+            apo.innerHTML = `<option value="">${apoOptions.length ? "No Assistant Presiding Officer" : "No Assistant Presiding Officer available"}</option>` + apoOptions.map(item => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.name || item.email || "Officer")}</option>`).join("");
+            po.value = selectedStaff?.poUid || "";
+            apo.value = selectedStaff?.apoUid || "";
+        }
+
+        function unassignedVoters() {
+            return state.voters.filter(voter => !voter.boothId);
+        }
+
+        function normaliseSearch(value) {
+            return String(value || "").trim().toLowerCase();
+        }
+
+        function sortedVoters(voters) {
+            return [...voters].sort((first, second) => String(first.rollNumber || first.name || "").localeCompare(String(second.rollNumber || second.name || ""), undefined, { numeric: true, sensitivity: "base" }));
+        }
+
+        function renderAssignmentFilters() {
+            const allUnassigned = unassignedVoters();
+            const classSelect = $("bulkClassFilter");
+            const sectionSelect = $("bulkSectionFilter");
+            const selectedClass = classSelect.value;
+            const classes = [...new Set(allUnassigned.map(voter => String(voter.className || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+            classSelect.innerHTML = '<option value="">All classes</option>' + classes.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("");
+            classSelect.value = classes.includes(selectedClass) ? selectedClass : "";
+
+            const selectedSection = sectionSelect.value;
+            const sections = [...new Set(allUnassigned
+                .filter(voter => !classSelect.value || String(voter.className || "") === classSelect.value)
+                .map(voter => String(voter.section || "").trim())
+                .filter(Boolean))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+            sectionSelect.innerHTML = '<option value="">All sections</option>' + sections.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("");
+            sectionSelect.value = sections.includes(selectedSection) ? selectedSection : "";
+        }
+
+        function filteredUnassignedVoters() {
+            const search = normaliseSearch($("bulkVoterSearch").value);
+            const className = $("bulkClassFilter").value;
+            const section = $("bulkSectionFilter").value;
+            return sortedVoters(unassignedVoters().filter(voter => {
+                const matchesSearch = !search || [voter.name, voter.rollNumber, voter.className, voter.section]
+                    .some(value => normaliseSearch(value).includes(search));
+                return matchesSearch
+                    && (!className || String(voter.className || "") === className)
+                    && (!section || String(voter.section || "") === section);
+            }));
+        }
+
+        function updateBulkSelectionSummary(totalMatches, firstItem, lastItem) {
+            const count = state.bulkSelectedVoterIds.size;
+            const button = $("bulkAssignVotersBtn");
+            button.disabled = count === 0;
+            if (!button.dataset.busy) {
+                button.textContent = count ? `Assign ${count} Selected Student${count === 1 ? "" : "s"}` : "Assign Selected Students";
+            }
+            $("bulkPageInfo").textContent = totalMatches
+                ? `${count} selected · Showing ${firstItem}–${lastItem} of ${totalMatches} unassigned students`
+                : "0 selected · No unassigned students found";
+        }
+
+        function renderAssignmentTable() {
+            const availableIds = new Set(unassignedVoters().map(voter => voter.id));
+            state.bulkSelectedVoterIds = new Set([...state.bulkSelectedVoterIds].filter(id => availableIds.has(id)));
+            renderAssignmentFilters();
+            const matches = filteredUnassignedVoters();
+            state.bulkPageSize = Number($("bulkPageSize").value) || 25;
+            const totalPages = Math.max(1, Math.ceil(matches.length / state.bulkPageSize));
+            state.bulkPage = Math.min(Math.max(1, state.bulkPage), totalPages);
+            const start = (state.bulkPage - 1) * state.bulkPageSize;
+            const pageVoters = matches.slice(start, start + state.bulkPageSize);
+            state.bulkPageVoterIds = pageVoters.map(voter => voter.id);
+
+            const body = $("bulkVoterTableBody");
+            body.innerHTML = pageVoters.map(voter => `<tr><td>${escapeHtml(voter.name || "Unnamed student")}</td><td>${escapeHtml(voter.rollNumber || "—")}</td><td>${escapeHtml(voter.className || "—")}</td><td>${escapeHtml(voter.section || "—")}</td><td><input type="checkbox" aria-label="Select ${escapeHtml(voter.name || "student")}" data-bulk-voter-id="${escapeHtml(voter.id)}" ${state.bulkSelectedVoterIds.has(voter.id) ? "checked" : ""}></td></tr>`).join("");
+            $("bulkVoterEmpty").hidden = pageVoters.length > 0;
+
+            body.querySelectorAll("[data-bulk-voter-id]").forEach(input => {
+                input.addEventListener("change", () => {
+                    if (input.checked) state.bulkSelectedVoterIds.add(input.dataset.bulkVoterId);
+                    else state.bulkSelectedVoterIds.delete(input.dataset.bulkVoterId);
+                    renderAssignmentTable();
+                });
+            });
+
+            const selectPage = $("selectPageVoters");
+            selectPage.disabled = pageVoters.length === 0;
+            selectPage.checked = pageVoters.length > 0 && pageVoters.every(voter => state.bulkSelectedVoterIds.has(voter.id));
+            selectPage.indeterminate = pageVoters.some(voter => state.bulkSelectedVoterIds.has(voter.id)) && !selectPage.checked;
+            $("bulkPreviousPageBtn").disabled = state.bulkPage === 1;
+            $("bulkNextPageBtn").disabled = state.bulkPage === totalPages || matches.length === 0;
+            $("bulkPaginationText").textContent = `Page ${state.bulkPage} of ${totalPages}`;
+            updateBulkSelectionSummary(matches.length, matches.length ? start + 1 : 0, Math.min(start + pageVoters.length, matches.length));
+        }
+
+        function renderVoters() {
+            const selected = state.selectedBoothId;
+            const list = $("assignedVoterList");
+            const assigned = sortedVoters(votersFor(selected));
+            list.innerHTML = assigned.length ? assigned.map(voter => `<div class="voter-row"><div><strong>${escapeHtml(voter.name)}</strong><p class="muted">${escapeHtml(voter.rollNumber)} · ${escapeHtml(voter.className || "")}</p></div><button type="button" class="secondary" data-unassign-id="${escapeHtml(voter.id)}">Remove</button></div>`).join("") : '<p class="empty">No student is assigned to this booth.</p>';
+            list.querySelectorAll("[data-unassign-id]").forEach(button => button.addEventListener("click", () => unassignVoter(button.dataset.unassignId)));
+            renderAssignmentTable();
+        }
+
+        function selectBooth(boothId) {
+            const boothChanged = state.selectedBoothId !== boothId;
+            state.selectedBoothId = boothId;
+            if (boothChanged) {
+                state.bulkSelectedVoterIds.clear();
+                state.bulkPage = 1;
+            }
+            const booth = state.booths.find(item => item.id === boothId);
+            if (!booth) return;
+            $("selectedBoothCard").hidden = false;
+            $("selectedBoothTitle").textContent = boothName(booth);
+            $("selectedBoothHelp").textContent = `${booth.location || "No location"}. Assign staff and students below.`;
+            $("selectedBoothStatus").textContent = booth.status === "ready" ? "Ready" : "Incomplete";
+            $("selectedBoothStatus").className = `status ${booth.status === "ready" ? "ready" : "incomplete"}`;
+            renderBooths();
+            renderStaffOptions();
+            renderVoters();
+        }
+
+        async function loadOfficers() {
+            const [poSnap, apoSnap] = await Promise.all([
+                getDocs(query(collection(db, "Users"), where("role", "==", "presiding_officer"))),
+                getDocs(query(collection(db, "Users"), where("role", "==", "assistant_presiding_officer")))
+            ]);
+            state.officers = [...poSnap.docs, ...apoSnap.docs].map(item => ({ id: item.id, ...item.data() })).filter(item => item.status === "active");
+        }
+
+        async function refreshElectionWorkspace(selectedBoothId = state.selectedBoothId) {
+            if (!state.election) return;
+            const electionId = state.election.id;
+            const [boothsSnap, staffSnap, votersSnap] = await Promise.all([
+                getDocs(query(collection(db, "Booths"), where("electionId", "==", electionId))),
+                getDocs(query(collection(db, "BoothStaff"), where("electionId", "==", electionId))),
+                getDocs(query(collection(db, "Voters"), where("electionId", "==", electionId)))
+            ]);
+            state.booths = boothsSnap.docs.map(item => ({ id: item.id, ...item.data() })).sort((a, b) => boothName(a).localeCompare(boothName(b), undefined, { numeric: true }));
+            state.staff = new Map(staffSnap.docs.map(item => [item.id, { id: item.id, ...item.data() }]));
+            state.voters = votersSnap.docs.map(item => ({ id: item.id, ...item.data() })).filter(item => item.eligible === true && item.participationStatus === "not_voted");
+            renderBooths();
+
+            if (selectedBoothId && state.booths.some(booth => booth.id === selectedBoothId)) {
+                selectBooth(selectedBoothId);
+            } else {
+                state.selectedBoothId = "";
+                $("selectedBoothCard").hidden = true;
+            }
+        }
+
+        async function loadElectionWorkspace(electionId) {
+            clearMessage();
+            state.election = state.elections.find(item => item.id === electionId) || null;
+            state.selectedBoothId = "";
+            state.bulkSelectedVoterIds.clear();
+            state.bulkPage = 1;
+            state.bulkPageVoterIds = [];
+            $("selectedBoothCard").hidden = true;
+            $("workspace").hidden = !state.election;
+            if (!state.election) return;
+            try {
+                await loadOfficers();
+                await refreshElectionWorkspace();
+            } catch (error) {
+                console.error("Booth workspace load failed", error);
+                showMessage("Unable to load booths and staff. Check this account has the Booths and Staff duty.", "error");
+            }
+        }
+
+        async function createBooth() {
+            const boothNumber = $("boothNumber").value.trim();
+            const location = $("boothLocation").value.trim();
+            if (!state.election || !boothNumber || !location) { showMessage("Enter booth number and location.", "error"); return; }
+            const button = $("createBoothBtn");
+            button.disabled = true;
+            try {
+                const boothRef = await addDoc(collection(db, "Booths"), { electionId: state.election.id, boothNumber, location, status: "incomplete", createdBy: state.user.uid, createdAt: serverTimestamp(), updatedBy: state.user.uid, updatedAt: serverTimestamp() });
+                $("boothNumber").value = ""; $("boothLocation").value = "";
+                state.booths.push({ id: boothRef.id, electionId: state.election.id, boothNumber, location, status: "incomplete" });
+                state.booths.sort((a, b) => boothName(a).localeCompare(boothName(b), undefined, { numeric: true }));
+                renderBooths();
+                showMessage("Booth created.");
+            } catch (error) {
+                console.error("Create booth failed", error);
+                showMessage("Unable to create booth. The voter list must be finalised first.", "error");
+            } finally { button.disabled = false; }
+        }
+
+        async function saveStaff() {
+            const booth = state.booths.find(item => item.id === state.selectedBoothId);
+            const poUid = $("poSelect").value;
+            const apoUid = $("apoSelect").value;
+            if (!booth || !poUid) { showMessage("Select a Presiding Officer.", "error"); return; }
+            if (poUid === apoUid) { showMessage("PO and APO must be different people.", "error"); return; }
+            const alreadyAssignedElsewhere = uid => [...state.staff.entries()].some(([assignedBoothId, assignment]) => assignedBoothId !== booth.id && (assignment.poUid === uid || assignment.apoUid === uid));
+            if (alreadyAssignedElsewhere(poUid) || (apoUid && alreadyAssignedElsewhere(apoUid))) {
+                showMessage("A polling staff member can only be assigned to one booth in this election.", "error");
+                return;
+            }
+            const existing = staffFor(booth.id);
+            try {
+                if (existing) {
+                    await updateDoc(doc(db, "BoothStaff", booth.id), { poUid, apoUid, updatedBy: state.user.uid, updatedAt: serverTimestamp() });
+                } else {
+                    await setDoc(doc(db, "BoothStaff", booth.id), { electionId: state.election.id, boothId: booth.id, poUid, apoUid, assignedBy: state.user.uid, assignedAt: serverTimestamp(), updatedBy: state.user.uid, updatedAt: serverTimestamp() });
+                }
+                state.staff.set(booth.id, {
+                    ...(existing || {}),
+                    id: booth.id,
+                    electionId: state.election.id,
+                    boothId: booth.id,
+                    poUid,
+                    apoUid
+                });
+                renderBooths();
+                renderStaffOptions();
+                showMessage("Booth staff saved.");
+            } catch (error) {
+                console.error("Save staff failed", error);
+                showMessage("Unable to save booth staff. Check the selected officer accounts are active.", "error");
+            }
+        }
+
+        async function invitePollingStaff() {
+            const name = $("staffName").value.trim();
+            const email = $("staffEmail").value.trim();
+            const role = $("staffRole").value;
+            if (!name || !email) {
+                showMessage("Enter the staff member's name and email address.", "error");
+                return;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showMessage("Enter a valid email address.", "error");
+                return;
+            }
+            const button = $("sendStaffInviteBtn");
+            button.disabled = true;
+            button.textContent = "Sending Invitation...";
+            try {
+                const invitation = await createInvitation({ db, auth, name, email, role, createdBy: state.user.uid });
+                $("staffName").value = "";
+                $("staffEmail").value = "";
+                showMessage(`Invitation sent to ${invitation.email}. This person will appear in the staff list after they create their account.`);
+            } catch (error) {
+                console.error("Polling staff invitation failed", error);
+                showMessage("Unable to send the invitation. Check the email address and Firebase email sign-in settings.", "error");
+            } finally {
+                button.disabled = false;
+                button.textContent = "Send Invitation";
+            }
+        }
+
+        async function refreshStaffList() {
+            const button = $("refreshOfficersBtn");
+            button.disabled = true;
+            button.textContent = "Refreshing...";
+            try {
+                await loadOfficers();
+                if (state.selectedBoothId) renderStaffOptions();
+                showMessage("Staff list updated.");
+            } catch (error) {
+                console.error("Polling staff list refresh failed", error);
+                showMessage("Unable to refresh the staff list.", "error");
+            } finally {
+                button.disabled = false;
+                button.textContent = "Refresh Staff List";
+            }
+        }
+
+        async function assignSelectedVoters() {
+            const boothId = state.selectedBoothId;
+            const validIds = [...state.bulkSelectedVoterIds].filter(id => unassignedVoters().some(voter => voter.id === id));
+            if (!boothId || !validIds.length) {
+                showMessage("Select at least one unassigned student first.", "error");
+                return;
+            }
+
+            const button = $("bulkAssignVotersBtn");
+            button.disabled = true;
+            button.textContent = "Assigning Students...";
+            button.dataset.busy = "true";
+            try {
+                for (let start = 0; start < validIds.length; start += BULK_ASSIGNMENT_BATCH_SIZE) {
+                    const batch = writeBatch(db);
+                    validIds.slice(start, start + BULK_ASSIGNMENT_BATCH_SIZE).forEach(voterId => {
+                        batch.update(doc(db, "Voters", voterId), { boothId, updatedAt: serverTimestamp() });
+                    });
+                    await batch.commit();
+                }
+                state.bulkSelectedVoterIds.clear();
+                const assignedIds = new Set(validIds);
+                state.voters = state.voters.map(voter => assignedIds.has(voter.id) ? { ...voter, boothId } : voter);
+                renderBooths();
+                renderVoters();
+                showMessage(`${validIds.length} student${validIds.length === 1 ? "" : "s"} assigned to this booth.`);
+            } catch (error) {
+                console.error("Bulk voter assignment failed", error);
+                showMessage("Unable to assign all selected students. The booth list will now refresh.", "error");
+                await refreshElectionWorkspace(boothId);
+            } finally {
+                delete button.dataset.busy;
+                renderAssignmentTable();
+            }
+        }
+
+        async function unassignVoter(voterId) {
+            const boothId = state.selectedBoothId;
+            const booth = state.booths.find(item => item.id === boothId);
+            try {
+                const wasLastStudent = Boolean(booth) && votersFor(boothId).length === 1;
+                const batch = writeBatch(db);
+                batch.update(doc(db, "Voters", voterId), { boothId: "", updatedAt: serverTimestamp() });
+                if (wasLastStudent && booth.status === "ready") {
+                    batch.update(doc(db, "Booths", boothId), { status: "incomplete", updatedBy: state.user.uid, updatedAt: serverTimestamp() });
+                }
+                await batch.commit();
+                state.voters = state.voters.map(voter => voter.id === voterId ? { ...voter, boothId: "" } : voter);
+                if (wasLastStudent && booth.status === "ready") {
+                    state.booths = state.booths.map(item => item.id === boothId ? { ...item, status: "incomplete" } : item);
+                }
+                renderBooths();
+                renderVoters();
+                showMessage(wasLastStudent && booth.status === "ready" ? "Student removed. This booth is now incomplete." : "Student removed from this booth.");
+            } catch (error) {
+                console.error("Unassign voter failed", error);
+                showMessage("Unable to remove this student.", "error");
+            }
+        }
+
+        async function markReady() {
+            const booth = state.booths.find(item => item.id === state.selectedBoothId);
+            if (!booth) return;
+            if (!staffFor(booth.id)?.poUid || votersFor(booth.id).length === 0) { showMessage("Assign at least one student and one Presiding Officer first.", "error"); return; }
+            try {
+                await updateDoc(doc(db, "Booths", booth.id), { status: "ready", updatedBy: state.user.uid, updatedAt: serverTimestamp() });
+                state.booths = state.booths.map(item => item.id === booth.id ? { ...item, status: "ready" } : item);
+                selectBooth(booth.id);
+                showMessage("Booth is ready.");
+            } catch (error) {
+                console.error("Mark booth ready failed", error);
+                showMessage("Unable to mark this booth ready.", "error");
+            }
+        }
+
+        async function initialise(user) {
+            const [userSnap, ecSnap] = await Promise.all([getDoc(doc(db, "Users", user.uid)), getDoc(doc(db, "ElectionCommission", user.uid))]);
+            const userData = userSnap.data();
+            const ecData = ecSnap.data();
+            const hasDuty = userSnap.exists() && ecSnap.exists() && userData.role === "election_commission" && userData.status === "active" && ecData.status === "active" && Array.isArray(ecData.duties) && ecData.duties.includes("Booth & Polling Staff Management");
+            if (!hasDuty) { throw new Error("This page is only for active Election Commission members with the Booths and Staff duty."); }
+            state.user = user;
+            state.userData = userData;
+            state.ecData = ecData;
+            renderProfile();
+            const institutionSnap = await getDoc(doc(db, "Institutions", "main"));
+            const institutionName = institutionSnap.exists()
+                ? (institutionSnap.data().name || "Institution")
+                : (userData.collegeName || "Institution");
+            $("institutionHeader").textContent = `${institutionName} — Institutional Election Management System`;
+            const electionsSnap = await getDocs(collection(db, "Elections"));
+            state.elections = electionsSnap.docs.map(item => ({ id: item.id, ...item.data() })).filter(item => item.status === "finalized" && item.voterListFinalized === true);
+            if (!state.elections.length) { showMessage("No election is ready for booth setup. Finalise the voter list first.", "error"); }
+            renderElectionOptions();
+        }
+
+        $("electionSelect").addEventListener("change", event => loadElectionWorkspace(event.target.value));
+        $("createBoothBtn").addEventListener("click", createBooth);
+        $("sendStaffInviteBtn").addEventListener("click", invitePollingStaff);
+        $("refreshOfficersBtn").addEventListener("click", refreshStaffList);
+        $("saveStaffBtn").addEventListener("click", saveStaff);
+        const resetAssignmentPage = () => { state.bulkPage = 1; renderAssignmentTable(); };
+        $("bulkVoterSearch").addEventListener("input", resetAssignmentPage);
+        $("bulkClassFilter").addEventListener("change", resetAssignmentPage);
+        $("bulkSectionFilter").addEventListener("change", resetAssignmentPage);
+        $("bulkPageSize").addEventListener("change", resetAssignmentPage);
+        $("selectPageVoters").addEventListener("change", event => {
+            state.bulkPageVoterIds.forEach(id => {
+                if (event.target.checked) state.bulkSelectedVoterIds.add(id);
+                else state.bulkSelectedVoterIds.delete(id);
+            });
+            renderAssignmentTable();
+        });
+        $("clearBulkSelectionBtn").addEventListener("click", () => { state.bulkSelectedVoterIds.clear(); renderAssignmentTable(); });
+        $("bulkPreviousPageBtn").addEventListener("click", () => { state.bulkPage = Math.max(1, state.bulkPage - 1); renderAssignmentTable(); });
+        $("bulkNextPageBtn").addEventListener("click", () => { state.bulkPage += 1; renderAssignmentTable(); });
+        $("bulkAssignVotersBtn").addEventListener("click", assignSelectedVoters);
+        $("markReadyBtn").addEventListener("click", markReady);
+        $("backBtn").addEventListener("click", () => window.location.href = "ec-dashboard.html");
+        $("profileButton").addEventListener("click", event => {
+            event.stopPropagation();
+            const dropdown = $("profileDropdown");
+            const isOpen = !dropdown.hidden;
+            dropdown.hidden = isOpen;
+            $("profileButton").setAttribute("aria-expanded", String(!isOpen));
+        });
+        document.addEventListener("click", event => {
+            if (!$("profileDropdown").contains(event.target) && !$("profileButton").contains(event.target)) {
+                $("profileDropdown").hidden = true;
+                $("profileButton").setAttribute("aria-expanded", "false");
+            }
+        });
+        $("myProfileButton").addEventListener("click", () => window.location.href = "profile.html");
+        $("dashboardSignOutButton").addEventListener("click", async () => { await signOut(auth); window.location.href = "login.html"; });
+
+        onAuthStateChanged(auth, async user => {
+            if (!user) { window.location.href = "login.html"; return; }
+            try { await initialise(user); } catch (error) { console.error("Booths and Staff setup failed", error); showMessage(error.message || "Unable to open this page.", "error"); }
+        });
+    </script>
+</body>
+</html>

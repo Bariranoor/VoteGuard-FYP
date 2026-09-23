@@ -1,0 +1,4679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nomination Form Editor</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f4f6f8;
+    color:#222;
+    min-height:100vh;
+}
+
+.header{
+    background:#1976d2;
+    color:#fff;
+    padding:20px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+}
+
+.header h1{
+    margin-bottom:5px;
+    font-size:25px;
+}
+
+.header p{
+    opacity:.92;
+}
+
+.header-right{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.back-link{
+    color:#fff;
+    text-decoration:none;
+    font-size:14px;
+}
+
+.back-link:hover{
+    text-decoration:underline;
+}
+
+.profile-area{
+    position:relative;
+}
+
+.profile-btn{
+    background:transparent;
+    border:0;
+    color:#fff;
+    padding:0;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    font-size:14px;
+}
+
+.profile-avatar{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background:#fff;
+    color:#1976d2;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+}
+
+.profile-dropdown{
+    display:none;
+    position:absolute;
+    right:0;
+    top:44px;
+    width:230px;
+    background:#fff;
+    color:#222;
+    border:1px solid #ddd;
+    border-radius:8px;
+    box-shadow:0 4px 14px rgba(0,0,0,.12);
+    z-index:50;
+}
+
+.profile-dropdown.open{
+    display:block;
+}
+
+.profile-dropdown .profile-info{
+    padding:14px;
+    border-bottom:1px solid #eee;
+}
+
+.profile-dropdown .name{
+    font-weight:bold;
+    margin-bottom:4px;
+}
+
+.profile-dropdown .role{
+    font-size:13px;
+    color:#666;
+}
+
+.profile-dropdown button{
+    width:100%;
+    text-align:left;
+    background:#fff;
+    color:#222;
+    border-radius:0;
+    padding:12px 14px;
+}
+
+.profile-dropdown button:hover{
+    background:#f4f6f8;
+}
+
+.container{
+    max-width:1250px;
+    margin:auto;
+    padding:28px;
+}
+
+.panel{
+    background:#fff;
+    border-radius:10px;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+    padding:22px;
+    margin-bottom:20px;
+}
+
+.panel h2{
+    margin-bottom:8px;
+}
+
+.panel h3{
+    margin-bottom:15px;
+}
+
+.description{
+    color:#666;
+    line-height:1.5;
+    margin-bottom:18px;
+}
+
+.message{
+    display:none;
+    padding:11px 13px;
+    border-radius:6px;
+    margin-bottom:15px;
+    line-height:1.5;
+}
+
+.message.show{
+    display:block;
+}
+
+.message.success{
+    background:#d4edda;
+    color:#155724;
+}
+
+.message.error{
+    background:#f8d7da;
+    color:#842029;
+}
+
+.message.warning{
+    background:#fff3cd;
+    color:#856404;
+}
+
+.loading{
+    padding:25px;
+    text-align:center;
+    color:#666;
+}
+
+.toolbar{
+    display:flex;
+    gap:12px;
+    align-items:end;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+}
+
+.field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-width:220px;
+}
+
+.field.full{
+    grid-column:1/-1;
+}
+
+.field label{
+    font-size:13px;
+    font-weight:bold;
+}
+
+input,
+select,
+textarea{
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:14px;
+    background:#fff;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+    outline:none;
+    border-color:#1976d2;
+}
+
+input[readonly]{
+    background:#f7f8fa;
+}
+
+textarea{
+    min-height:120px;
+    resize:vertical;
+}
+
+button{
+    padding:10px 15px;
+    border:0;
+    border-radius:6px;
+    background:#1976d2;
+    color:#fff;
+    cursor:pointer;
+    font-size:14px;
+}
+
+button:hover{
+    background:#1565c0;
+}
+
+button.secondary{
+    background:#6c757d;
+}
+
+button.secondary:hover{
+    background:#5a6268;
+}
+
+button.success{
+    background:#2e7d32;
+}
+
+button.success:hover{
+    background:#256628;
+}
+
+button.danger{
+    background:#c62828;
+}
+
+button.danger:hover{
+    background:#a91f1f;
+}
+
+button.warning{
+    background:#ef6c00;
+}
+
+button.warning:hover{
+    background:#d85f00;
+}
+
+button.small{
+    padding:7px 10px;
+    font-size:12px;
+}
+
+button:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+}
+
+.actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
+
+.grid-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+
+.info-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:14px;
+}
+
+.info-box{
+    background:#f7f8fa;
+    border-radius:7px;
+    padding:14px;
+}
+
+.info-box strong{
+    display:block;
+    color:#666;
+    font-size:12px;
+    margin-bottom:6px;
+}
+
+.info-box span,
+.info-box div{
+    font-size:14px;
+    word-break:break-word;
+}
+
+.status{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:14px;
+    font-size:12px;
+    font-weight:bold;
+    background:#e8eef5;
+    color:#245;
+}
+
+.status.draft{
+    background:#fff3cd;
+    color:#856404;
+}
+
+.status.published{
+    background:#d4edda;
+    color:#155724;
+}
+
+.status.closed{
+    background:#e2e3e5;
+    color:#383d41;
+}
+
+.readonly-note{
+    padding:12px 14px;
+    border-radius:6px;
+    background:#e8f1ff;
+    color:#174a8b;
+    line-height:1.5;
+    margin-bottom:18px;
+}
+
+.warning-note{
+    padding:12px 14px;
+    border-radius:6px;
+    background:#fff3cd;
+    color:#856404;
+    line-height:1.5;
+    margin-bottom:18px;
+}
+
+.section-block{
+    margin-top:20px;
+    border-top:1px solid #eee;
+    padding-top:20px;
+}
+
+.section-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:12px;
+}
+
+.section-header h3{
+    margin-bottom:0;
+}
+
+.position-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:9px;
+}
+
+.position-item{
+    border:1px solid #ddd;
+    border-radius:7px;
+    padding:11px;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    background:#fff;
+}
+
+.position-item.selected{
+    border-color:#1976d2;
+    background:#f4f8ff;
+}
+
+.position-item input{
+    width:auto;
+    flex-shrink:0;
+}
+
+.position-meta{
+    min-width:0;
+}
+
+.position-name{
+    font-weight:bold;
+    margin-bottom:3px;
+}
+
+.position-seats{
+    font-size:12px;
+    color:#666;
+}
+
+.dynamic-list{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+}
+
+.list-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.list-row input{
+    flex:1;
+}
+
+.list-row button{
+    flex-shrink:0;
+}
+
+.list-number{
+    width:28px;
+    text-align:center;
+    font-weight:bold;
+    color:#666;
+}
+
+.empty{
+    padding:22px;
+    text-align:center;
+    color:#666;
+    border:1px dashed #ccc;
+    border-radius:8px;
+}
+
+.check-list{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+}
+
+.check-item{
+    border:1px solid #ddd;
+    border-radius:7px;
+    padding:11px;
+    display:flex;
+    align-items:flex-start;
+    gap:9px;
+}
+
+.check-item input{
+    width:auto;
+    margin-top:2px;
+}
+
+.check-item-text{
+    flex:1;
+}
+
+.check-item-title{
+    font-weight:bold;
+    margin-bottom:3px;
+}
+
+.check-item-description{
+    font-size:12px;
+    color:#666;
+    line-height:1.4;
+}
+
+.locked-field{
+    background:#f7f8fa;
+    border:1px solid #ddd;
+    border-radius:7px;
+    padding:12px;
+}
+
+.locked-field .field-title{
+    font-weight:bold;
+    margin-bottom:4px;
+}
+
+.locked-field .field-subtitle{
+    color:#666;
+    font-size:12px;
+}
+
+.preview{
+    background:#f4f6f8;
+    border:1px solid #ddd;
+    border-radius:8px;
+    padding:18px;
+}
+
+.preview-card{
+    background:#fff;
+    border-radius:8px;
+    padding:20px;
+    box-shadow:0 1px 5px rgba(0,0,0,.05);
+}
+
+.preview-title{
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:8px;
+}
+
+.preview-text{
+    color:#666;
+    line-height:1.5;
+    margin-bottom:16px;
+    white-space:pre-wrap;
+}
+
+.preview-heading{
+    font-size:15px;
+    font-weight:bold;
+    margin:17px 0 8px;
+}
+
+.preview-list{
+    padding-left:20px;
+    line-height:1.6;
+}
+
+.preview-field{
+    margin-bottom:12px;
+}
+
+.preview-field label{
+    display:block;
+    font-size:13px;
+    font-weight:bold;
+    margin-bottom:5px;
+}
+
+.preview-input,
+.preview-textarea,
+.preview-upload{
+    width:100%;
+    border:1px solid #ccc;
+    border-radius:6px;
+    padding:10px;
+    color:#777;
+    background:#fafafa;
+}
+
+.preview-textarea{
+    min-height:85px;
+}
+
+.preview-declaration{
+    border:1px solid #ddd;
+    padding:12px;
+    border-radius:7px;
+    background:#fafafa;
+    line-height:1.5;
+}
+
+.form-actions{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:20px;
+}
+
+.form-actions-left,
+.form-actions-right{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.hint{
+    font-size:12px;
+    color:#777;
+    line-height:1.4;
+}
+/* =====================================================
+   FINALIZE FORM MODAL
+===================================================== */
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 9999;
+}
+
+.modal-backdrop.open {
+    display: flex;
+}
+
+.finalize-modal-content {
+    width: min(430px, 100%);
+    background: #ffffff;
+    border: 1px solid #d5dde6;
+    border-radius: 8px;
+    padding: 22px;
+}
+
+.finalize-modal-content h3 {
+    margin: 0 0 12px;
+    font-size: 19px;
+    color: #102c49;
+}
+
+.finalize-modal-content p {
+    margin: 0;
+    color: #344054;
+    line-height: 1.5;
+}
+
+.finalize-note {
+    background: #fff4e5;
+    border: 1px solid #f5d6a8;
+    border-radius: 6px;
+    color: #7a4805;
+    font-size: 14px;
+    line-height: 1.45;
+    margin-top: 16px;
+    padding: 12px;
+}
+
+.modal-actions {
+    border-top: 1px solid #e6edf3;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+}
+
+.modal-actions button {
+    min-width: 130px;
+}
+
+.hidden{
+    display:none !important;
+}
+
+@media(max-width:900px){
+    .grid-2,
+    .grid-3,
+    .info-grid,
+    .position-grid{
+        grid-template-columns:1fr;
+    }
+
+    .header{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .header-right{
+        width:100%;
+        justify-content:space-between;
+    }
+}
+
+@media(max-width:600px){
+    .container{
+        padding:16px;
+    }
+
+    .panel{
+        padding:17px;
+    }
+
+    .list-row{
+        flex-wrap:wrap;
+    }
+
+    .list-row input{
+        min-width:0;
+        width:100%;
+        flex-basis:100%;
+    }
+}
+</style>
+<link rel="stylesheet" href="assets/css/navigation.css?v=20260913-nav">
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+</head>
+
+<body>
+
+<header class="header">
+
+    <div>
+        <h1>Nomination Form Editor</h1>
+        <p id="institutionHeader">
+            Institutional Election Management System
+        </p>
+    </div>
+
+    <div class="header-right">
+
+    <div class="profile-area">
+
+            <button
+                id="profileBtn"
+                class="profile-btn"
+                type="button"
+            >
+                <span
+                    id="profileAvatar"
+                    class="profile-avatar"
+                >
+                    EC
+                </span>
+
+                <span id="profileName">
+                    Election Commission
+                </span>
+            </button>
+
+            <div
+                id="profileDropdown"
+                class="profile-dropdown"
+            >
+                <div class="profile-info">
+                    <div
+                        id="dropdownName"
+                        class="name"
+                    >
+                        Election Commission
+                    </div>
+
+                    <div
+                        id="dropdownRole"
+                        class="role"
+                    >
+                        Election Commission
+                    </div>
+                </div>
+
+                <button
+                    id="logoutBtn"
+                    type="button"
+                >
+                    Logout
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="container">
+<nav class="page-navigation" aria-label="Page navigation">
+    <a
+        id="backToNominationPage"
+        href="#"
+        class="back-link back-dashboard-button"
+    >
+        Back to Nominations
+    </a>
+</nav>
+<div
+    id="loadingArea"
+    class="loading"
+>
+    Loading selected election...
+</div>
+
+<section
+    id="selectedElectionHeader"
+    class="panel hidden"
+>
+    <h2 id="selectedElectionHeaderName">
+        Nomination Form
+    </h2>
+
+    <p
+        id="selectedElectionHeaderText"
+        class="description"
+        style="margin-bottom:0"
+    >
+        Loading election information...
+    </p>
+</section>
+    <div
+        id="pageMessage"
+        class="message"
+    ></div>
+
+
+  
+
+    <!-- =====================================================
+         ELECTION INFORMATION
+    ====================================================== -->
+
+    <section
+        id="electionInformationPanel"
+        class="panel hidden"
+    >
+
+        <h2>Election Information</h2>
+
+        <p class="description">
+            This information is controlled by the Principal or authorized Sub-Admin.
+            Election Commission members cannot change it from this page.
+        </p>
+
+        <div class="info-grid">
+
+            <div class="info-box">
+                <strong>Election Name</strong>
+                <span id="displayElectionName">—</span>
+            </div>
+
+            <div class="info-box">
+                <strong>Academic Session</strong>
+                <span id="displayAcademicSession">—</span>
+            </div>
+
+            <div class="info-box">
+                <strong>Description</strong>
+                <span id="displayElectionDescription">—</span>
+            </div>
+
+            <div class="info-box">
+                <strong>Election Status</strong>
+                <span id="displayElectionStatus">—</span>
+            </div>
+
+            <div class="info-box">
+                <strong>Nomination Start</strong>
+                <span id="displayNominationStart">—</span>
+            </div>
+
+            <div class="info-box">
+                <strong>Nomination End</strong>
+                <span id="displayNominationEnd">—</span>
+            </div>
+
+            <div class="info-box">
+                <strong>Voting Start</strong>
+                <span id="displayVotingStart">—</span>
+            </div>
+
+            <div class="info-box">
+                <strong>Voting End</strong>
+                <span id="displayVotingEnd">—</span>
+            </div>
+
+        </div>
+
+        <div
+            id="voterListStatusNotice"
+            style="margin-top:18px"
+        ></div>
+
+    </section>
+
+
+    <!-- =====================================================
+         AVAILABLE POSITIONS
+    ====================================================== -->
+
+    <section
+        id="positionsPanel"
+        class="panel hidden"
+    >
+
+        <h2>Available Election Positions</h2>
+
+        <p class="description">
+            These positions were created in Election Management by the Principal or authorized
+            Sub-Admin. You may select which existing positions should appear on the student
+            nomination form. You cannot create, rename, or change the number of seats here.
+        </p>
+
+        <div
+            id="positionsContainer"
+            class="position-grid"
+        ></div>
+
+    </section>
+
+
+    <!-- =====================================================
+         NOMINATION FORM CONFIGURATION
+    ====================================================== -->
+
+    <section
+        id="configurationPanel"
+        class="panel hidden"
+    >
+
+        <h2>Nomination Form Configuration</h2>
+
+        <div
+            id="configurationLockNotice"
+            class="readonly-note hidden"
+        ></div>
+
+
+        <!-- FORM DETAILS -->
+
+        <div class="section-block" style="margin-top:0;padding-top:0;border-top:0">
+
+            <h3>Form Details</h3>
+
+            <div class="grid-2">
+
+                <div class="field full">
+
+                    <label for="formTitle">
+                        Form Title
+                    </label>
+
+                    <input
+                        id="formTitle"
+                        type="text"
+                        maxlength="150"
+                        placeholder="e.g. Candidate Nomination Form"
+                    >
+
+                    <div class="hint">
+                        This title will appear on the future student-facing application form.
+                    </div>
+
+                </div>
+
+
+                <div class="field full">
+
+                    <label for="formInstructions">
+                        Instructions
+                    </label>
+
+                    <textarea
+                        id="formInstructions"
+                        maxlength="5000"
+                        placeholder="Explain who can apply, how the form should be completed, and any important instructions."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+       <!-- CANDIDATE INFORMATION -->
+
+<div class="section-block">
+
+    <h3>Candidate Information</h3>
+
+    <p class="description">
+        Configure the information that the future student-facing nomination application will collect.
+        Essential identity fields are permanently required because they are used to verify the applicant
+        against the institution's eligible voter records.
+    </p>
+
+
+    <div class="check-list">
+
+        <!-- FULL NAME -->
+
+        <div class="check-item">
+
+            <input
+                type="checkbox"
+                checked
+                disabled
+            >
+
+            <div class="check-item-text">
+
+                <div class="check-item-title">
+                    Full Name
+                </div>
+
+                <div class="check-item-description">
+                    Required system field. Cannot be removed.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ROLL NUMBER -->
+
+        <div class="check-item">
+
+            <input
+                type="checkbox"
+                checked
+                disabled
+            >
+
+            <div class="check-item-text">
+
+                <div class="check-item-title">
+                    Roll Number
+                </div>
+
+                <div class="check-item-description">
+                    Required system field used for voter-list verification. Cannot be removed.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CLASS -->
+
+        <div class="check-item">
+
+            <input
+                type="checkbox"
+                checked
+                disabled
+            >
+
+            <div class="check-item-text">
+
+                <div class="check-item-title">
+                    Class / Program
+                </div>
+
+                <div class="check-item-description">
+                    Required institutional student field. Cannot be removed.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SECTION -->
+
+        <div class="check-item">
+
+            <input
+                type="checkbox"
+                checked
+                disabled
+            >
+
+            <div class="check-item-text">
+
+                <div class="check-item-title">
+                    Section
+                </div>
+
+                <div class="check-item-description">
+                    Required institutional student field. Cannot be removed.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- POSITION -->
+
+        <div class="check-item">
+
+            <input
+                type="checkbox"
+                checked
+                disabled
+            >
+
+            <div class="check-item-text">
+
+                <div class="check-item-title">
+                    Position
+                </div>
+
+                <div class="check-item-description">
+                    Required system field. Students select from the election positions enabled above.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- MANIFESTO -->
+
+        <div class="check-item">
+
+            <input
+                id="manifestoEnabled"
+                type="checkbox"
+                checked
+            >
+
+            <div class="check-item-text">
+
+                <div class="check-item-title">
+                    Manifesto / Candidate Statement
+                </div>
+
+                <div class="check-item-description">
+                    Optional configurable student field. The EC may enable or disable this field.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- MANIFESTO REQUIRED -->
+
+        <div
+            id="manifestoRequiredRow"
+            class="check-item"
+        >
+
+            <input
+                id="manifestoRequired"
+                type="checkbox"
+                checked
+            >
+
+            <div class="check-item-text">
+
+                <div class="check-item-title">
+                    Manifesto / Candidate Statement — Required
+                </div>
+
+                <div class="check-item-description">
+                    Applies only when the manifesto field is enabled.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SYMBOL -->
+
+        <div class="check-item">
+
+            <input
+                id="candidateSymbolEnabled"
+                type="checkbox"
+                checked
+            >
+
+            <div class="check-item-text">
+
+                <div class="check-item-title">
+                    Candidate Symbol / Logo
+                </div>
+
+                <div class="check-item-description">
+                    Student uploads their own candidate symbol on the future student-facing application.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SYMBOL REQUIRED -->
+
+        <div
+            id="candidateSymbolRequiredRow"
+            class="check-item"
+        >
+
+            <input
+                id="candidateSymbolRequired"
+                type="checkbox"
+                checked
+            >
+
+            <div class="check-item-text">
+
+                <div class="check-item-title">
+                    Candidate Symbol / Logo — Required
+                </div>
+
+                <div class="check-item-description">
+                    JPEG, PNG, or WebP. Actual upload and compression happen on the student-facing page.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+        <!-- REQUIREMENTS -->
+
+        <div class="section-block">
+
+            <div class="section-header">
+
+                <h3>Nomination Requirements</h3>
+
+                <button
+                    id="addRequirementBtn"
+                    type="button"
+                    class="secondary small"
+                >
+                    + Add Requirement
+                </button>
+
+            </div>
+
+            <p class="description">
+                Requirements describe what a student must satisfy to be eligible to apply.
+                Store each requirement separately so it can be shown clearly on the student form.
+            </p>
+
+            <div
+                id="requirementsList"
+                class="dynamic-list"
+            ></div>
+
+            <div
+                id="requirementsEmpty"
+                class="empty"
+            >
+                No requirements have been added yet.
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- =====================================================
+         FORM PREVIEW
+    ====================================================== -->
+
+    <section
+        id="previewPanel"
+        class="panel hidden"
+    >
+
+        <h2>Student Form Preview</h2>
+
+        <p class="description">
+            This is a preview of how the future student-facing nomination application may appear.
+            This preview does not submit an application and does not create a candidate record.
+        </p>
+
+        <div class="preview">
+
+            <div class="preview-card">
+
+                <div
+                    id="previewTitle"
+                    class="preview-title"
+                >
+                    Candidate Nomination Form
+                </div>
+
+                <div
+                    id="previewInstructions"
+                    class="preview-text"
+                >
+                    Instructions will appear here.
+                </div>
+
+
+                <div class="preview-heading">
+                    Candidate Information
+                </div>
+
+
+                <div class="preview-field">
+
+                    <label>
+                        Full Name
+                    </label>
+
+                    <div class="preview-input">
+                        Student enters full name
+                    </div>
+
+                </div>
+
+
+                <div class="preview-field">
+
+                    <label>
+                        Roll Number
+                    </label>
+
+                    <div class="preview-input">
+                        Student enters roll number
+                    </div>
+
+                </div>
+
+
+                <div class="preview-field">
+
+                    <label>
+                        Class / Program
+                    </label>
+
+                    <div class="preview-input">
+                        Student enters class/program
+                    </div>
+
+                </div>
+
+
+                <div class="preview-field">
+
+                    <label>
+                        Section
+                    </label>
+
+                    <div class="preview-input">
+                        Student enters section
+                    </div>
+
+                </div>
+
+
+                <div class="preview-field">
+
+                    <label>
+                        Position
+                    </label>
+
+                    <div
+                        id="previewPositions"
+                        class="preview-input"
+                    >
+                        No positions selected.
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="previewManifestoBlock"
+                    class="preview-field"
+                >
+
+                    <label>
+                        Manifesto / Candidate Statement
+                    </label>
+
+                    <div class="preview-textarea">
+                        Student enters a plain-text manifesto or candidate statement.
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="previewSymbolBlock"
+                    class="preview-field"
+                >
+
+                    <label>
+                        Candidate Symbol / Logo
+                    </label>
+
+                    <div class="preview-upload">
+                        Student uploads JPEG, PNG, or WebP image.
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="previewRequirementsBlock"
+                >
+
+                    <div class="preview-heading">
+                        Requirements
+                    </div>
+
+                    <ul
+                        id="previewRequirements"
+                        class="preview-list"
+                    >
+                    </ul>
+
+                </div>
+
+
+                <div
+                    id="previewRulesBlock"
+                >
+
+                    <div class="preview-heading">
+                     Nomination Rules
+                    </div>
+
+                    <ul
+                        id="previewRules"
+                        class="preview-list"
+                    >
+                    </ul>
+
+                </div>
+
+
+                <div class="preview-heading">
+                    Declaration
+                </div>
+
+                <div
+                    id="previewDeclaration"
+                    class="preview-declaration"
+                >
+                    Declaration text will appear here.
+                </div>
+
+                <div style="margin-top:14px">
+
+                    <label style="display:flex;gap:8px;align-items:flex-start">
+
+                        <input
+                            type="checkbox"
+                            disabled
+                            style="width:auto;margin-top:2px"
+                        >
+
+                        <span>
+                            I accept this declaration.
+                        </span>
+
+                    </label>
+
+                </div>
+
+                <div
+                    class="actions"
+                    style="margin-top:18px"
+                >
+
+                    <button
+                        type="button"
+                        disabled
+                    >
+                        Submit Application
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ACTIONS
+    ====================================================== -->
+
+    <section
+    id="actionsPanel"
+    class="panel hidden"
+>
+
+    <div class="form-actions">
+
+        <div class="form-actions-left">
+
+            <button
+                id="backBtn"
+                type="button"
+                class="secondary"
+            >
+                Back
+            </button>
+
+        </div>
+
+        <div class="form-actions-right">
+
+            <button
+                id="saveDraftBtn"
+                type="button"
+            >
+                Save Draft
+            </button>
+
+            <button
+                id="finalizeFormBtn"
+                type="button"
+                class="success"
+            >
+                Finalize Form
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+<!-- FINALIZE NOMINATION FORM MODAL -->
+<div id="finalizeFormModal" class="modal-backdrop">
+    <div class="finalize-modal-content" role="dialog" aria-modal="true" aria-labelledby="finalizeFormTitle">
+
+        <h3 id="finalizeFormTitle">Finalize nomination form?</h3>
+
+        <p>
+            Finalizing locks this form. You cannot change it later.
+        </p>
+
+        <div class="finalize-note">
+            Students can use the nomination form after it is finalized.
+        </div>
+
+        <div class="modal-actions">
+
+            <button
+                id="cancelFinalizeFormBtn"
+                type="button"
+                class="secondary"
+            >
+                Cancel
+            </button>
+
+            <button
+                id="confirmFinalizeFormBtn"
+                type="button"
+                class="success"
+            >
+                Finalize Form
+            </button>
+
+        </div>
+
+    </div>
+</div>
+</main>
+
+
+<script type="module">
+
+import { auth, db } from "./js/firebase.js";
+import {
+    requireAuth
+} from "./js/auth.js";
+import {
+    getDashboardForRole
+} from "./js/navigation.js";
+
+import {
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    query,
+    where,
+    setDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+import {
+    signOut
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+
+/* =========================================================
+   CONSTANTS
+========================================================= */
+
+const EC_DUTY =
+    "Nomination & Candidate Management";
+const NOMINATION_FORM_STATUSES = {
+    DRAFT: "draft",
+    FINALIZED: "finalized",
+    CLOSED: "closed"
+};
+const FIXED_APPLICANT_DECLARATION =
+    "I assure that the information provided in this nomination application is correct.";
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let currentUser = null;
+let currentUserData = null;
+let ecData = null;
+
+let elections = [];
+let selectedElectionId = "";
+let selectedElection = null;
+
+let positions = [];
+let nominationForm = null;
+
+let requirements = [];
+let rules = [];
+
+
+/* =========================================================
+   DOM HELPER
+========================================================= */
+
+const $ = (id) =>
+    document.getElementById(id);
+
+
+/* =========================================================
+   MESSAGE HANDLING
+========================================================= */
+
+function showMessage(
+    text,
+    type = "success"
+) {
+
+    const el =
+        $("pageMessage");
+
+    el.textContent =
+        text;
+
+    el.className =
+        `message show ${type}`;
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+}
+
+
+function clearMessage() {
+
+    $("pageMessage").className =
+        "message";
+
+    $("pageMessage").textContent =
+        "";
+}
+
+
+/* =========================================================
+   SAFE ERROR MESSAGE
+========================================================= */
+
+function getFriendlyError(error) {
+
+    const code =
+        error?.code || "";
+
+    if (
+        code ===
+        "permission-denied"
+    ) {
+
+        return "You do not have permission to perform this action.";
+
+    }
+
+    if (
+        code ===
+        "unavailable"
+    ) {
+
+        return "The service is temporarily unavailable. Please check your internet connection and try again.";
+
+    }
+
+    if (
+        code ===
+        "failed-precondition"
+    ) {
+
+        return "This operation cannot be completed in the current election state.";
+
+    }
+
+    if (
+        code ===
+        "not-found"
+    ) {
+
+        return "The requested election or form could not be found.";
+
+    }
+
+    return "The requested operation could not be completed. Please try again.";
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+/* =========================================================
+   DATE FORMATTING
+========================================================= */
+
+function formatDate(
+    value
+) {
+
+    if (!value) {
+        return "—";
+    }
+
+    try {
+
+        const date =
+            value?.toDate
+                ? value.toDate()
+                : new Date(value);
+
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+            return "—";
+        }
+
+        return date.toLocaleString();
+
+    } catch {
+
+        return "—";
+
+    }
+
+}
+
+
+/* =========================================================
+   STATUS BADGE
+========================================================= */
+
+function statusBadge(
+    status
+) {
+
+    const safeStatus =
+        String(
+            status || "draft"
+        )
+        .toLowerCase();
+
+    const label =
+        safeStatus
+            .replaceAll(
+                "_",
+                " "
+            )
+            .replace(
+                /^\w/,
+                c => c.toUpperCase()
+            );
+
+    return `
+        <span class="status ${escapeHtml(safeStatus)}">
+            ${escapeHtml(label)}
+        </span>
+    `;
+
+}
+
+
+/* =========================================================
+   LOAD CURRENT USER
+========================================================= */
+
+async function loadCurrentUser() {
+
+    const result =
+        await requireAuth(
+            "login.html"
+        );
+
+    if (!result) {
+        throw new Error(
+            "Authentication required."
+        );
+    }
+
+    currentUser =
+        result.user;
+
+    currentUserData =
+        result.data;
+
+    if (!currentUserData) {
+
+        throw new Error(
+            "Your account profile could not be found."
+        );
+
+    }
+
+
+    if (
+        currentUserData.status !==
+        "active"
+    ) {
+
+        showMessage(
+            "Your account is not active.",
+            "error"
+        );
+
+        return false;
+
+    }
+
+
+    if (
+        currentUserData.role !==
+        "election_commission"
+    ) {
+
+        showMessage(
+            "You are not authorized to access Nomination Form Editor.",
+            "error"
+        );
+
+        setTimeout(
+            () => {
+
+                window.location.href =
+                    getDashboardForRole(
+                        currentUserData.role
+                    );
+
+            },
+            1200
+        );
+
+        return false;
+
+    }
+
+
+    const ecSnap =
+        await getDoc(
+            doc(
+                db,
+                "ElectionCommission",
+                currentUser.uid
+            )
+        );
+
+
+    if (
+        !ecSnap.exists()
+    ) {
+
+        showMessage(
+            "Your Election Commission profile could not be found.",
+            "error"
+        );
+
+        return false;
+
+    }
+
+
+    ecData =
+        ecSnap.data();
+
+
+    if (
+        ecData.status !==
+        "active"
+    ) {
+
+        showMessage(
+            "Your Election Commission account is not active.",
+            "error"
+        );
+
+        return false;
+
+    }
+
+
+    if (
+        !Array.isArray(
+            ecData.duties
+        ) ||
+        !ecData.duties.includes(
+            EC_DUTY
+        )
+    ) {
+
+        showMessage(
+            "You are not authorized to configure nomination forms.",
+            "error"
+        );
+
+        setTimeout(
+            () => {
+
+                window.location.href =
+                    "ec-dashboard.html";
+
+            },
+            1200
+        );
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+   LOAD INSTITUTION
+========================================================= */
+
+async function loadInstitutionInformation() {
+
+    try {
+
+        const snap =
+            await getDoc(
+                doc(
+                    db,
+                    "Institutions",
+                    "main"
+                )
+            );
+
+
+        if (
+            snap.exists() &&
+            snap.data().name
+        ) {
+
+            $("institutionHeader").textContent =
+                snap.data().name;
+
+        } else {
+
+            $("institutionHeader").textContent =
+                "Institutional Election Management System";
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Institution loading error:",
+            error
+        );
+
+        $("institutionHeader").textContent =
+            "Institutional Election Management System";
+
+    }
+
+}
+
+
+/* =========================================================
+   PROFILE
+========================================================= */
+
+function renderProfile() {
+
+    const name =
+        currentUserData?.name ||
+        ecData?.name ||
+        "Election Commission";
+
+    $("profileName").textContent =
+        name;
+
+    $("dropdownName").textContent =
+        name;
+
+    $("dropdownRole").textContent =
+        "Election Commission";
+
+
+    const initials =
+        name
+            .split(/\s+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map(
+                part =>
+                    part[0]
+                        .toUpperCase()
+            )
+            .join("");
+
+
+    $("profileAvatar").textContent =
+        initials || "EC";
+
+}
+
+
+/* =========================================================
+   LOAD ELECTIONS
+========================================================= */
+
+async function loadElections() {
+
+    $("electionSelect").innerHTML =
+        `<option value="">Loading elections...</option>`;
+
+
+    const snap =
+        await getDocs(
+            collection(
+                db,
+                "Elections"
+            )
+        );
+
+
+    elections =
+        snap.docs
+            .map(
+                electionDoc => ({
+                    id: electionDoc.id,
+                    ...electionDoc.data()
+                })
+            )
+            .sort(
+                (a, b) => {
+
+                    const aTime =
+                        a.createdAt?.toMillis?.() || 0;
+
+                    const bTime =
+                        b.createdAt?.toMillis?.() || 0;
+
+                    return bTime - aTime;
+
+                }
+            );
+
+
+    const select =
+        $("electionSelect");
+
+
+    select.innerHTML =
+        "";
+
+
+    if (
+        elections.length === 0
+    ) {
+
+        select.innerHTML =
+            `<option value="">No elections available</option>`;
+
+        selectedElectionId =
+            "";
+
+        selectedElection =
+            null;
+
+        hideElectionPanels();
+
+        return;
+
+    }
+
+
+    select.appendChild(
+        new Option(
+            "Select an election",
+            ""
+        )
+    );
+
+
+    elections.forEach(
+        election => {
+
+            const status =
+                election.status ||
+                "draft";
+
+            const option =
+                new Option(
+                    `${election.electionName || "Unnamed Election"} (${status})`,
+                    election.id
+                );
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
+
+
+    if (
+        selectedElectionId &&
+        elections.some(
+            election =>
+                election.id ===
+                selectedElectionId
+        )
+    ) {
+
+        select.value =
+            selectedElectionId;
+
+        await loadSelectedElection();
+
+    } else {
+
+        selectedElectionId =
+            "";
+
+        selectedElection =
+            null;
+
+        hideElectionPanels();
+
+    }
+
+}
+
+
+/* =========================================================
+   LOAD SELECTED ELECTION
+========================================================= */
+async function loadSelectedElection() {
+
+    if (!selectedElectionId) {
+
+        throw new Error(
+            "No election was selected. Return to Nomination & Candidate Management and select an election first."
+        );
+
+    }
+
+
+    const electionSnap =
+        await getDoc(
+            doc(
+                db,
+                "Elections",
+                selectedElectionId
+            )
+        );
+
+
+    if (
+        !electionSnap.exists()
+    ) {
+
+        throw new Error(
+            "The selected election could not be found."
+        );
+
+    }
+
+
+    selectedElection = {
+        id: electionSnap.id,
+        ...electionSnap.data()
+    };
+
+if (
+    selectedElection.status !== "finalized"
+) {
+
+    throw new Error(
+        "Nomination forms can only be configured for finalized elections."
+    );
+
+}
+    $("selectedElectionHeader")
+        .classList.remove("hidden");
+
+
+    $("selectedElectionHeaderName")
+        .textContent =
+        selectedElection.electionName ||
+        "Nomination Form";
+
+
+    $("selectedElectionHeaderText")
+        .textContent =
+        `Configuring nomination form for ${
+            selectedElection.electionName ||
+            "the selected election"
+        }`;
+
+
+    await Promise.all([
+        loadPositions(),
+        loadExistingNominationForm()
+    ]);
+
+
+    renderElectionInformation();
+    renderPositions();
+    renderConfiguration();
+    renderPreview();
+    updateActionButtons();
+
+}
+
+
+/* =========================================================
+   LOAD POSITIONS
+========================================================= */
+
+async function loadPositions() {
+
+    positions = [];
+
+
+    if (!selectedElectionId) {
+        return;
+    }
+
+
+    const snap =
+        await getDocs(
+            query(
+                collection(
+                    db,
+                    "Positions"
+                ),
+                where(
+                    "electionId",
+                    "==",
+                    selectedElectionId
+                )
+            )
+        );
+
+
+    positions =
+        snap.docs
+            .map(
+                positionDoc => ({
+                    id: positionDoc.id,
+                    ...positionDoc.data()
+                })
+            )
+            .sort(
+                (a, b) =>
+                    Number(a.order || 0) -
+                    Number(b.order || 0)
+            );
+
+}
+
+
+/* =========================================================
+   LOAD EXISTING NOMINATION FORM
+========================================================= */
+
+async function loadExistingNominationForm() {
+
+    nominationForm =
+        null;
+
+    requirements =
+        [];
+
+    rules =
+        [];
+
+
+    if (!selectedElectionId) {
+        return;
+    }
+
+
+    const formSnap =
+        await getDoc(
+            doc(
+                db,
+                "NominationForms",
+                selectedElectionId
+            )
+        );
+
+
+    if (
+        !formSnap.exists()
+    ) {
+
+        nominationForm =
+            null;
+
+        requirements =
+            [];
+
+        rules =
+            [];
+
+        return;
+
+    }
+
+
+    nominationForm = {
+        id: formSnap.id,
+        ...formSnap.data()
+    };
+
+
+    requirements =
+        Array.isArray(
+            nominationForm.requirements
+        )
+            ? [...nominationForm.requirements]
+            : [];
+
+
+    rules = [];
+
+}
+
+
+/* =========================================================
+   RENDER ELECTION INFORMATION
+========================================================= */
+
+function renderElectionInformation() {
+
+    $("electionInformationPanel")
+        .classList.remove("hidden");
+
+    $("positionsPanel")
+        .classList.remove("hidden");
+
+    $("configurationPanel")
+        .classList.remove("hidden");
+
+    $("previewPanel")
+        .classList.remove("hidden");
+
+    $("actionsPanel")
+        .classList.remove("hidden");
+
+
+    $("displayElectionName").textContent =
+        selectedElection.electionName ||
+        "—";
+
+
+    $("displayAcademicSession").textContent =
+        selectedElection.academicSession ||
+        "—";
+
+
+    $("displayElectionDescription").textContent =
+        selectedElection.description ||
+        "No description provided.";
+
+
+    $("displayElectionStatus").innerHTML =
+        statusBadge(
+            selectedElection.status
+        );
+
+
+    $("displayNominationStart").textContent =
+        formatDate(
+            selectedElection.nominationStart
+        );
+
+
+    $("displayNominationEnd").textContent =
+        formatDate(
+            selectedElection.nominationEnd
+        );
+
+
+    $("displayVotingStart").textContent =
+        formatDate(
+            selectedElection.votingStart
+        );
+
+
+    $("displayVotingEnd").textContent =
+        formatDate(
+            selectedElection.votingEnd
+        );
+
+
+    renderVoterListStatus();
+
+}
+
+
+/* =========================================================
+   VOTER LIST STATUS
+========================================================= */
+
+function renderVoterListStatus() {
+
+    const notice =
+        $("voterListStatusNotice");
+
+
+    const finalized =
+        selectedElection?.voterListFinalized === true;
+
+
+    if (finalized) {
+
+        notice.innerHTML = `
+            <div class="readonly-note">
+                <strong>Voter List:</strong>
+                Finalized. The election has an official voter list available for application verification.
+            </div>
+        `;
+
+    } else {
+
+        notice.innerHTML = `
+            <div class="warning-note">
+                <strong>Voter List:</strong>
+                Not finalized yet. You may save a draft form, but the nomination application cannot be published/opened until the EC uploads and finalizes the voter list.
+                <br><br>
+                <button
+                    id="goToVoterManagementBtn"
+                    type="button"
+                    class="warning small"
+                >
+                    Go to Voter Management
+                </button>
+            </div>
+        `;
+
+
+        $("goToVoterManagementBtn")
+            .addEventListener(
+                "click",
+                () => {
+
+                    window.location.href =
+                        `voter-management.html?electionId=${encodeURIComponent(selectedElectionId)}`;
+
+                }
+            );
+
+    }
+
+}
+
+
+/* =========================================================
+   RENDER POSITIONS
+========================================================= */
+
+function renderPositions() {
+
+    const container =
+        $("positionsContainer");
+
+
+    container.innerHTML =
+        "";
+
+
+    if (
+        !positions.length
+    ) {
+
+        container.innerHTML = `
+            <div class="empty" style="grid-column:1/-1">
+                No positions have been created for this election.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    const allowedIds =
+        new Set(
+            nominationForm?.allowedPositionIds || []
+        );
+
+
+    const formLocked =
+        isFormStructurallyLocked();
+
+
+    positions.forEach(
+        position => {
+
+            const label =
+                document.createElement(
+                    "label"
+                );
+
+            label.className =
+                "position-item" +
+                (
+                    allowedIds.has(position.id)
+                        ? " selected"
+                        : ""
+                );
+
+
+            const checkbox =
+                document.createElement(
+                    "input"
+                );
+
+            checkbox.type =
+                "checkbox";
+
+            checkbox.className =
+                "position-checkbox";
+
+            checkbox.value =
+                position.id;
+
+            checkbox.checked =
+                allowedIds.has(
+                    position.id
+                );
+
+            checkbox.disabled =
+                formLocked;
+
+
+            const meta =
+                document.createElement(
+                    "div"
+                );
+
+            meta.className =
+                "position-meta";
+
+
+            const name =
+                document.createElement(
+                    "div"
+                );
+
+            name.className =
+                "position-name";
+
+            name.textContent =
+                position.name ||
+                "Unnamed Position";
+
+
+            const seats =
+                document.createElement(
+                    "div"
+                );
+
+            seats.className =
+                "position-seats";
+
+            const seatCount =
+                Number(
+                    position.seats || 1
+                );
+
+            seats.textContent =
+                `${seatCount} seat${seatCount === 1 ? "" : "s"}`;
+
+
+            meta.appendChild(name);
+            meta.appendChild(seats);
+
+            label.appendChild(
+                checkbox
+            );
+
+            label.appendChild(
+                meta
+            );
+
+            container.appendChild(
+                label
+            );
+
+        }
+    );
+
+
+    container
+        .querySelectorAll(
+            ".position-checkbox"
+        )
+        .forEach(
+            checkbox => {
+
+                checkbox.addEventListener(
+                    "change",
+                    () => {
+
+                        checkbox
+                            .closest(
+                                ".position-item"
+                            )
+                            .classList.toggle(
+                                "selected",
+                                checkbox.checked
+                            );
+
+                        renderPreview();
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   FORM LOCKING
+========================================================= */
+
+function isFormStructurallyLocked() {
+
+    if (!selectedElection) {
+        return true;
+    }
+
+
+    const formStatus =
+        nominationForm?.formStatus ||
+        NOMINATION_FORM_STATUSES.DRAFT;
+
+
+    /*
+     * Finalized nomination forms are permanently
+     * locked against structural editing.
+     */
+    if (
+        formStatus ===
+        NOMINATION_FORM_STATUSES.FINALIZED
+    ) {
+
+        return true;
+
+    }
+
+
+    /*
+     * Closed forms are immutable.
+     */
+    if (
+        formStatus ===
+        NOMINATION_FORM_STATUSES.CLOSED
+    ) {
+
+        return true;
+
+    }
+
+
+    /*
+     * The nomination form may only be configured
+     * after the election itself has been finalized.
+     */
+    if (
+        selectedElection.status !==
+        "finalized"
+    ) {
+
+        return true;
+
+    }
+
+
+    /*
+     * Voting-related states are also locked.
+     */
+    if (
+        [
+            "voting_active",
+            "voting_stopped",
+            "closed"
+        ].includes(
+            selectedElection.status
+        )
+    ) {
+
+        return true;
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================================================
+   RENDER CONFIGURATION
+========================================================= */
+
+function renderConfiguration() {
+
+    const formStatus =
+        nominationForm?.formStatus ||
+        NOMINATION_FORM_STATUSES.DRAFT;
+
+
+    $("formTitle").value =
+        nominationForm?.title ||
+        "";
+
+
+    $("formInstructions").value =
+        nominationForm?.instructions ||
+        "";
+
+
+    $("manifestoEnabled").checked =
+    nominationForm?.candidateFields?.manifesto?.enabled !== false;
+
+
+$("manifestoRequired").checked =
+    nominationForm?.candidateFields?.manifesto?.required !== false;
+
+
+$("candidateSymbolEnabled").checked =
+    nominationForm?.candidateFields?.candidateSymbol?.enabled !== false;
+
+
+$("candidateSymbolRequired").checked =
+    nominationForm?.candidateFields?.candidateSymbol?.required !== false;
+
+    renderRequirements();
+
+
+    const locked =
+        isFormStructurallyLocked();
+$("manifestoRequired").disabled =
+    locked ||
+    !$("manifestoEnabled").checked;
+
+$("candidateSymbolRequired").disabled =
+    locked ||
+    !$("candidateSymbolEnabled").checked;
+
+$("manifestoRequiredRow").style.display =
+    $("manifestoEnabled").checked
+        ? "flex"
+        : "none";
+
+$("candidateSymbolRequiredRow").style.display =
+    $("candidateSymbolEnabled").checked
+        ? "flex"
+        : "none";
+
+    $("formTitle").disabled =
+        locked;
+
+    $("formInstructions").disabled =
+        locked;
+
+    $("manifestoRequired").disabled =
+        locked;
+
+    $("candidateSymbolRequired").disabled =
+        locked;
+
+    $("addRequirementBtn").disabled =
+        locked;
+
+
+    const notice =
+        $("configurationLockNotice");
+
+
+    if (formStatus === "finalized") {
+
+        notice.textContent =
+            "This nomination form has been finalized. Structural configuration is now locked. The application link can now be shared with eligible students.";
+
+        notice.classList.remove(
+            "hidden"
+        );
+
+    } else if (
+        formStatus === "closed"
+    ) {
+
+        notice.textContent =
+            "This nomination form is closed and immutable.";
+
+        notice.classList.remove(
+            "hidden"
+        );
+
+    } else {
+
+        notice.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   REQUIREMENTS
+========================================================= */
+
+function renderRequirements() {
+
+    const container =
+        $("requirementsList");
+
+    container.innerHTML = "";
+
+
+    $("requirementsEmpty").style.display =
+        requirements.length
+            ? "none"
+            : "block";
+
+
+    requirements.forEach(
+        (item, index) => {
+
+            const row =
+                document.createElement("div");
+
+            row.className =
+                "list-row";
+
+
+            const number =
+                document.createElement("div");
+
+            number.className =
+                "list-number";
+
+            number.textContent =
+                String(index + 1);
+
+
+            const input =
+                document.createElement("input");
+
+            input.type =
+                "text";
+
+            input.maxLength =
+                500;
+
+            input.placeholder =
+                "Enter nomination requirement";
+
+            input.value =
+                item || "";
+
+            input.disabled =
+                isFormStructurallyLocked();
+
+
+            input.addEventListener(
+                "input",
+                () => {
+
+                    requirements[index] =
+                        input.value;
+
+                    renderPreview();
+
+                }
+            );
+
+
+            const upButton =
+                document.createElement("button");
+
+            upButton.type =
+                "button";
+
+            upButton.className =
+                "secondary small";
+
+            upButton.textContent =
+                "↑";
+
+            upButton.disabled =
+                isFormStructurallyLocked() ||
+                index === 0;
+
+            upButton.addEventListener(
+                "click",
+                () => {
+
+                    [
+                        requirements[index - 1],
+                        requirements[index]
+                    ] = [
+                        requirements[index],
+                        requirements[index - 1]
+                    ];
+
+                    renderRequirements();
+                    renderPreview();
+
+                }
+            );
+
+
+            const downButton =
+                document.createElement("button");
+
+            downButton.type =
+                "button";
+
+            downButton.className =
+                "secondary small";
+
+            downButton.textContent =
+                "↓";
+
+            downButton.disabled =
+                isFormStructurallyLocked() ||
+                index === requirements.length - 1;
+
+            downButton.addEventListener(
+                "click",
+                () => {
+
+                    [
+                        requirements[index],
+                        requirements[index + 1]
+                    ] = [
+                        requirements[index + 1],
+                        requirements[index]
+                    ];
+
+                    renderRequirements();
+                    renderPreview();
+
+                }
+            );
+
+
+            const removeButton =
+                document.createElement("button");
+
+            removeButton.type =
+                "button";
+
+            removeButton.className =
+                "danger small";
+
+            removeButton.textContent =
+                "Remove";
+
+            removeButton.disabled =
+                isFormStructurallyLocked();
+
+            removeButton.addEventListener(
+                "click",
+                () => {
+
+                    requirements.splice(
+                        index,
+                        1
+                    );
+
+                    renderRequirements();
+                    renderPreview();
+
+                }
+            );
+
+
+            row.appendChild(number);
+            row.appendChild(input);
+            row.appendChild(upButton);
+            row.appendChild(downButton);
+            row.appendChild(removeButton);
+
+            container.appendChild(row);
+
+        }
+    );
+
+}
+
+/* =========================================================
+   RULES
+========================================================= */
+function renderRules() {
+
+    const container =
+        $("rulesList");
+
+    container.innerHTML = "";
+
+
+    $("rulesEmpty").style.display =
+        rules.length
+            ? "none"
+            : "block";
+
+
+    rules.forEach(
+        (item, index) => {
+
+            const row =
+                document.createElement("div");
+
+            row.className =
+                "list-row";
+
+
+            const number =
+                document.createElement("div");
+
+            number.className =
+                "list-number";
+
+            number.textContent =
+                String(index + 1);
+
+
+            const input =
+                document.createElement("input");
+
+            input.type =
+                "text";
+
+            input.maxLength =
+                500;
+
+            input.placeholder =
+                "Enter election / nomination rule";
+
+            input.value =
+                item || "";
+
+            input.disabled =
+                isFormStructurallyLocked();
+
+
+            input.addEventListener(
+                "input",
+                () => {
+
+                    rules[index] =
+                        input.value;
+
+                    renderPreview();
+
+                }
+            );
+
+
+            const upButton =
+                document.createElement("button");
+
+            upButton.type =
+                "button";
+
+            upButton.className =
+                "secondary small";
+
+            upButton.textContent =
+                "↑";
+
+            upButton.disabled =
+                isFormStructurallyLocked() ||
+                index === 0;
+
+            upButton.addEventListener(
+                "click",
+                () => {
+
+                    [
+                        rules[index - 1],
+                        rules[index]
+                    ] = [
+                        rules[index],
+                        rules[index - 1]
+                    ];
+
+                    renderRules();
+                    renderPreview();
+
+                }
+            );
+
+
+            const downButton =
+                document.createElement("button");
+
+            downButton.type =
+                "button";
+
+            downButton.className =
+                "secondary small";
+
+            downButton.textContent =
+                "↓";
+
+            downButton.disabled =
+                isFormStructurallyLocked() ||
+                index === rules.length - 1;
+
+            downButton.addEventListener(
+                "click",
+                () => {
+
+                    [
+                        rules[index],
+                        rules[index + 1]
+                    ] = [
+                        rules[index + 1],
+                        rules[index]
+                    ];
+
+                    renderRules();
+                    renderPreview();
+
+                }
+            );
+
+
+            const removeButton =
+                document.createElement("button");
+
+            removeButton.type =
+                "button";
+
+            removeButton.className =
+                "danger small";
+
+            removeButton.textContent =
+                "Remove";
+
+            removeButton.disabled =
+                isFormStructurallyLocked();
+
+            removeButton.addEventListener(
+                "click",
+                () => {
+
+                    rules.splice(
+                        index,
+                        1
+                    );
+
+                    renderRules();
+                    renderPreview();
+
+                }
+            );
+
+
+            row.appendChild(number);
+            row.appendChild(input);
+            row.appendChild(upButton);
+            row.appendChild(downButton);
+            row.appendChild(removeButton);
+
+            container.appendChild(row);
+
+        }
+    );
+
+}
+
+/* =========================================================
+   ADD REQUIREMENT
+========================================================= */
+
+function addRequirement() {
+
+    if (
+        isFormStructurallyLocked()
+    ) {
+
+        showMessage(
+            "The nomination form is locked and cannot be edited.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    requirements.push("");
+
+
+    renderRequirements();
+
+
+    const inputs =
+        $("requirementsList")
+            .querySelectorAll("input");
+
+
+    if (
+        inputs.length
+    ) {
+
+        inputs[
+            inputs.length - 1
+        ].focus();
+
+    }
+
+}
+
+
+/* =========================================================
+   ADD RULE
+========================================================= */
+function addRule() {
+
+    if (
+        isFormStructurallyLocked()
+    ) {
+
+        showMessage(
+            "The nomination form is locked and cannot be edited.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    rules.push("");
+
+
+    renderRules();
+
+
+    const inputs =
+        $("rulesList")
+            .querySelectorAll("input");
+
+
+    if (
+        inputs.length
+    ) {
+
+        inputs[
+            inputs.length - 1
+        ].focus();
+
+    }
+
+}
+
+
+/* =========================================================
+   GET SELECTED POSITIONS
+========================================================= */
+
+function getSelectedPositionIds() {
+
+    return Array.from(
+        document.querySelectorAll(
+            ".position-checkbox:checked"
+        )
+    )
+        .map(
+            input =>
+                input.value
+        );
+
+}
+
+
+/* =========================================================
+   COLLECT FORM DATA
+========================================================= */
+
+function collectFormData() {
+
+    const allowedPositionIds =
+        getSelectedPositionIds();
+
+
+    const cleanRequirements =
+        requirements
+            .map(
+                item =>
+                    String(
+                        item ?? ""
+                    ).trim()
+            )
+            .filter(Boolean);
+
+
+    const manifestoEnabled =
+        $("manifestoEnabled")
+            .checked;
+
+
+    const candidateSymbolEnabled =
+        $("candidateSymbolEnabled")
+            .checked;
+
+
+    return {
+
+        electionId:
+            selectedElectionId,
+
+        title:
+            $("formTitle")
+                .value
+                .trim(),
+
+        instructions:
+            $("formInstructions")
+                .value
+                .trim(),
+
+        requirements:
+            cleanRequirements,
+
+        rules: [],
+
+        allowedPositionIds,
+
+        candidateFields: {
+
+            fullName: {
+                enabled: true,
+                required: true,
+                systemField: true
+            },
+
+            rollNumber: {
+                enabled: true,
+                required: true,
+                systemField: true
+            },
+
+            className: {
+                enabled: true,
+                required: true,
+                systemField: true
+            },
+
+            section: {
+                enabled: true,
+                required: true,
+                systemField: true
+            },
+
+            position: {
+                enabled: true,
+                required: true,
+                systemField: true
+            },
+
+            manifesto: {
+                enabled:
+                    manifestoEnabled,
+
+                required:
+                    manifestoEnabled &&
+                    $("manifestoRequired")
+                        .checked,
+
+                systemField: true,
+                multiline: true,
+                maxLength: 5000
+            },
+
+            candidateSymbol: {
+    enabled: true,
+    required: true,
+    systemField: true,
+    allowedMimeTypes: [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+    ],
+    maxOriginalBytes:
+        2 * 1024 * 1024,
+    maxFinalDataUrlBytes:
+        150 * 1024
+}
+        },
+
+        candidateSymbolEnabled: true,
+
+candidateSymbolRequired: true,
+
+        declarationText:
+            FIXED_APPLICANT_DECLARATION
+
+    };
+
+}
+
+
+/* =========================================================
+   VALIDATE FORM
+========================================================= */
+
+function validateFormData(
+    data,
+    mode
+) {
+
+    if (
+        !selectedElectionId ||
+        !selectedElection
+    ) {
+
+        throw new Error(
+            "Select a valid election first."
+        );
+
+    }
+
+
+    if (
+        selectedElection.status ===
+        "closed"
+    ) {
+
+        throw new Error(
+            "This election is closed."
+        );
+
+    }
+
+
+  if (
+    mode === "draft" &&
+    selectedElection.status !==
+    "finalized"
+) {
+
+    throw new Error(
+        "The election must be finalized before its nomination form can be configured."
+    );
+
+}
+
+
+    if (nominationForm?.formStatus === "finalized") {
+
+        throw new Error(
+            "The published nomination form is locked."
+        );
+
+    }
+
+
+    if (
+        nominationForm?.formStatus ===
+        "closed"
+    ) {
+
+        throw new Error(
+            "The closed nomination form is immutable."
+        );
+
+    }
+
+
+    if (
+        !data.title
+    ) {
+
+        throw new Error(
+            "Form title is required."
+        );
+
+    }
+
+
+    if (
+        data.title.length > 150
+    ) {
+
+        throw new Error(
+            "Form title must be 150 characters or fewer."
+        );
+
+    }
+
+
+    if (
+        data.instructions.length > 5000
+    ) {
+
+        throw new Error(
+            "Instructions are too long."
+        );
+
+    }
+
+
+    if (
+        data.allowedPositionIds.length === 0
+    ) {
+
+        throw new Error(
+            "Select at least one election position."
+        );
+
+    }
+
+
+    const invalidPosition =
+        data.allowedPositionIds.some(
+            id =>
+                !positions.some(
+                    position =>
+                        position.id === id
+                )
+        );
+
+
+    if (
+        invalidPosition
+    ) {
+
+        throw new Error(
+            "One or more selected positions do not belong to this election."
+        );
+
+    }
+
+
+    const duplicateRequirements =
+        data.requirements
+            .map(
+                item =>
+                    item.toLowerCase()
+            )
+            .filter(
+                (
+                    value,
+                    index,
+                    array
+                ) =>
+                    array.indexOf(value) !==
+                    index
+            );
+
+
+    if (
+        duplicateRequirements.length
+    ) {
+
+        throw new Error(
+            "Duplicate nomination requirements are not allowed."
+        );
+
+    }
+
+
+    if (
+        mode === "finalize"
+    ) {
+
+        if (
+            selectedElection.status !==
+            "finalized"
+        ) {
+
+            throw new Error(
+                "The election must be finalized before the nomination form can be finalized."
+            );
+
+        }
+
+
+        if (
+            selectedElection.voterListFinalized !==
+            true
+        ) {
+
+            throw new Error(
+                "The voter list must be finalized before the nomination form can be finalized."
+            );
+
+        }
+
+
+        if (
+            !data.instructions
+        ) {
+
+            throw new Error(
+                "Instructions are required before finalizing the form."
+            );
+
+        }
+
+
+        if (
+            data.requirements.length ===
+            0
+        ) {
+
+            throw new Error(
+                "Add at least one nomination requirement before finalizing the form."
+            );
+
+        }
+
+
+        if (
+            !data.declarationText
+        ) {
+
+            throw new Error(
+                "Applicant declaration is required before finalizing the form."
+            );
+
+        }
+
+    }
+
+}
+
+/* =========================================================
+   SAVE FORM
+========================================================= */
+
+async function saveForm() {
+
+    if (
+        !selectedElectionId ||
+        !selectedElection
+    ) {
+
+        showMessage(
+            "No valid election was selected.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        isFormStructurallyLocked()
+    ) {
+
+        showMessage(
+            "This nomination form is locked and cannot be edited.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        clearMessage();
+
+
+        const data =
+            collectFormData();
+
+
+        validateFormData(
+            data,
+            "draft"
+        );
+
+
+        const formRef =
+            doc(
+                db,
+                "NominationForms",
+                selectedElectionId
+            );
+
+
+        const payload = {
+
+            electionId:
+                selectedElectionId,
+
+            title:
+                data.title,
+
+            instructions:
+                data.instructions,
+
+            requirements:
+                data.requirements,
+
+            rules:
+                data.rules,
+
+            allowedPositionIds:
+                data.allowedPositionIds,
+
+            candidateFields:
+                data.candidateFields,
+
+            candidateSymbolEnabled:
+                data.candidateSymbolEnabled,
+
+            candidateSymbolRequired:
+                data.candidateSymbolRequired,
+
+            declarationText:
+                data.declarationText,
+
+            formStatus:
+                NOMINATION_FORM_STATUSES.DRAFT,
+
+            updatedBy:
+                currentUser.uid,
+
+            updatedAt:
+                serverTimestamp()
+
+        };
+
+
+        if (
+            !nominationForm
+        ) {
+
+            payload.createdBy =
+                currentUser.uid;
+
+            payload.createdAt =
+                serverTimestamp();
+
+        }
+
+
+        await setDoc(
+            formRef,
+            payload,
+            {
+                merge: true
+            }
+        );
+
+
+        await loadExistingNominationForm();
+
+        renderConfiguration();
+        renderPreview();
+        updateActionButtons();
+
+
+        showMessage(
+            "Nomination form draft saved successfully.",
+            "success"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "saveForm error:",
+            error
+        );
+
+
+        showMessage(
+            error.message ||
+            getFriendlyError(error),
+            "error"
+        );
+
+    }
+
+}
+function finalizeForm() {
+    $("finalizeFormModal").classList.add("open");
+}
+async function performFinalization() {
+    if (
+        !selectedElection ||
+        !selectedElectionId
+    ) {
+
+        showMessage(
+            "No valid election is selected.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        selectedElection.status !==
+        "finalized"
+    ) {
+
+        showMessage(
+            "Only finalized elections can have a finalized nomination form.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        selectedElection.voterListFinalized !==
+        true
+    ) {
+
+        showMessage(
+            "The voter list must be uploaded and finalized before the nomination form can be finalized.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        nominationForm?.formStatus ===
+        "finalized"
+    ) {
+
+        showMessage(
+            "This nomination form is already finalized.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        nominationForm?.formStatus ===
+        "closed"
+    ) {
+
+        showMessage(
+            "This nomination form is closed and cannot be changed.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        clearMessage();
+
+
+        const data =
+            collectFormData();
+
+
+        validateFormData(
+            data,
+            "finalize"
+        );
+
+
+        const formRef =
+            doc(
+                db,
+                "NominationForms",
+                selectedElectionId
+            );
+
+
+        const payload = {
+
+            electionId:
+                selectedElectionId,
+
+            title:
+                data.title,
+
+            instructions:
+                data.instructions,
+
+            requirements:
+                data.requirements,
+
+            rules:
+                data.rules,
+
+            allowedPositionIds:
+                data.allowedPositionIds,
+
+            candidateFields:
+                data.candidateFields,
+
+            candidateSymbolEnabled:
+                true,
+
+            candidateSymbolRequired:
+                true,
+
+            declarationText:
+                data.declarationText,
+
+            formStatus: "finalized",
+finalizedBy: auth.currentUser.uid,
+finalizedAt: serverTimestamp(),
+
+            updatedBy:
+                currentUser.uid,
+
+            updatedAt:
+                serverTimestamp()
+
+        };
+
+
+        if (
+            !nominationForm
+        ) {
+
+            payload.createdBy =
+                currentUser.uid;
+
+            payload.createdAt =
+                serverTimestamp();
+
+        }
+
+
+        await setDoc(
+            formRef,
+            payload,
+            {
+                merge: true
+            }
+        );
+
+
+        await loadExistingNominationForm();
+
+        renderConfiguration();
+        renderPreview();
+        updateActionButtons();
+
+
+        showMessage(
+            "Nomination form finalized successfully. The application link can now be copied and shared.",
+            "success"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "finalizeForm error:",
+            error
+        );
+
+
+        showMessage(
+            error.message ||
+            getFriendlyError(error),
+            "error"
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   RENDER PREVIEW
+========================================================= */
+
+function renderPreview() {
+
+    if (!selectedElection) {
+
+        return;
+
+    }
+
+
+    const title =
+        $("formTitle")
+            .value
+            .trim();
+
+
+    const instructions =
+        $("formInstructions")
+            .value
+            .trim();
+
+
+    const declaration =
+        FIXED_APPLICANT_DECLARATION;
+
+
+    $("previewTitle").textContent =
+        title ||
+        "Candidate Nomination Form";
+
+
+    $("previewInstructions").textContent =
+        instructions ||
+        "Instructions will appear here.";
+
+
+    const selectedIds =
+        getSelectedPositionIds();
+
+
+    const selectedPositions =
+        positions.filter(
+            position =>
+                selectedIds.includes(
+                    position.id
+                )
+        );
+
+
+    const positionPreview =
+        $("previewPositions");
+
+
+    if (
+        !selectedPositions.length
+    ) {
+
+        positionPreview.textContent =
+            "No positions selected.";
+
+    } else {
+
+        positionPreview.textContent =
+            selectedPositions
+                .map(
+                    position =>
+                        `${position.name || "Unnamed Position"} (${Number(position.seats || 1)} seat${Number(position.seats || 1) === 1 ? "" : "s"})`
+                )
+                .join(", ");
+
+    }
+
+
+    $("previewManifestoBlock")
+    .style.display =
+        $("manifestoEnabled").checked
+            ? "block"
+            : "none";
+
+
+$("previewSymbolBlock")
+    .style.display =
+        $("candidateSymbolEnabled").checked
+            ? "block"
+            : "none";
+
+
+    const previewRequirements =
+        $("previewRequirements");
+
+
+    previewRequirements.innerHTML =
+        "";
+
+
+    if (
+        requirements.length
+    ) {
+
+        $("previewRequirementsBlock")
+            .style.display =
+                "block";
+
+
+        requirements
+            .filter(
+                item =>
+                    String(
+                        item
+                    ).trim()
+            )
+            .forEach(
+                item => {
+
+                    const li =
+                        document.createElement(
+                            "li"
+                        );
+
+                    li.textContent =
+                        item;
+
+                    previewRequirements.appendChild(
+                        li
+                    );
+
+                }
+            );
+
+    } else {
+
+        $("previewRequirementsBlock")
+            .style.display =
+                "none";
+
+    }
+
+
+    const previewRules =
+        $("previewRules");
+
+
+    previewRules.innerHTML =
+        "";
+
+
+    if (
+        rules.length
+    ) {
+
+        $("previewRulesBlock")
+            .style.display =
+                "block";
+
+
+        rules
+            .filter(
+                item =>
+                    String(
+                        item
+                    ).trim()
+            )
+            .forEach(
+                item => {
+
+                    const li =
+                        document.createElement(
+                            "li"
+                        );
+
+                    li.textContent =
+                        item;
+
+                    previewRules.appendChild(
+                        li
+                    );
+
+                }
+            );
+
+    } else {
+
+        $("previewRulesBlock")
+            .style.display =
+                "none";
+
+    }
+
+
+    $("previewDeclaration").textContent =
+        declaration ||
+        "Declaration text will appear here.";
+
+}
+
+
+/* =========================================================
+   ACTION BUTTONS
+========================================================= */
+
+function updateActionButtons() {
+
+    if (!selectedElection) {
+
+        $("saveDraftBtn").disabled =
+            true;
+
+        $("finalizeFormBtn").disabled =
+            true;
+
+        return;
+
+    }
+
+
+    const formStatus =
+        nominationForm?.formStatus ||
+        "draft";
+
+
+    const editable =
+        !isFormStructurallyLocked();
+
+
+    $("saveDraftBtn").disabled =
+        !editable;
+
+
+    $("finalizeFormBtn").disabled =
+        !editable;
+
+
+    if (
+        formStatus ===
+        "finalized"
+    ) {
+
+        $("saveDraftBtn").style.display =
+            "none";
+
+        $("finalizeFormBtn").style.display =
+            "none";
+
+    } else if (
+        formStatus ===
+        "closed"
+    ) {
+
+        $("saveDraftBtn").style.display =
+            "none";
+
+        $("finalizeFormBtn").style.display =
+            "none";
+
+    } else {
+
+        $("saveDraftBtn").style.display =
+            "inline-block";
+
+        $("finalizeFormBtn").style.display =
+            "inline-block";
+
+    }
+
+}
+
+
+/* =========================================================
+   HIDE PANELS
+========================================================= */
+
+function hideElectionPanels() {
+
+    [
+        "electionInformationPanel",
+        "positionsPanel",
+        "configurationPanel",
+        "previewPanel",
+        "actionsPanel"
+    ]
+        .forEach(
+            id => {
+
+                $(id)
+                    .classList.add(
+                        "hidden"
+                    );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   BACK TO NOMINATION MANAGEMENT
+========================================================= */
+
+function goBackToNominationManagement() {
+
+    if (
+        selectedElectionId
+    ) {
+
+        window.location.href =
+            `nomination-candidate-management.html?electionId=${encodeURIComponent(selectedElectionId)}`;
+
+    } else {
+
+        window.location.href =
+            "nomination-candidate-management.html";
+
+    }
+
+}
+
+
+/* =========================================================
+   EVENT SETUP
+========================================================= */
+
+function setupEvents() {
+
+
+    $("addRequirementBtn")
+        .addEventListener(
+            "click",
+            addRequirement
+        );
+
+
+    $("saveDraftBtn")
+        .addEventListener(
+            "click",
+            saveForm
+        );
+
+
+     $("finalizeFormBtn")
+    .addEventListener(
+        "click",
+        finalizeForm
+    );
+   
+       $("cancelFinalizeFormBtn").addEventListener("click", () => {
+    $("finalizeFormModal").classList.remove("open");
+}); 
+
+   $("confirmFinalizeFormBtn").addEventListener("click", async () => {
+    $("finalizeFormModal").classList.remove("open");
+
+    await performFinalization();
+});
+        
+
+
+
+    $("backBtn")
+        .addEventListener(
+            "click",
+            goBackToNominationManagement
+        );
+
+
+    $("backToNominationPage")
+        .addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+
+                goBackToNominationManagement();
+
+            }
+        );
+
+
+    [
+        "formTitle",
+        "formInstructions"
+    ]
+        .forEach(
+            id => {
+
+                $(id)
+                    .addEventListener(
+                        "input",
+                        renderPreview
+                    );
+
+            }
+        );
+
+
+    $("manifestoEnabled")
+    .addEventListener(
+        "change",
+        () => {
+
+            $("manifestoRequiredRow").style.display =
+                $("manifestoEnabled").checked
+                    ? "flex"
+                    : "none";
+
+            $("manifestoRequired").disabled =
+                !$("manifestoEnabled").checked ||
+                isFormStructurallyLocked();
+
+            renderPreview();
+
+        }
+    );
+
+
+$("manifestoRequired")
+    .addEventListener(
+        "change",
+        renderPreview
+    );
+
+
+$("candidateSymbolEnabled")
+    .addEventListener(
+        "change",
+        () => {
+
+            $("candidateSymbolRequiredRow").style.display =
+                $("candidateSymbolEnabled").checked
+                    ? "flex"
+                    : "none";
+
+            $("candidateSymbolRequired").disabled =
+                !$("candidateSymbolEnabled").checked ||
+                isFormStructurallyLocked();
+
+            renderPreview();
+
+        }
+    );
+
+
+$("candidateSymbolRequired")
+    .addEventListener(
+        "change",
+        renderPreview
+    );
+
+
+    $("profileBtn")
+        .addEventListener(
+            "click",
+            () => {
+
+                $("profileDropdown")
+                    .classList.toggle(
+                        "open"
+                    );
+
+            }
+        );
+
+
+    document.addEventListener(
+        "click",
+        event => {
+
+            if (
+                !event.target.closest(
+                    ".profile-area"
+                )
+            ) {
+
+                $("profileDropdown")
+                    .classList.remove(
+                        "open"
+                    );
+
+            }
+
+        }
+    );
+
+
+    $("logoutBtn")
+        .addEventListener(
+            "click",
+            async () => {
+
+                try {
+
+                    await signOut(
+                        auth
+                    );
+
+                } finally {
+
+                    window.location.href =
+                        "login.html";
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+async function init() {
+
+    try {
+
+        setupEvents();
+
+
+        const authorized =
+            await loadCurrentUser();
+
+
+        if (!authorized) {
+            return;
+        }
+
+
+        await loadInstitutionInformation();
+
+        renderProfile();
+
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+
+        selectedElectionId =
+            params.get("electionId") || "";
+
+
+        if (!selectedElectionId) {
+
+            $("loadingArea")
+                .classList.add("hidden");
+
+            showMessage(
+                "No election was selected. Return to Nomination & Candidate Management and select an election first.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        await loadSelectedElection();
+
+
+        $("loadingArea")
+            .classList.add("hidden");
+
+
+    } catch (error) {
+
+        console.error(
+            "Nomination form editor initialization error:",
+            error
+        );
+
+
+        $("loadingArea")
+            .classList.add("hidden");
+
+
+        showMessage(
+            error.message ||
+            getFriendlyError(error),
+            "error"
+        );
+
+    }
+
+}
+
+
+init();
+
+</script>
+
+</body>
+</html>

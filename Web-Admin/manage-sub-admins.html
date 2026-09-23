@@ -1,0 +1,2226 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>VoteGuard | Manage Sub-Admins</title>
+
+<style>
+
+    *  {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f4f6f8;
+    color: #222;
+}
+
+/* ================================
+   HEADER
+================================= */
+
+.header {
+    background: #1976d2;
+    color: white;
+    padding: 20px 30px;
+}
+
+.header h1 {
+    margin-bottom: 5px;
+}
+
+.header p {
+    opacity: 0.9;
+}
+
+/* ================================
+   CONTAINER
+================================= */
+
+.container {
+    max-width: 1100px;
+    margin: 35px auto;
+    padding: 0 20px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #1976d2;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+/* ================================
+   MAIN CARD
+================================= */
+
+.page-card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.page-card h2 {
+    margin-bottom: 8px;
+}
+
+.description {
+    color: #666;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+/* ================================
+   MESSAGE
+================================= */
+
+#message {
+    margin-bottom: 20px;
+    padding: 12px;
+    border-radius: 6px;
+    display: none;
+    font-size: 14px;
+}
+
+#message.success {
+    display: block;
+    background: #e5f7e5;
+    color: #146b14;
+}
+
+#message.error {
+    display: block;
+    background: #ffe5e5;
+    color: #b00020;
+}
+
+/* ================================
+   ADMIN LIST
+================================= */
+
+.admin-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.admin-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 25px;
+    background: #fff;
+}
+
+/* NO HOVER EFFECT ON ADMIN CARD */
+
+.admin-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.admin-info h3 {
+    margin-bottom: 7px;
+    font-size: 18px;
+}
+
+.admin-info p {
+    color: #666;
+    font-size: 14px;
+    word-break: break-word;
+}
+
+.admin-status {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 4px 9px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status-active {
+    background: #e5f7e5;
+    color: #146b14;
+}
+
+.status-disabled {
+    background: #ffe5e5;
+    color: #b00020;
+}
+
+/* ================================
+   ACTIONS
+================================= */
+
+.actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.actions button {
+    padding: 9px 13px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    color: white;
+}
+
+/* EDIT */
+
+.edit-btn {
+    background: #455a64;
+}
+
+/* No hover color change */
+
+/* DUTIES */
+
+.duty-btn {
+    background: #6a1b9a;
+}
+
+/* No hover color change */
+
+/* ENABLE / DISABLE */
+
+.delete-btn {
+    background: #c62828;
+}
+.enable-btn {
+    background: #2e7d32;
+}
+/* No hover color change */
+
+.actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* ================================
+   EMPTY
+================================= */
+
+.empty {
+    text-align: center;
+    padding: 40px;
+    color: #777;
+}
+
+/* ================================
+   MODAL
+================================= */
+
+.modal {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.45);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+    z-index: 2000;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 520px;
+
+    background: white;
+
+    border-radius: 10px;
+    padding: 25px;
+
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    font-size: 20px;
+}
+
+.close-btn {
+    border: none;
+    background: transparent;
+
+    font-size: 25px;
+    cursor: pointer;
+
+    color: #666;
+}
+
+.close-btn:hover {
+    color: #666;
+}
+
+/* ================================
+   EDIT FORM
+================================= */
+
+.form-group {
+    margin-bottom: 17px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 7px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 11px;
+
+    border: 1px solid #ccc;
+    border-radius: 5px;
+
+    font-size: 14px;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #1976d2;
+}
+
+/* ================================
+   DUTIES
+================================= */
+
+.duty-description {
+    color: #666;
+    line-height: 1.5;
+
+    margin-bottom: 18px;
+    font-size: 14px;
+}
+
+.duty-section-title {
+    margin-top: 20px;
+    margin-bottom: 10px;
+
+    font-size: 15px;
+    color: #333;
+}
+
+.duty-section-title:first-child {
+    margin-top: 0;
+}
+
+.duties-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.duty-option {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 11px;
+
+    border: 1px solid #ddd;
+    border-radius: 6px;
+
+    cursor: pointer;
+}
+
+.duty-option:hover {
+    background: #f7f9fb;
+    border-color: #ddd;
+}
+
+.duty-option input {
+    width: auto;
+    cursor: pointer;
+}
+/* ================================
+   STATUS CONFIRMATION MODAL
+================================= */
+
+.delete-modal-content {
+    width: 100%;
+    max-width: 460px;
+
+    background: white;
+
+    border-radius: 10px;
+    padding: 25px;
+
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+}
+
+.delete-modal-content h2 {
+    margin-bottom: 12px;
+    font-size: 20px;
+    color: #222;
+}
+
+.delete-modal-content p {
+    line-height: 1.5;
+}
+
+.delete-admin-name {
+    margin-top: 15px;
+    font-weight: bold;
+    color: #333;
+}
+
+.delete-warning {
+    margin-top: 12px;
+    color: #666;
+    font-size: 14px;
+}
+
+.delete-modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.delete-modal-actions button {
+    padding: 10px 16px;
+
+    border: none;
+    border-radius: 5px;
+
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.confirm-delete-btn {
+    background: #c62828;
+    color: white;
+}
+
+.delete-cancel-btn {
+    background: #777;
+    color: white;
+}
+
+.delete-modal-actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+/* ================================
+   MODAL BUTTONS
+================================= */
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.modal-actions button {
+    padding: 10px 16px;
+
+    border: none;
+    border-radius: 5px;
+
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.modal-actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.save-btn {
+    background: #1976d2;
+    color: white;
+}
+
+.save-btn:hover {
+    background: #1976d2;
+}
+
+.cancel-btn {
+    background: #777;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background: #777;
+}
+
+/* ================================
+   MOBILE
+================================= */
+
+@media (max-width: 750px) {
+
+    .admin-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .actions button {
+        flex: 1;
+    }
+}
+
+</style>
+
+<link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+
+<link rel="stylesheet" href="assets/css/navigation.css?v=20260913-nav">
+</head>
+
+<body>
+
+<!-- =================================
+     HEADER
+================================= -->
+
+<div class="header">
+
+    <h1>
+        VoteGuard — Manage Sub-Admins
+    </h1>
+
+    <p>
+      Controlled Institutional Election Management System with Electronic Voting
+    </p>
+
+</div>
+
+
+<!-- =================================
+     MAIN CONTAINER
+================================= -->
+
+<div class="container">
+
+    <nav class="page-navigation" aria-label="Page navigation">
+        <a
+            href="principal-dashboard.html"
+            class="back-link back-dashboard-button"
+        >
+            Back to Dashboard
+        </a>
+    </nav>
+
+
+    <div class="page-card">
+
+        <h2>
+            Sub-Admin Accounts
+        </h2>
+
+
+        <p class="description">
+           Manage authorized Sub-Admin accounts,
+edit their information, assign their
+responsibilities, or enable or disable
+their system access.
+        </p>
+
+
+        <div id="message"></div>
+
+
+        <div
+            id="adminList"
+            class="admin-list"
+        >
+
+            <div class="empty">
+                Loading Sub-Admins...
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =================================
+     EDIT MODAL
+================================= -->
+
+<div
+    id="editModal"
+    class="modal hidden"
+>
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2>
+                Edit Sub-Admin
+            </h2>
+
+            <button
+                type="button"
+                class="close-btn"
+                id="closeEditBtn"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="editName">
+                Full Name
+            </label>
+
+            <input
+                type="text"
+                id="editName"
+                placeholder="Enter full name"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="editEmail">
+                Email Address
+            </label>
+
+            <input
+                type="email"
+                id="editEmail"
+                readonly
+            >
+<p style="margin-top:6px; color:#777; font-size:12px;">
+    Email cannot be changed here.
+</p>
+        </div>
+
+
+        <div class="modal-actions">
+
+            <button
+                type="button"
+                class="save-btn"
+                id="saveEditBtn"
+            >
+                Save Changes
+            </button>
+
+            <button
+                type="button"
+                class="cancel-btn"
+                id="cancelEditBtn"
+            >
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =================================
+     MANAGE DUTIES MODAL
+================================= -->
+
+<div
+    id="dutiesModal"
+    class="modal hidden"
+>
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2>
+                Manage Duties
+            </h2>
+
+            <button
+                type="button"
+                class="close-btn"
+                id="closeDutiesBtn"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <p class="duty-description">
+
+            Select the functions that this Sub-Admin
+            is authorized to perform. Only selected
+            functions should be available to the
+            Sub-Admin.
+
+        </p>
+
+
+        <div class="duties-list">
+
+            <h3 class="duty-section-title">
+                Election Control
+            </h3>
+
+            <label class="duty-option">
+
+                <input
+                    type="checkbox"
+                    value="Create New Election"
+                >
+
+                Create New Election
+
+            </label>
+
+            <label class="duty-option">
+
+                <input
+                    type="checkbox"
+                    value="Manage Elections"
+                >
+
+                Manage Elections
+
+            </label>
+
+            <label class="duty-option">
+
+                <input
+                    type="checkbox"
+                    value="Control Voting & Election Status"
+                >
+
+                Control Voting & Election Status
+
+            </label>
+
+        
+
+            <h3 class="duty-section-title">
+                Election Commission
+            </h3>
+
+            <label class="duty-option">
+
+                <input
+                    type="checkbox"
+                    value="Create EC Member"
+                >
+
+                Create EC Member
+
+            </label>
+
+            <label class="duty-option">
+
+                <input
+                    type="checkbox"
+                    value="Manage Election Commission"
+                >
+
+                Manage Election Commission
+
+            </label>
+
+
+            <h3 class="duty-section-title">
+                Election Overview
+            </h3>
+
+            <label class="duty-option">
+
+                <input
+                    type="checkbox"
+                    value="Finalized Candidates"
+                >
+
+                Finalized Candidates
+
+            </label>
+
+            <label class="duty-option">
+
+                <input
+                    type="checkbox"
+                    value="Booth and Assigned Officers"
+                >
+
+                Booth & Assigned Officers
+
+            </label>
+
+
+           <h3 class="duty-section-title">
+    Results
+</h3>
+
+<label class="duty-option">
+
+    <input
+        type="checkbox"
+        value="Review Results"
+    >
+
+    Review Results
+
+</label>
+
+        </div>
+
+
+        <div class="modal-actions">
+
+            <button
+                type="button"
+                class="save-btn"
+                id="saveDutiesBtn"
+            >
+                Save Duties
+            </button>
+
+            <button
+                type="button"
+                class="cancel-btn"
+                id="cancelDutiesBtn"
+            >
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =================================
+     STATUS CONFIRMATION MODAL
+================================= -->
+
+<div
+    id="deleteModal"
+    class="modal hidden"
+>
+
+    <div class="delete-modal-content">
+
+        <h2 id="statusModalTitle">
+            Disable Sub-Admin
+        </h2>
+
+        <p id="statusModalMessage">
+            Are you sure you want to disable this Sub-Admin?
+        </p>
+
+        <p
+            id="deleteAdminName"
+            class="delete-admin-name"
+        >
+        </p>
+
+        <p
+            id="statusModalWarning"
+            class="delete-warning"
+        >
+            The Sub-Admin will no longer be able to access
+            the election management system. Their account
+            and records will be retained.
+        </p>
+
+        <div class="delete-modal-actions">
+
+            <button
+                type="button"
+                class="confirm-delete-btn"
+                id="confirmDeleteBtn"
+            >
+                Disable
+            </button>
+
+            <button
+                type="button"
+                class="delete-cancel-btn"
+                id="cancelDeleteBtn"
+            >
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =================================
+     FIREBASE
+================================= -->
+
+<script type="module">
+
+    /* =================================
+       FIREBASE IMPORTS
+    ================================= */
+
+    import {
+        initializeApp
+    } from
+    "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+
+
+    import {
+        getAuth,
+        onAuthStateChanged
+    } from
+    "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+
+    import {
+        getFirestore,
+        collection,
+        getDocs,
+        doc,
+        getDoc,
+        updateDoc,
+        writeBatch
+    } from
+    "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+
+    /* =================================
+       FIREBASE CONFIG
+    ================================= */
+
+    const firebaseConfig = {
+  apiKey: "AIzaSyDdYImwHeNlLbfJ-S1N4Tv3kDbaOtZVd9s",
+  authDomain: "voteguard-a6de3.firebaseapp.com",
+  projectId: "voteguard-a6de3",
+  storageBucket: "voteguard-a6de3.firebasestorage.app",
+  messagingSenderId: "97235064913",
+  appId: "1:97235064913:web:df10c7faf8149d53b88070"
+};
+
+
+    /* =================================
+       INITIALIZE FIREBASE
+    ================================= */
+
+    const app =
+        initializeApp(firebaseConfig);
+
+    const auth =
+        getAuth(app);
+
+    const db =
+        getFirestore(app);
+
+
+    /* =================================
+       ELEMENTS
+    ================================= */
+
+    const adminList =
+        document.getElementById("adminList");
+
+    const message =
+        document.getElementById("message");
+
+    const editModal =
+        document.getElementById("editModal");
+
+    const editName =
+        document.getElementById("editName");
+
+    const editEmail =
+        document.getElementById("editEmail");
+
+    const dutiesModal =
+        document.getElementById("dutiesModal");
+
+    const deleteModal =
+        document.getElementById("deleteModal");
+
+    const deleteAdminName =
+        document.getElementById("deleteAdminName");
+
+    const confirmDeleteBtn =
+        document.getElementById("confirmDeleteBtn");
+
+    const cancelDeleteBtn =
+        document.getElementById("cancelDeleteBtn");
+
+    const saveEditBtn =
+        document.getElementById("saveEditBtn");
+
+    const saveDutiesBtn =
+        document.getElementById("saveDutiesBtn");
+
+
+    let selectedAdminId = null;
+
+    let deleteAdminId = null;
+
+    let messageTimer = null;
+
+    let changingStatus = false;
+
+
+    /* =================================
+       CHECK AUTHENTICATION
+    ================================= */
+
+    onAuthStateChanged(
+        auth,
+        async (user) => {
+
+            if (!user) {
+
+                window.location.href =
+                    "login.html";
+
+                return;
+            }
+
+
+            try {
+
+                const userRef =
+                    doc(
+                        db,
+                        "Users",
+                        user.uid
+                    );
+
+
+                const userSnapshot =
+                    await getDoc(userRef);
+
+
+                if (!userSnapshot.exists()) {
+
+                    alert(
+                        "User profile was not found."
+                    );
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+                }
+
+
+                const userData =
+                    userSnapshot.data();
+
+
+                if (
+                    userData.status ===
+                    "disabled"
+                ) {
+
+                    alert(
+                        "Your account has been disabled."
+                    );
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+                }
+
+
+                if (
+                    userData.role !==
+                    "principal"
+                ) {
+
+                    alert(
+                        "Access denied. Principal access only."
+                    );
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+                }
+
+
+                await loadSubAdmins();
+
+            } catch (error) {
+
+                console.error(
+                    "Authentication error:",
+                    error
+                );
+
+                alert(
+                    "Unable to verify your account."
+                );
+
+                window.location.href =
+                    "login.html";
+            }
+
+        }
+    );
+
+
+    /* =================================
+       LOAD SUB-ADMINS
+    ================================= */
+
+    async function loadSubAdmins() {
+
+        try {
+
+            adminList.innerHTML = `
+                <div class="empty">
+                    Loading Sub-Admins...
+                </div>
+            `;
+
+
+            const snapshot =
+                await getDocs(
+                    collection(
+                        db,
+                        "SubAdmins"
+                    )
+                );
+
+
+            adminList.innerHTML = "";
+
+
+            if (snapshot.empty) {
+
+                adminList.innerHTML = `
+                    <div class="empty">
+                        No Sub-Admin accounts found.
+                    </div>
+                `;
+
+                return;
+            }
+
+
+            snapshot.forEach(
+                (documentSnapshot) => {
+
+                    const admin =
+                        documentSnapshot.data();
+
+                    const adminId =
+                        documentSnapshot.id;
+
+                    const status =
+                        admin.status ||
+                        "active";
+
+                    const statusClass =
+                        status === "disabled"
+                            ? "status-disabled"
+                            : "status-active";
+
+                    const statusText =
+                        status === "disabled"
+                            ? "Disabled"
+                            : "Active";
+
+const actionButtonClass =
+    status === "disabled"
+        ? "enable-btn"
+        : "delete-btn";
+                    const card =
+                        document.createElement("div");
+
+                    card.className =
+                        "admin-card";
+
+
+                    card.innerHTML = `
+
+                        <div class="admin-info">
+
+                            <h3>
+                                ${escapeHTML(
+                                    admin.name ||
+                                    "Unnamed"
+                                )}
+                            </h3>
+
+                            <p>
+                                ${escapeHTML(
+                                    admin.email ||
+                                    "No email"
+                                )}
+                            </p>
+
+                            <span
+                                class="admin-status ${statusClass}"
+                            >
+                                ${statusText}
+                            </span>
+
+                        </div>
+
+
+                        <div class="actions">
+
+                            <button
+                                type="button"
+                                class="edit-btn"
+                                data-id="${escapeHTML(adminId)}"
+                            >
+                                Edit
+                            </button>
+
+                            <button
+                                type="button"
+                                class="duty-btn"
+                                data-id="${escapeHTML(adminId)}"
+                            >
+                                Manage Duties
+                            </button>
+
+                            <button
+    type="button"
+    class="${actionButtonClass}"
+    data-id="${escapeHTML(adminId)}"
+>
+    ${status === "disabled" ? "Enable" : "Disable"}
+</button>
+                       </div>
+                    `;
+
+
+                    adminList.appendChild(card);
+
+                }
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Load Sub-Admins error:",
+                error
+            );
+
+            adminList.innerHTML = `
+                <div class="empty">
+                    Unable to load Sub-Admins.
+                </div>
+            `;
+
+            showMessage(
+                "Unable to load Sub-Admins.",
+                "error"
+            );
+        }
+
+    }
+
+
+    /* =================================
+       BUTTON HANDLING
+       
+       ONE LISTENER ONLY
+    ================================= */
+
+    adminList.addEventListener(
+        "click",
+        async (event) => {
+
+            const button =
+                event.target.closest("button");
+
+
+            if (!button) {
+                return;
+            }
+
+
+            const adminId =
+                button.getAttribute("data-id");
+
+
+            if (!adminId) {
+                return;
+            }
+
+
+            /* EDIT */
+
+            if (
+                button.classList.contains(
+                    "edit-btn"
+                )
+            ) {
+
+                await openEditModal(
+                    adminId
+                );
+
+                return;
+            }
+
+
+            /* MANAGE DUTIES */
+
+            if (
+                button.classList.contains(
+                    "duty-btn"
+                )
+            ) {
+
+                await openDutiesModal(
+                    adminId
+                );
+
+                return;
+            }
+
+
+            /* ENABLE / DISABLE */
+
+if (
+    button.classList.contains(
+        "delete-btn"
+    )
+) {
+
+    await openDeleteModal(
+        adminId
+    );
+
+    return;
+}
+if (
+    button.classList.contains(
+        "enable-btn"
+    )
+) {
+
+    await openDeleteModal(
+        adminId
+    );
+
+    return;
+}
+        }
+    );
+
+
+    /* =================================
+       OPEN DELETE MODAL
+    ================================= */
+
+    async function openDeleteModal(adminId) {
+
+    try {
+
+        const adminRef =
+            doc(
+                db,
+                "SubAdmins",
+                adminId
+            );
+
+        const snapshot =
+            await getDoc(
+                adminRef
+            );
+
+        if (!snapshot.exists()) {
+
+            showMessage(
+                "This Sub-Admin account no longer exists.",
+                "error"
+            );
+
+            await loadSubAdmins();
+
+            return;
+        }
+
+        const adminData =
+            snapshot.data();
+
+        const adminName =
+            adminData.name ||
+            adminData.email ||
+            "Unnamed Sub-Admin";
+
+        const currentStatus =
+            adminData.status ||
+            "active";
+
+        const isDisabled =
+            currentStatus === "disabled";
+
+        deleteAdminId =
+            adminId;
+
+        deleteAdminName.textContent =
+            "Sub-Admin: " +
+            adminName;
+
+        document.getElementById(
+            "statusModalTitle"
+        ).textContent =
+            isDisabled
+                ? "Enable Sub-Admin"
+                : "Disable Sub-Admin";
+
+        document.getElementById(
+            "statusModalMessage"
+        ).textContent =
+            isDisabled
+                ? "Are you sure you want to enable this Sub-Admin?"
+                : "Are you sure you want to disable this Sub-Admin?";
+
+        document.getElementById(
+            "statusModalWarning"
+        ).textContent =
+            isDisabled
+                ? "The Sub-Admin will be allowed to access the election management system again."
+                : "The Sub-Admin will no longer be able to access the election management system. Their account and records will be retained.";
+
+        confirmDeleteBtn.textContent =
+            isDisabled
+                ? "Enable"
+                : "Disable";
+
+        deleteModal.classList.remove(
+            "hidden"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Open Status Modal error:",
+            error
+        );
+
+        showMessage(
+            "Unable to open account status confirmation.",
+            "error"
+        );
+    }
+
+}
+
+
+    /* =================================
+       CANCEL DELETE
+    ================================= */
+
+    cancelDeleteBtn.addEventListener(
+        "click",
+        () => {
+
+            deleteModal.classList.add(
+                "hidden"
+            );
+
+            deleteAdminId =
+                null;
+
+        }
+    );
+
+
+    /* =================================
+       CONFIRM DELETE
+    ================================= */
+
+   confirmDeleteBtn.addEventListener(
+    "click",
+    async () => {
+
+        if (
+            changingStatus ||
+            !deleteAdminId
+        ) {
+
+            return;
+        }
+
+        const adminId =
+            deleteAdminId;
+
+        try {
+
+            changingStatus =
+                true;
+
+            confirmDeleteBtn.disabled =
+                true;
+
+            const subAdminRef =
+                doc(
+                    db,
+                    "SubAdmins",
+                    adminId
+                );
+
+            const userRef =
+                doc(
+                    db,
+                    "Users",
+                    adminId
+                );
+
+            const subAdminSnapshot =
+                await getDoc(
+                    subAdminRef
+                );
+
+            const userSnapshot =
+                await getDoc(
+                    userRef
+                );
+
+            if (
+                !subAdminSnapshot.exists() ||
+                !userSnapshot.exists()
+            ) {
+
+                deleteModal.classList.add(
+                    "hidden"
+                );
+
+                deleteAdminId =
+                    null;
+
+                showMessage(
+                    "The Sub-Admin account record was not found.",
+                    "error"
+                );
+
+                await loadSubAdmins();
+
+                return;
+            }
+
+            const adminData =
+                subAdminSnapshot.data();
+
+            const adminName =
+                adminData.name ||
+                adminData.email ||
+                "Sub-Admin";
+
+            const currentStatus =
+                adminData.status ||
+                "active";
+
+            const newStatus =
+                currentStatus === "disabled"
+                    ? "active"
+                    : "disabled";
+
+            const batch =
+                writeBatch(db);
+
+            batch.update(
+                subAdminRef,
+                {
+                    status: newStatus
+                }
+            );
+
+            batch.update(
+                userRef,
+                {
+                    status: newStatus
+                }
+            );
+
+            confirmDeleteBtn.textContent =
+                newStatus === "disabled"
+                    ? "Disabling..."
+                    : "Enabling...";
+
+            await batch.commit();
+
+            deleteModal.classList.add(
+                "hidden"
+            );
+
+            deleteAdminId =
+                null;
+
+            await loadSubAdmins();
+
+            showMessage(
+                newStatus === "disabled"
+                    ? "Sub-Admin \"" +
+                      adminName +
+                      "\" has been disabled."
+                    : "Sub-Admin \"" +
+                      adminName +
+                      "\" has been enabled.",
+                "success"
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Change Sub-Admin status error:",
+                error
+            );
+
+            if (
+                error.code ===
+                "permission-denied"
+            ) {
+
+                showMessage(
+                    "Unable to change account status. Firestore permission was denied.",
+                    "error"
+                );
+
+            } else {
+
+                showMessage(
+                    "Unable to change Sub-Admin status.",
+                    "error"
+                );
+            }
+
+        } finally {
+
+            changingStatus =
+                false;
+
+            confirmDeleteBtn.disabled =
+                false;
+
+            confirmDeleteBtn.textContent =
+                "Disable";
+        }
+
+    }
+);
+
+
+    /* =================================
+       OPEN EDIT MODAL
+    ================================= */
+
+    async function openEditModal(adminId) {
+
+        try {
+
+            const adminRef =
+                doc(
+                    db,
+                    "SubAdmins",
+                    adminId
+                );
+
+
+            const snapshot =
+                await getDoc(
+                    adminRef
+                );
+
+
+            if (!snapshot.exists()) {
+
+                showMessage(
+                    "Sub-Admin account was not found.",
+                    "error"
+                );
+
+                await loadSubAdmins();
+
+                return;
+            }
+
+
+            const adminData =
+                snapshot.data();
+
+
+            selectedAdminId =
+                adminId;
+
+
+            editName.value =
+                adminData.name ||
+                "";
+
+            editEmail.value =
+                adminData.email ||
+                "";
+
+
+            editModal.classList.remove(
+                "hidden"
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Open Edit Modal error:",
+                error
+            );
+
+
+            showMessage(
+                "Unable to open edit form.",
+                "error"
+            );
+        }
+
+    }
+
+
+    /* =================================
+       SAVE EDIT
+    ================================= */
+
+    saveEditBtn.addEventListener(
+        "click",
+        async () => {
+
+            const name =
+                editName.value.trim();
+
+            
+           if (!name) {
+
+                showMessage(
+                    "Please enter both name and email.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            if (!selectedAdminId) {
+
+                showMessage(
+                    "No Sub-Admin selected.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            try {
+
+                saveEditBtn.disabled =
+                    true;
+
+                saveEditBtn.textContent =
+                    "Saving...";
+
+
+                await updateDoc(
+    doc(
+        db,
+        "SubAdmins",
+        selectedAdminId
+    ),
+    {
+        name: name
+    }
+);
+await updateDoc(
+    doc(
+        db,
+        "Users",
+        selectedAdminId
+    ),
+    {
+        name: name
+    }
+);
+
+                editModal.classList.add(
+                    "hidden"
+                );
+
+
+                selectedAdminId =
+                    null;
+
+
+                await loadSubAdmins();
+
+
+                showMessage(
+                    "Sub-Admin information updated successfully.",
+                    "success"
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Save Edit error:",
+                    error
+                );
+
+
+                if (
+                    error.code ===
+                    "permission-denied"
+                ) {
+
+                    showMessage(
+                        "Permission denied. Check your Firestore security rules.",
+                        "error"
+                    );
+
+                } else {
+
+                    showMessage(
+                        "Unable to update Sub-Admin.",
+                        "error"
+                    );
+                }
+
+            } finally {
+
+                saveEditBtn.disabled =
+                    false;
+
+                saveEditBtn.textContent =
+                    "Save Changes";
+            }
+
+        }
+    );
+
+
+    /* =================================
+       OPEN DUTIES MODAL
+    ================================= */
+
+    async function openDutiesModal(adminId) {
+
+        try {
+
+            const adminRef =
+                doc(
+                    db,
+                    "SubAdmins",
+                    adminId
+                );
+
+
+            const snapshot =
+                await getDoc(
+                    adminRef
+                );
+
+
+            if (!snapshot.exists()) {
+
+                showMessage(
+                    "Sub-Admin account was not found.",
+                    "error"
+                );
+
+                await loadSubAdmins();
+
+                return;
+            }
+
+
+            const adminData =
+                snapshot.data();
+
+
+            selectedAdminId =
+                adminId;
+
+
+            const currentDuties =
+                Array.isArray(
+                    adminData.duties
+                )
+                    ? adminData.duties
+                    : [];
+
+
+            document
+                .querySelectorAll(
+                    ".duty-option input"
+                )
+                .forEach(
+                    (checkbox) => {
+
+                        checkbox.checked =
+                            currentDuties.includes(
+                                checkbox.value
+                            );
+
+                    }
+                );
+
+
+            dutiesModal.classList.remove(
+                "hidden"
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Open Duties Modal error:",
+                error
+            );
+
+
+            showMessage(
+                "Unable to open duties.",
+                "error"
+            );
+        }
+
+    }
+
+
+    /* =================================
+       SAVE DUTIES
+    ================================= */
+
+    saveDutiesBtn.addEventListener(
+        "click",
+        async () => {
+
+            if (!selectedAdminId) {
+
+                showMessage(
+                    "No Sub-Admin selected.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            const selectedDuties = [];
+
+
+            document
+                .querySelectorAll(
+                    ".duty-option input:checked"
+                )
+                .forEach(
+                    (checkbox) => {
+
+                        selectedDuties.push(
+                            checkbox.value
+                        );
+
+                    }
+                );
+
+
+            try {
+
+                saveDutiesBtn.disabled =
+                    true;
+
+                saveDutiesBtn.textContent =
+                    "Saving...";
+
+
+                await updateDoc(
+                    doc(
+                        db,
+                        "SubAdmins",
+                        selectedAdminId
+                    ),
+                    {
+                        duties:
+                            selectedDuties
+                    }
+                );
+
+
+                dutiesModal.classList.add(
+                    "hidden"
+                );
+
+
+                selectedAdminId =
+                    null;
+
+
+                showMessage(
+                    "Sub-Admin duties updated successfully.",
+                    "success"
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Save Duties error:",
+                    error
+                );
+
+
+                if (
+                    error.code ===
+                    "permission-denied"
+                ) {
+
+                    showMessage(
+                        "Permission denied. Check your Firestore security rules.",
+                        "error"
+                    );
+
+                } else {
+
+                    showMessage(
+                        "Unable to update duties.",
+                        "error"
+                    );
+                }
+
+            } finally {
+
+                saveDutiesBtn.disabled =
+                    false;
+
+                saveDutiesBtn.textContent =
+                    "Save Duties";
+            }
+
+        }
+    );
+
+
+    /* =================================
+       CLOSE EDIT MODAL
+    ================================= */
+
+    document
+        .getElementById(
+            "closeEditBtn"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                editModal.classList.add(
+                    "hidden"
+                );
+
+                selectedAdminId =
+                    null;
+            }
+        );
+
+
+    document
+        .getElementById(
+            "cancelEditBtn"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                editModal.classList.add(
+                    "hidden"
+                );
+
+                selectedAdminId =
+                    null;
+            }
+        );
+
+
+    /* =================================
+       CLOSE DUTIES MODAL
+    ================================= */
+
+    document
+        .getElementById(
+            "closeDutiesBtn"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                dutiesModal.classList.add(
+                    "hidden"
+                );
+
+                selectedAdminId =
+                    null;
+            }
+        );
+
+
+    document
+        .getElementById(
+            "cancelDutiesBtn"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                dutiesModal.classList.add(
+                    "hidden"
+                );
+
+                selectedAdminId =
+                    null;
+            }
+        );
+
+
+    /* =================================
+       MESSAGE
+    ================================= */
+
+    function showMessage(
+        text,
+        type
+    ) {
+
+        message.textContent =
+            text;
+
+        message.className =
+            type;
+
+        message.style.display =
+            "block";
+
+
+        if (messageTimer) {
+
+            clearTimeout(
+                messageTimer
+            );
+        }
+
+
+        messageTimer =
+            setTimeout(
+                () => {
+
+                    message.style.display =
+                        "none";
+
+                    message.className =
+                        "";
+
+                },
+                4000
+            );
+
+    }
+
+
+    /* =================================
+       BASIC HTML ESCAPING
+    ================================= */
+
+    function escapeHTML(
+        value
+    ) {
+
+        return String(value)
+
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+
+            .replace(
+                /</g,
+                "&lt;"
+            )
+
+            .replace(
+                />/g,
+                "&gt;"
+            )
+
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+</script>
+```
+
+</body>
+
+</html>

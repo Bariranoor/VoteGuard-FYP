@@ -1,0 +1,66 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true" android:background="@color/vg_page">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingLeft="24dp" android:paddingTop="24dp" android:paddingRight="24dp" android:paddingBottom="22dp" android:background="@color/vg_navy">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="VoteGuard" android:textStyle="bold" android:textSize="26sp" android:textColor="@color/white"/>
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Controlled Institutional Election Management System with Electronic Voting" android:textSize="13sp" android:textColor="#E3EDF7" android:lineSpacingExtra="2dp"/>
+            <TextView android:id="@+id/tvInstitutionName" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Loading institution..." android:textStyle="bold" android:textSize="15sp" android:textColor="@color/white"/>
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="On-site voting device" android:textSize="12sp" android:textColor="#C9D9E8"/>
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:paddingLeft="20dp" android:paddingTop="24dp" android:paddingRight="20dp" android:paddingBottom="32dp">
+        <!--  =====================================================
+                     PAIRING PANEL
+                     =====================================================  -->
+        <LinearLayout android:id="@+id/pairingPanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal">
+            <TextView android:id="@+id/tvScreenTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Connect this voting device" android:textStyle="bold" android:textSize="24sp" android:textColor="@color/vg_text" android:gravity="center"/>
+            <TextView android:id="@+id/tvDescription" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="Ask the Presiding Officer for the booth pairing code, then enter it below." android:textSize="15sp" android:textColor="@color/vg_muted" android:gravity="center" android:lineSpacingExtra="3dp"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:orientation="vertical" android:padding="20dp" android:background="#FFFFFF">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Booth pairing code" android:textStyle="bold" android:textSize="14sp" android:textColor="@color/vg_text"/>
+                <EditText android:id="@+id/etPairingCode" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="10dp" android:hint="Enter code" android:inputType="number" android:maxLines="1" android:textSize="20sp" android:textColor="@color/vg_text" android:textColorHint="#98A2B3" android:gravity="center" android:backgroundTint="@color/vg_navy"/>
+                <Button android:id="@+id/btnConnectDevice" android:layout_width="match_parent" android:layout_height="54dp" android:layout_marginTop="20dp" android:text="Connect device" android:textStyle="bold" android:textSize="15sp" android:textColor="@color/white" android:backgroundTint="@color/vg_navy"/>
+            </LinearLayout>
+        </LinearLayout>
+        <!--  =====================================================
+                     CONNECTED / WAITING PANEL
+                     =====================================================  -->
+        <LinearLayout android:id="@+id/connectedPanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:visibility="gone">
+            <TextView android:id="@+id/tvConnectedTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Voting device ready" android:textStyle="bold" android:textSize="24sp" android:textColor="@color/vg_text" android:gravity="center"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:orientation="vertical" android:padding="20dp" android:background="#FFFFFF">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Assigned booth" android:textStyle="bold" android:textSize="13sp" android:textColor="@color/vg_muted"/>
+                <TextView android:id="@+id/tvBoothName" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="Loading booth..." android:textStyle="bold" android:textSize="22sp" android:textColor="@color/vg_text"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="Current election" android:textStyle="bold" android:textSize="13sp" android:textColor="@color/vg_muted"/>
+                <TextView android:id="@+id/tvElectionName" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="Loading election..." android:textSize="17sp" android:textColor="@color/vg_text"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:orientation="vertical" android:gravity="center" android:padding="22dp" android:background="@color/vg_soft_blue">
+                <TextView android:id="@+id/tvWaitingStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Waiting for voter authorization..." android:textStyle="bold" android:textSize="19sp" android:textColor="@color/vg_text" android:gravity="center"/>
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="The ballot opens after the Presiding Officer verifies and authorizes a voter." android:textSize="14sp" android:textColor="@color/vg_muted" android:gravity="center" android:lineSpacingExtra="3dp"/>
+            </LinearLayout>
+        </LinearLayout>
+        <!--  =====================================================
+                     BALLOT PANEL
+                     =====================================================  -->
+        <LinearLayout android:id="@+id/ballotPanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Official ballot" android:textStyle="bold" android:textSize="13sp" android:textColor="@color/vg_navy" android:gravity="center"/>
+            <TextView android:id="@+id/tvBallotElectionName" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="Election" android:textStyle="bold" android:textSize="25sp" android:textColor="@color/vg_text" android:gravity="center"/>
+            <TextView android:id="@+id/tvBallotBoothName" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:text="Booth" android:textSize="14sp" android:textColor="@color/vg_muted" android:gravity="center"/>
+            <TextView android:id="@+id/tvBallotMessage" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:padding="14dp" android:text="Choose one candidate for each position." android:textSize="15sp" android:textColor="@color/vg_text" android:background="@color/vg_soft_blue" android:gravity="center"/>
+            <TextView android:id="@+id/tvBallotProgress" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Completed: 0 of 0 positions" android:textStyle="bold" android:textSize="14sp" android:textColor="@color/vg_navy" android:gravity="center"/>
+            <LinearLayout android:id="@+id/ballotContainer" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:orientation="vertical"/>
+            <Button android:id="@+id/btnSubmitBallot" android:layout_width="match_parent" android:layout_height="54dp" android:layout_marginTop="18dp" android:text="Submit ballot" android:textStyle="bold" android:textSize="15sp" android:textColor="@color/white" android:backgroundTint="@color/vg_navy" android:enabled="false"/>
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Your vote is private. Your voter record is not stored with your candidate choice." android:textSize="12sp" android:textColor="@color/vg_muted" android:gravity="center"/>
+        </LinearLayout>
+        <!--  =====================================================
+                     SUCCESS PANEL
+                     =====================================================  -->
+        <LinearLayout android:id="@+id/successPanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:orientation="vertical" android:gravity="center" android:padding="28dp" android:background="#FFFFFF" android:visibility="gone">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="✓" android:textSize="48sp" android:textColor="@color/vg_success"/>
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Ballot submitted" android:textStyle="bold" android:textSize="24sp" android:textColor="@color/vg_text" android:gravity="center"/>
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="Your vote has been recorded." android:textSize="15sp" android:textColor="@color/vg_muted" android:gravity="center"/>
+        </LinearLayout>
+        <!--  =====================================================
+                     DEVICE STATUS
+                     =====================================================  -->
+        <TextView android:id="@+id/tvAuthStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="22dp" android:text="Checking device identity..." android:textSize="13sp" android:textColor="@color/vg_muted" android:gravity="center"/>
+        <TextView android:id="@+id/tvDeviceUid" android:layout_width="match_parent" android:layout_height="wrap_content" android:visibility="gone"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

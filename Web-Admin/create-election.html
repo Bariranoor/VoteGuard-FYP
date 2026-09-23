@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Create Election</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        .header {
+            background: #1976d2;
+            color: white;
+            padding: 20px 30px;
+        }
+
+        .header h1 {
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.95;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+        .form-card h2 {
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .date-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .positions-section {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid #ddd;
+        }
+
+        .positions-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .position-row {
+            display: grid;
+            grid-template-columns: 1fr 150px 90px;
+            gap: 12px;
+            align-items: end;
+            margin-bottom: 12px;
+        }
+
+        .position-row input {
+            margin: 0;
+        }
+
+        button {
+            padding: 11px 18px;
+            border: none;
+            border-radius: 5px;
+            background: #1976d2;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        .remove-btn {
+            background: #c62828;
+            width: 100%;
+        }
+
+        .add-position-btn {
+            background: #2e7d32;
+            margin-top: 5px;
+        }
+
+        .no-positions {
+            color: #777;
+            font-size: 14px;
+            padding: 15px;
+            background: #f7f7f7;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .action-buttons {
+            margin-top: 30px;
+        }
+
+        .back-btn {
+            background: #666;
+            margin-left: 10px;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 5px;
+            display: none;
+            line-height: 1.4;
+        }
+
+        .success {
+            background: #e5f7e5;
+            color: #146b14;
+        }
+
+        .error {
+            background: #ffe5e5;
+            color: #b00020;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 30px 10px;
+        }
+
+        .form-content {
+            display: none;
+        }
+
+        @media (max-width: 650px) {
+
+            .date-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .position-row {
+                grid-template-columns: 1fr;
+            }
+
+            .back-btn {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+
+            .form-card {
+                padding: 20px;
+            }
+
+        }
+
+    </style>
+
+        <link rel="stylesheet" href="assets/css/navigation.css?v=20260913-nav">
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+</head>
+
+
+<body>
+
+    <div class="header">
+
+        <h1>Create Election</h1>
+
+        <p>
+            Institutional Election Management System
+        </p>
+
+    </div>
+
+
+    <div class="container">
+
+        <nav class="page-navigation" aria-label="Page navigation">
+            <button type="button" id="backBtn" class="back-btn back-dashboard-button">
+                Back to Dashboard
+            </button>
+        </nav>
+
+        <div
+            id="loadingMessage"
+            class="loading"
+        >
+            Checking authorization...
+        </div>
+
+
+        <div
+            id="formContent"
+            class="form-content"
+        >
+
+            <div class="form-card">
+
+                <h2>
+                    Election Information
+                </h2>
+
+                <p class="description">
+                    Create a new institutional election.
+                    The election will initially be saved as Draft.
+                    Election positions can be defined during creation.
+                </p>
+
+
+                <!-- ELECTION NAME -->
+
+                <div class="form-group">
+
+                    <label for="electionName">
+                        Election Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="electionName"
+                        maxlength="150"
+                        placeholder="e.g. Student Council Election 2026"
+                    >
+
+                </div>
+
+
+                <!-- ACADEMIC SESSION -->
+
+                <div class="form-group">
+
+                    <label for="academicSession">
+                        Academic Session
+                    </label>
+
+                    <input
+                        type="text"
+                        id="academicSession"
+                        maxlength="30"
+                        placeholder="e.g. 2026-2027"
+                    >
+
+                </div>
+
+
+                <!-- DESCRIPTION -->
+
+                <div class="form-group">
+
+                    <label for="electionDescription">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="electionDescription"
+                        maxlength="1000"
+                        placeholder="Enter a short description of the election."
+                    ></textarea>
+
+                </div>
+
+
+                <!-- NOMINATION PERIOD -->
+
+                <div class="date-grid">
+
+                    <div class="form-group">
+
+                        <label for="nominationStart">
+                            Nomination Start
+                        </label>
+
+                        <input
+                            type="datetime-local"
+                            id="nominationStart"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="nominationEnd">
+                            Nomination End
+                        </label>
+
+                        <input
+                            type="datetime-local"
+                            id="nominationEnd"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- VOTING PERIOD -->
+
+                <div class="date-grid">
+
+                    <div class="form-group">
+
+                        <label for="votingStart">
+                            Voting Start
+                        </label>
+
+                        <input
+                            type="datetime-local"
+                            id="votingStart"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="votingEnd">
+                            Voting End
+                        </label>
+
+                        <input
+                            type="datetime-local"
+                            id="votingEnd"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- POSITIONS -->
+
+                <div class="positions-section">
+
+                    <h2>
+                        Election Positions
+                    </h2>
+
+                    <p class="positions-description">
+                        Add each position in this election, for example
+                        President, Vice President, or CR. Each position
+                        has one winner.
+                    </p>
+
+
+                    <div id="positionsContainer">
+
+                        <div
+                            class="no-positions"
+                            id="noPositionsMessage"
+                        >
+                            No positions have been added yet.
+                            Click "Add Position" to create one.
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="addPositionBtn"
+                        class="add-position-btn"
+                    >
+                        + Add Position
+                    </button>
+
+                </div>
+
+
+                <!-- ACTION BUTTONS -->
+
+                <div class="action-buttons">
+
+                    <button
+                        type="button"
+                        id="createElectionBtn"
+                    >
+                        Create Election
+                    </button>
+                </div>
+
+
+                <div
+                    id="message"
+                    class="message"
+                ></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script type="module">
+
+        import {
+            auth,
+            db
+        } from "./js/firebase.js";
+
+
+        import {
+            requirePermission
+        } from "./js/auth.js";
+
+
+        import {
+            collection,
+            doc,
+            serverTimestamp,
+            Timestamp,
+            writeBatch
+        } from
+        "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+
+        import {
+            getDashboardForRole
+        } from "./js/navigation.js";
+
+
+        // ==================================================
+        // CONFIGURATION
+        // ==================================================
+
+       const CREATE_ELECTION_PERMISSION =
+    "Create New Election";
+
+        const MAX_POSITIONS =
+            30;
+
+
+        // The ballot and result workflow elect one candidate per position.
+        // Multi-seat positions must not be created until multi-select voting
+        // and multi-winner result handling are implemented together.
+        const MAX_SEATS_PER_POSITION =
+            1;
+
+
+        // ==================================================
+        // PAGE ELEMENTS
+        // ==================================================
+
+        const loadingMessage =
+            document.getElementById(
+                "loadingMessage"
+            );
+
+
+        const formContent =
+            document.getElementById(
+                "formContent"
+            );
+
+
+        const positionsContainer =
+            document.getElementById(
+                "positionsContainer"
+            );
+
+
+        const addPositionBtn =
+            document.getElementById(
+                "addPositionBtn"
+            );
+
+
+        const createElectionBtn =
+            document.getElementById(
+                "createElectionBtn"
+            );
+
+
+        const backBtn =
+            document.getElementById(
+                "backBtn"
+            );
+
+
+        const messageBox =
+            document.getElementById(
+                "message"
+            );
+
+
+        // ==================================================
+        // AUTHENTICATION / AUTHORIZATION
+        // ==================================================
+
+        let currentUser = null;
+
+        let currentUserData = null;
+
+
+        initializePage();
+
+
+        async function initializePage() {
+
+            try {
+
+               const result =
+    await requirePermission(
+        CREATE_ELECTION_PERMISSION,
+        "login.html"
+    );
+
+                if (!result) {
+                    return;
+                }
+
+
+                currentUser =
+                    result.user;
+
+
+                currentUserData =
+                    result.data;
+
+
+                loadingMessage.style.display =
+                    "none";
+
+
+                formContent.style.display =
+                    "block";
+
+
+            } catch (error) {
+
+                console.error(
+                    "Authorization error:",
+                    error
+                );
+
+
+                loadingMessage.textContent =
+                    "Unable to verify your authorization.";
+
+            }
+
+        }
+
+
+        // ==================================================
+        // POSITION MANAGEMENT
+        // ==================================================
+
+        addPositionBtn.addEventListener(
+            "click",
+            addPosition
+        );
+
+
+        function addPosition() {
+
+            const existingRows =
+                positionsContainer.querySelectorAll(
+                    ".position-row"
+                );
+
+
+            if (
+                existingRows.length >=
+                MAX_POSITIONS
+            ) {
+
+                showMessage(
+                    `A maximum of ${MAX_POSITIONS} positions can be added.`,
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const noPositionsMessage =
+                document.getElementById(
+                    "noPositionsMessage"
+                );
+
+
+            if (noPositionsMessage) {
+                noPositionsMessage.remove();
+            }
+
+
+            const positionRow =
+                document.createElement(
+                    "div"
+                );
+
+
+            positionRow.className =
+                "position-row";
+
+
+            positionRow.innerHTML = `
+
+                <div>
+
+                    <label>
+                        Position Name
+                    </label>
+
+                    <input
+                        type="text"
+                        class="position-name"
+                        maxlength="100"
+                        placeholder="e.g. President"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        Number of Winners (one)
+                    </label>
+
+                    <input
+                        type="number"
+                        class="position-seats"
+                        min="1"
+                        max="${MAX_SEATS_PER_POSITION}"
+                        step="1"
+                        value="1"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <button
+                        type="button"
+                        class="remove-btn"
+                    >
+                        Remove
+                    </button>
+
+                </div>
+
+            `;
+
+
+            const removeButton =
+                positionRow.querySelector(
+                    ".remove-btn"
+                );
+
+
+            removeButton.addEventListener(
+                "click",
+                () => {
+
+                    positionRow.remove();
+
+                    updatePositionsMessage();
+
+                }
+            );
+
+
+            positionsContainer.appendChild(
+                positionRow
+            );
+
+        }
+
+
+        function updatePositionsMessage() {
+
+            const rows =
+                positionsContainer.querySelectorAll(
+                    ".position-row"
+                );
+
+
+            if (rows.length === 0) {
+
+                const message =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                message.className =
+                    "no-positions";
+
+
+                message.id =
+                    "noPositionsMessage";
+
+
+                message.textContent =
+                    'No positions have been added yet. Click "Add Position" to create one.';
+
+
+                positionsContainer.appendChild(
+                    message
+                );
+
+            }
+
+        }
+
+
+        // ==================================================
+        // CREATE ELECTION
+        // ==================================================
+
+        createElectionBtn.addEventListener(
+            "click",
+            createElection
+        );
+
+
+        async function createElection() {
+
+            clearMessage();
+
+
+            // ----------------------------------------------
+            // AUTHORIZATION CHECK
+            // ----------------------------------------------
+
+            if (!currentUser || !currentUserData) {
+
+                showMessage(
+                    "Your session could not be verified. Please sign in again.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            if (
+                currentUserData.status !==
+                "active"
+            ) {
+
+                showMessage(
+                    "Your account is not active.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            // ----------------------------------------------
+            // READ FORM VALUES
+            // ----------------------------------------------
+
+            const electionName =
+                document
+                    .getElementById(
+                        "electionName"
+                    )
+                    .value
+                    .trim();
+
+
+            const academicSession =
+                document
+                    .getElementById(
+                        "academicSession"
+                    )
+                    .value
+                    .trim();
+
+
+            const electionDescription =
+                document
+                    .getElementById(
+                        "electionDescription"
+                    )
+                    .value
+                    .trim();
+
+
+            const nominationStartValue =
+                document
+                    .getElementById(
+                        "nominationStart"
+                    )
+                    .value;
+
+
+            const nominationEndValue =
+                document
+                    .getElementById(
+                        "nominationEnd"
+                    )
+                    .value;
+
+
+            const votingStartValue =
+                document
+                    .getElementById(
+                        "votingStart"
+                    )
+                    .value;
+
+
+            const votingEndValue =
+                document
+                    .getElementById(
+                        "votingEnd"
+                    )
+                    .value;
+
+
+            // ----------------------------------------------
+            // BASIC VALIDATION
+            // ----------------------------------------------
+
+            if (
+                !electionName ||
+                !academicSession ||
+                !nominationStartValue ||
+                !nominationEndValue ||
+                !votingStartValue ||
+                !votingEndValue
+            ) {
+
+                showMessage(
+                    "Please complete all required election fields.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            if (
+                electionName.length < 3
+            ) {
+
+                showMessage(
+                    "Election name must contain at least 3 characters.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            if (
+                academicSession.length < 4
+            ) {
+
+                showMessage(
+                    "Please enter a valid academic session.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            // ----------------------------------------------
+            // CONVERT DATES
+            // ----------------------------------------------
+
+            const nominationStart =
+                parseLocalDateTime(
+                    nominationStartValue
+                );
+
+
+            const nominationEnd =
+                parseLocalDateTime(
+                    nominationEndValue
+                );
+
+
+            const votingStart =
+                parseLocalDateTime(
+                    votingStartValue
+                );
+
+
+            const votingEnd =
+                parseLocalDateTime(
+                    votingEndValue
+                );
+
+
+            if (
+                !nominationStart ||
+                !nominationEnd ||
+                !votingStart ||
+                !votingEnd
+            ) {
+
+                showMessage(
+                    "Please enter valid election dates and times.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            // ----------------------------------------------
+            // DATE ORDER VALIDATION
+            // ----------------------------------------------
+
+            if (
+                nominationEnd <=
+                nominationStart
+            ) {
+
+                showMessage(
+                    "Nomination end must be after nomination start.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            if (
+                votingStart <=
+                nominationEnd
+            ) {
+
+                showMessage(
+                    "Voting must start after the nomination period ends.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            if (
+                votingEnd <=
+                votingStart
+            ) {
+
+                showMessage(
+                    "Voting end must be after voting start.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            // ----------------------------------------------
+            // COLLECT POSITIONS
+            // ----------------------------------------------
+
+            const positionRows =
+                positionsContainer.querySelectorAll(
+                    ".position-row"
+                );
+
+
+            if (
+                positionRows.length === 0
+            ) {
+
+                showMessage(
+                    "Please add at least one election position.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const positions = [];
+
+
+            positionRows.forEach(
+                (row, index) => {
+
+                    const name =
+                        row
+                            .querySelector(
+                                ".position-name"
+                            )
+                            .value
+                            .trim();
+
+
+                    const seats =
+                        Number(
+                            row
+                                .querySelector(
+                                    ".position-seats"
+                                )
+                                .value
+                        );
+
+
+                    positions.push({
+
+                        name:
+                            name,
+
+                        seats:
+                            seats,
+
+                        order:
+                            index + 1
+
+                    });
+
+                }
+            );
+
+
+            // ----------------------------------------------
+            // POSITION VALIDATION
+            // ----------------------------------------------
+
+            for (
+                const position of positions
+            ) {
+
+                if (
+                    !position.name
+                ) {
+
+                    showMessage(
+                        "Please enter a name for every position.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                if (
+                    position.name.length < 2
+                ) {
+
+                    showMessage(
+                        "Position names must contain at least 2 characters.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                if (
+                    !Number.isInteger(
+                        position.seats
+                    ) ||
+                    position.seats < 1 ||
+                    position.seats >
+                    MAX_SEATS_PER_POSITION
+                ) {
+
+                    showMessage(
+                        "Each position has one winner. Add another position instead of adding more winners here.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+            }
+
+
+            // ----------------------------------------------
+            // DUPLICATE POSITION VALIDATION
+            // ----------------------------------------------
+
+            const positionNames =
+                positions.map(
+                    position =>
+                        normalizeName(
+                            position.name
+                        )
+                );
+
+
+            const uniquePositionNames =
+                new Set(
+                    positionNames
+                );
+
+
+            if (
+                uniquePositionNames.size !==
+                positionNames.length
+            ) {
+
+                showMessage(
+                    "Each position must have a unique name.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            // ----------------------------------------------
+            // DISABLE BUTTON
+            // ----------------------------------------------
+
+            createElectionBtn.disabled =
+                true;
+
+
+            createElectionBtn.textContent =
+                "Creating Election...";
+
+
+            try {
+
+                // ------------------------------------------
+                // CREATE A SINGLE ATOMIC BATCH
+                // ------------------------------------------
+
+                const batch =
+                    writeBatch(
+                        db
+                    );
+
+
+                // Generate the election document reference
+                // before committing the batch.
+
+                const electionRef =
+                    doc(
+                        collection(
+                            db,
+                            "Elections"
+                        )
+                    );
+
+
+                // ------------------------------------------
+                // ELECTION DOCUMENT
+                // ------------------------------------------
+
+                batch.set(
+                    electionRef,
+                    {
+
+                        electionName:
+                            electionName,
+
+                        academicSession:
+                            academicSession,
+
+                        description:
+                            electionDescription,
+
+                        nominationStart:
+                            Timestamp.fromDate(
+                                nominationStart
+                            ),
+
+                        nominationEnd:
+                            Timestamp.fromDate(
+                                nominationEnd
+                            ),
+
+                        votingStart:
+                            Timestamp.fromDate(
+                                votingStart
+                            ),
+
+                        votingEnd:
+                            Timestamp.fromDate(
+                                votingEnd
+                            ),
+
+                        status:
+                            "draft",
+
+                        createdBy:
+                            currentUser.uid,
+
+                        createdAt:
+                            serverTimestamp(),
+
+                        updatedBy:
+                            currentUser.uid,
+
+                        updatedAt:
+                            serverTimestamp()
+
+                    }
+                );
+
+
+                // ------------------------------------------
+                // POSITION DOCUMENTS
+                // ------------------------------------------
+
+                positions.forEach(
+                    (position) => {
+
+                        const positionRef =
+                            doc(
+                                collection(
+                                    db,
+                                    "Positions"
+                                )
+                            );
+
+
+                        batch.set(
+                            positionRef,
+                            {
+
+                                electionId:
+                                    electionRef.id,
+
+                                name:
+                                    position.name,
+
+                                seats:
+                                    position.seats,
+
+                                order:
+                                    position.order,
+
+                                createdBy:
+                                    currentUser.uid,
+
+                                createdAt:
+                                    serverTimestamp(),
+
+                                updatedBy:
+                                    currentUser.uid,
+
+                                updatedAt:
+                                    serverTimestamp()
+
+                            }
+                        );
+
+                    }
+                );
+
+
+                // ------------------------------------------
+                // COMMIT EVERYTHING TOGETHER
+                // ------------------------------------------
+
+                await batch.commit();
+
+
+                console.log(
+                    "Election created:",
+                    electionRef.id
+                );
+
+
+                showMessage(
+                    "Election created successfully and saved as Draft.",
+                    "success"
+                );
+
+
+                // ------------------------------------------
+                // REDIRECT
+                // ------------------------------------------
+
+                setTimeout(
+                    () => {
+
+                        window.location.href =
+                            getDashboardForRole(
+                                currentUserData.role
+                            );
+
+                    },
+                    1200
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Election creation failed:",
+                    error
+                );
+
+
+                createElectionBtn.disabled =
+                    false;
+
+
+                createElectionBtn.textContent =
+                    "Create Election";
+
+
+                showMessage(
+                    "Unable to create the election. Please try again.",
+                    "error"
+                );
+
+            }
+
+        }
+
+
+        // ==================================================
+        // DATETIME CONVERSION
+        // ==================================================
+
+        function parseLocalDateTime(
+            value
+        ) {
+
+            if (!value) {
+                return null;
+            }
+
+
+            const parts =
+                value.split(
+                    /[-T:]/
+                );
+
+
+            if (
+                parts.length !== 5
+            ) {
+
+                return null;
+
+            }
+
+
+            const year =
+                Number(parts[0]);
+
+
+            const month =
+                Number(parts[1]) - 1;
+
+
+            const day =
+                Number(parts[2]);
+
+
+            const hours =
+                Number(parts[3]);
+
+
+            const minutes =
+                Number(parts[4]);
+
+
+            const date =
+                new Date(
+                    year,
+                    month,
+                    day,
+                    hours,
+                    minutes,
+                    0,
+                    0
+                );
+
+
+            if (
+                Number.isNaN(
+                    date.getTime()
+                )
+            ) {
+
+                return null;
+
+            }
+
+
+            return date;
+
+        }
+
+
+        // ==================================================
+        // NAME NORMALIZATION
+        // ==================================================
+
+        function normalizeName(
+            value
+        ) {
+
+            return value
+                .trim()
+                .replace(
+                    /\s+/g,
+                    " "
+                )
+                .toLowerCase();
+
+        }
+
+
+        // ==================================================
+        // BACK BUTTON
+        // ==================================================
+
+        backBtn.addEventListener(
+            "click",
+            () => {
+
+                if (
+                    currentUserData &&
+                    currentUserData.role
+                ) {
+
+                    window.location.href =
+                        getDashboardForRole(
+                            currentUserData.role
+                        );
+
+                } else {
+
+                    window.location.href =
+                        "login.html";
+
+                }
+
+            }
+        );
+
+
+        // ==================================================
+        // MESSAGE FUNCTIONS
+        // ==================================================
+
+        function showMessage(
+            message,
+            type
+        ) {
+
+            messageBox.textContent =
+                message;
+
+
+            messageBox.className =
+                "message " + type;
+
+
+            messageBox.style.display =
+                "block";
+
+        }
+
+
+        function clearMessage() {
+
+            messageBox.textContent =
+                "";
+
+
+            messageBox.className =
+                "message";
+
+
+            messageBox.style.display =
+                "none";
+
+        }
+
+    </script>
+
+</body>
+
+</html>

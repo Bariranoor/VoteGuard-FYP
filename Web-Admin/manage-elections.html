@@ -1,0 +1,5634 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Manage Elections</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        .header {
+            background: #1976d2;
+            color: white;
+            padding: 20px 30px;
+        }
+
+        .header h1 {
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px 40px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .card h2 {
+            margin-bottom: 8px;
+        }
+
+        .card-description {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .message {
+            display: none;
+            margin-bottom: 20px;
+            padding: 13px;
+            border-radius: 6px;
+            line-height: 1.5;
+            white-space: pre-line;
+        }
+
+        .message.success-message {
+            background: #e5f7e5;
+            color: #146b14;
+        }
+
+        .message.error-message {
+            background: #ffe5e5;
+            color: #b00020;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+
+        .election-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .election-item {
+            background: #f7f8fa;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+            padding: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .election-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .election-item-info h3 {
+            margin-bottom: 7px;
+            word-break: break-word;
+        }
+
+        .election-item-info p {
+            color: #666;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .election-item-actions {
+            flex-shrink: 0;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .info-item {
+            background: #f7f8fa;
+            padding: 15px;
+            border-radius: 7px;
+        }
+
+        .info-item strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .info-item span {
+            font-size: 15px;
+            word-break: break-word;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .status.draft {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.finalized {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.stopped {
+            background: #ffe0b2;
+            color: #8a4b00;
+        }
+
+        .status.closed {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .position-list {
+            margin-top: 15px;
+        }
+
+        .position-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f7f8fa;
+            border-radius: 7px;
+            border: 1px solid #e1e1e1;
+        }
+
+        .position-info {
+            flex: 1;
+        }
+
+        .position-info h3 {
+            margin-bottom: 5px;
+        }
+
+        .position-info p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .position-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background: #1976d2;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #1565c0;
+        }
+
+        button:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+
+        .secondary {
+            background: #666;
+        }
+
+        .secondary:hover {
+            background: #555;
+        }
+
+        .danger {
+            background: #c62828;
+        }
+
+        .danger:hover {
+            background: #a61f1f;
+        }
+
+        .success {
+            background: #2e7d32;
+        }
+
+        .success:hover {
+            background: #256628;
+        }
+
+        .warning {
+            background: #ef6c00;
+        }
+
+        .warning:hover {
+            background: #d85f00;
+        }
+
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .empty {
+            color: #777;
+            padding: 15px;
+            background: #f7f8fa;
+            border-radius: 6px;
+        }
+
+        .control-box {
+            background: #f7f8fa;
+            padding: 18px;
+            border-radius: 7px;
+            margin-top: 15px;
+        }
+
+        .control-box h3 {
+            margin-bottom: 8px;
+        }
+
+        .control-box p {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .notice {
+            padding: 13px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            background: #e8f1ff;
+            color: #174a8b;
+            line-height: 1.5;
+        }
+
+        .delete-warning {
+            background: #fff0f0;
+            border: 1px solid #ffcaca;
+            color: #a61f1f;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            padding: 25px;
+            border-radius: 10px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 10px;
+        }
+
+        .modal-content p {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .danger-confirm {
+            background: #c62828;
+        }
+
+        .danger-confirm:hover {
+            background: #a61f1f;
+        }
+
+        @media (max-width: 700px) {
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .election-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .election-item-actions {
+                width: 100%;
+            }
+
+            .election-item-actions button {
+                flex: 1;
+            }
+
+            .position-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .position-actions {
+                width: 100%;
+            }
+
+            .position-actions button {
+                flex: 1;
+            }
+
+        }
+
+    </style>
+
+        <link rel="stylesheet" href="assets/css/navigation.css?v=20260913-nav">
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+</head>
+
+
+<body>
+
+
+    <!-- =========================================================
+         HEADER
+         ========================================================= -->
+
+    <div class="header">
+
+        <h1 id="pageTitle">
+            Manage Elections
+        </h1>
+
+
+
+    </div>
+
+
+    <div class="container">
+
+        <nav class="page-navigation" aria-label="Page navigation">
+            <button id="backBtn" type="button" class="secondary back-dashboard-button">
+                Back to Dashboard
+            </button>
+        </nav>
+
+
+        <!-- =====================================================
+             MESSAGE
+             ===================================================== -->
+
+        <div id="message" class="message"></div>
+
+
+        <!-- =====================================================
+             ELECTION LIST
+             ===================================================== -->
+
+        <div id="electionListSection" class="card">
+
+            <h2>Your Elections</h2>
+
+            <p class="card-description">
+                Select an election to view and manage its information,
+                schedule, positions and election controls.
+            </p>
+
+            <div id="electionLoading" class="loading">
+                Loading your elections...
+            </div>
+
+            <div
+                id="electionList"
+                class="election-list"
+                style="display: none;"
+            ></div>
+
+        </div>
+
+
+        <!-- =====================================================
+             MANAGEMENT SECTION
+             ===================================================== -->
+
+        <div
+            id="managementSection"
+            style="display: none;"
+        >
+
+
+            <!-- BACK BUTTON -->
+
+            <div class="button-row">
+
+                <button
+                    id="backToElectionsBtn"
+                    class="secondary"
+                >
+                    Back to Elections
+                </button>
+
+            </div>
+
+
+            <!-- =================================================
+                 ELECTION INFORMATION
+                 ================================================= -->
+
+            <div class="card">
+
+                <h2>Election Information</h2>
+
+                <p class="card-description">
+                    View and manage the basic information of the selected election.
+                </p>
+
+
+                <div class="info-grid">
+
+                    <div class="info-item">
+
+                        <strong>Election Name</strong>
+
+                        <span id="electionName">
+                            —
+                        </span>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <strong>Academic Session</strong>
+
+                        <span id="academicSession">
+                            —
+                        </span>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <strong>Description</strong>
+
+                        <span id="electionDescription">
+                            —
+                        </span>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <strong>Control Voting & Election Status</strong>
+
+                        <span
+                            id="electionStatus"
+                            class="status"
+                        >
+                            —
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="button-row">
+
+                    <button id="editElectionBtn">
+                        Edit Election Information
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 ELECTION SCHEDULE
+                 ================================================= -->
+
+            <div class="card">
+
+                <h2>Election Schedule</h2>
+
+                <p class="card-description">
+                    Set the official nomination and voting schedule
+                    before the election is finalized.
+                </p>
+
+
+                <div class="info-grid">
+
+                    <div class="info-item">
+
+                        <strong>Nomination Start</strong>
+
+                        <span id="nominationStart">
+                            —
+                        </span>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <strong>Nomination End</strong>
+
+                        <span id="nominationEnd">
+                            —
+                        </span>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <strong>Voting Start</strong>
+
+                        <span id="votingStart">
+                            —
+                        </span>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <strong>Voting End</strong>
+
+                        <span id="votingEnd">
+                            —
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="button-row">
+
+                    <button id="editScheduleBtn">
+                        Edit Schedule
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 POSITIONS
+                 ================================================= -->
+
+            <div class="card">
+
+                <h2>Election Positions</h2>
+
+                <p class="card-description">
+                    Add each position in this election, for example President,
+                    Vice President, or CR. Each position has one winner.
+                </p>
+
+
+                <div
+                    id="positionsList"
+                    class="position-list"
+                ></div>
+
+
+                <div class="button-row">
+
+                    <button id="addPositionBtn">
+                        + Add Position
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 ELECTION CONTROL
+                 ================================================= -->
+
+            <div class="card">
+
+                <h2>Election Control</h2>
+
+                <p class="card-description">
+                    Control the official lifecycle of the selected election.
+                </p>
+
+
+                <!-- FINALIZE -->
+
+                <div class="control-box">
+
+                    <h3>
+                        Finalize Election
+                    </h3>
+
+                    <p>
+                        Finalizing locks the election information,
+                        schedule and position structure.
+                        After finalization, these details cannot be edited.
+                    </p>
+
+                    <button
+                        id="finalizeBtn"
+                        class="success"
+                    >
+                        Finalize Election
+                    </button>
+
+                </div>
+
+
+                <!-- VOTING -->
+
+                <div class="control-box">
+
+                    <h3>
+                        Voting Control
+                    </h3>
+
+                    <p id="votingControlDescription">
+                        Finalize the election before voting can be started.
+                    </p>
+
+
+                    <div class="button-row">
+
+                        <button
+                            id="startVotingBtn"
+                            class="success"
+                        >
+                            Start Voting
+                        </button>
+
+
+                        <button
+                            id="stopVotingBtn"
+                            class="warning"
+                        >
+                            Stop Voting
+                        </button>
+
+
+                        <button
+                            id="closeElectionBtn"
+                            class="danger"
+                        >
+                            Close Election
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         CONFIRMATION MODAL
+         ========================================================= -->
+
+    <div
+        id="confirmModal"
+        class="modal modal-confirm"
+    >
+
+        <div class="modal-content">
+
+            <h2 id="modalTitle">
+                Confirm Action
+            </h2>
+
+            <p id="modalMessage">
+                Are you sure?
+            </p>
+
+            <div class="modal-buttons">
+
+                <button
+                    id="cancelModalBtn"
+                    class="secondary"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    id="confirmModalBtn"
+                    class="success"
+                >
+                    Confirm
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         EDIT ELECTION MODAL
+         ========================================================= -->
+
+    <div
+        id="editElectionModal"
+        class="modal modal-form"
+    >
+
+        <div class="modal-content">
+
+            <h2>
+                Edit Election Information
+            </h2>
+
+            <input
+                type="text"
+                id="editElectionName"
+                placeholder="Election Name"
+            >
+
+            <input
+                type="text"
+                id="editAcademicSession"
+                placeholder="Academic Session"
+            >
+
+            <input
+                type="text"
+                id="editDescription"
+                placeholder="Description"
+            >
+
+            <div class="modal-buttons">
+
+                <button
+                    id="cancelEditElectionBtn"
+                    class="secondary"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    id="saveElectionBtn"
+                    class="success"
+                >
+                    Save Changes
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         EDIT SCHEDULE MODAL
+         ========================================================= -->
+
+    <div
+        id="editScheduleModal"
+        class="modal modal-schedule"
+    >
+
+        <div class="modal-content">
+
+            <h2>
+                Edit Election Schedule
+            </h2>
+
+            <input
+                type="datetime-local"
+                id="editNominationStart"
+            >
+
+            <input
+                type="datetime-local"
+                id="editNominationEnd"
+            >
+
+            <input
+                type="datetime-local"
+                id="editVotingStart"
+            >
+
+            <input
+                type="datetime-local"
+                id="editVotingEnd"
+            >
+
+            <div class="modal-buttons">
+
+                <button
+                    id="cancelEditScheduleBtn"
+                    class="secondary"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    id="saveScheduleBtn"
+                    class="success"
+                >
+                    Save Schedule
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         POSITION MODAL
+         ========================================================= -->
+
+    <div
+        id="positionModal"
+        class="modal modal-compact"
+    >
+
+        <div class="modal-content">
+
+            <h2 id="positionModalTitle">
+                Add Position
+            </h2>
+
+            <input
+                type="text"
+                id="positionNameInput"
+                placeholder="Position Name e.g. President"
+            >
+
+            <input
+                type="number"
+                id="positionSeatsInput"
+                placeholder="Number of Winners (one)"
+                min="1"
+                max="1"
+                step="1"
+                value="1"
+            >
+
+            <div class="modal-buttons">
+
+                <button
+                    id="cancelPositionBtn"
+                    class="secondary"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    id="savePositionBtn"
+                    class="success"
+                >
+                    Save Position
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         FIREBASE + APPLICATION JAVASCRIPT
+         ========================================================= -->
+
+    <script type="module">
+import { auth, db } from "./js/firebase.js";
+import { requireAuth } from "./js/auth.js";
+import { getDashboardForRole } from "./js/navigation.js";
+       // =========================================================
+// FIREBASE IMPORTS
+// =========================================================
+
+import {
+    initializeApp
+} from
+"https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+
+
+import {
+    getAuth,
+    onAuthStateChanged
+} from
+"https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+
+import {
+    getFirestore,
+    collection,
+    query,
+    where,
+    getDocs,
+    doc,
+    getDoc,
+    updateDoc,
+    addDoc,
+    deleteDoc,
+    writeBatch,
+    Timestamp,
+    serverTimestamp
+
+} from
+"https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+        // =========================================================
+        // GLOBAL VARIABLES
+        // =========================================================
+
+        let currentUser = null;
+
+        let currentUserData = null;
+
+        let electionId = null;
+
+        let electionData = null;
+
+        let positions = [];
+
+        let editingPositionId = null;
+
+        let pendingAction = null;
+
+        let currentLoadedElections = [];
+
+let subAdminData = null;
+
+const MANAGE_ELECTIONS_PERMISSION =
+    "Manage Elections";
+
+const ELECTION_STATUS_PERMISSION =
+    "Control Voting & Election Status";
+
+function addAuditLogToBatch(
+    batch,
+    { action, targetType, targetId, details }
+) {
+    if (!currentUser || !currentUserData || !electionId || !electionData) {
+        throw new Error("Audit context is incomplete.");
+    }
+
+    const auditRef = doc(collection(db, "AuditLogs"));
+
+    batch.set(auditRef, {
+        action,
+        actorUid: currentUser.uid,
+        actorName: currentUserData.name || "",
+        actorRole: currentUserData.role || "",
+        electionId,
+        electionName: electionData.electionName || "",
+        targetType,
+        targetId,
+        details,
+        createdAt: serverTimestamp()
+    });
+}
+        // =========================================================
+        // DOM ELEMENTS
+        // =========================================================
+
+        const messageBox =
+            document.getElementById("message");
+
+        const electionListSection =
+            document.getElementById(
+                "electionListSection"
+            );
+
+        const managementSection =
+            document.getElementById(
+                "managementSection"
+            );
+
+        const electionLoading =
+            document.getElementById(
+                "electionLoading"
+            );
+
+        const electionList =
+            document.getElementById(
+                "electionList"
+            );
+
+
+                // =========================================================
+        // AUTHENTICATION
+        // =========================================================
+
+        let manageElectionsAuthorized = false;
+
+        let electionStatusAuthorized = false;
+
+
+        async function initializeManageElectionsPage() {
+
+            try {
+
+                const result =
+                    await requireAuth(
+                        "login.html"
+                    );
+
+
+                if (!result) {
+                    return;
+                }
+
+
+                currentUser =
+                    result.user;
+
+                currentUserData =
+                    result.data;
+
+
+                if (!currentUserData) {
+
+                    showMessage(
+                        "Your account profile could not be found.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                if (
+                    currentUserData.status ===
+                    "disabled"
+                ) {
+
+                    showMessage(
+                        "Your account is disabled.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                // -------------------------------------------------
+                // PRINCIPAL
+                // -------------------------------------------------
+
+                if (
+                    currentUserData.role ===
+                    "principal"
+                ) {
+
+                    manageElectionsAuthorized =
+                        true;
+
+                    electionStatusAuthorized =
+                        true;
+
+                }
+
+
+                // -------------------------------------------------
+                // SUB-ADMIN
+                // -------------------------------------------------
+
+                else if (
+                    currentUserData.role ===
+                    "sub_admin"
+                ) {
+
+                    const subAdminRef =
+                        doc(
+                            db,
+                            "SubAdmins",
+                            currentUser.uid
+                        );
+
+
+                    const subAdminSnapshot =
+                        await getDoc(
+                            subAdminRef
+                        );
+
+
+                    if (
+                        !subAdminSnapshot.exists()
+                    ) {
+
+                        showMessage(
+                            "Your Sub-Admin profile could not be found.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    subAdminData =
+                        subAdminSnapshot.data();
+
+
+                    if (
+                        subAdminData.status ===
+                        "disabled"
+                    ) {
+
+                        showMessage(
+                            "Your Sub-Admin account is disabled.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    const duties =
+                        Array.isArray(
+                            subAdminData.duties
+                        )
+                            ? subAdminData.duties
+                            : [];
+
+
+                    manageElectionsAuthorized =
+                        duties.includes(
+                            MANAGE_ELECTIONS_PERMISSION
+                        );
+
+
+                    /*
+                     * Election lifecycle control is Principal-only.
+                     * The published Firestore rules enforce the same boundary.
+                     */
+                    electionStatusAuthorized =
+                        false;
+
+                }
+
+
+                // -------------------------------------------------
+                // OTHER ROLES
+                // -------------------------------------------------
+
+                else {
+
+                    alert(
+                        "You are not authorized to access this page."
+                    );
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+
+                }
+
+
+                // -------------------------------------------------
+                // PAGE ACCESS
+                // At least one of the two duties is required.
+                // -------------------------------------------------
+
+                if (
+                    !manageElectionsAuthorized &&
+                    !electionStatusAuthorized
+                ) {
+
+                    alert(
+                        "You are not authorized to access this page."
+                    );
+
+                    window.location.href =
+                        getDashboardForRole(
+                            currentUserData.role
+                        );
+
+                    return;
+
+                }
+
+
+                const urlParams =
+                    new URLSearchParams(
+                        window.location.search
+                    );
+
+
+                const requestedElectionId =
+                    urlParams.get(
+                        "electionId"
+                    );
+
+
+                if (requestedElectionId) {
+
+                    electionId =
+                        requestedElectionId;
+
+                    await loadSelectedElection();
+
+                } else {
+
+                    await loadAllElections();
+
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "Authentication/loading error:",
+                    error
+                );
+
+
+                showMessage(
+                    "Unable to load your account information: " +
+                    error.message,
+                    "error"
+                );
+
+            }
+
+        }
+
+
+        initializeManageElectionsPage();
+
+        // =========================================================
+        // LOAD ALL ELECTIONS
+        // =========================================================
+
+        async function loadAllElections() {
+
+            electionListSection.style.display =
+                "block";
+
+            managementSection.style.display =
+                "none";
+
+
+            document.getElementById(
+                "pageTitle"
+            ).textContent =
+                "Manage Elections";
+
+
+            electionLoading.style.display =
+                "block";
+
+            electionList.style.display =
+                "none";
+
+
+            try {
+
+                if (!currentUser) {
+
+                    throw new Error(
+                        "No authenticated user was found."
+                    );
+
+                }
+
+
+                const electionsRef =
+                    collection(
+                        db,
+                        "Elections"
+                    );
+
+
+                const snapshot =
+    await getDocs(
+        electionsRef
+    );
+
+                currentLoadedElections =
+                    snapshot.docs.map(
+                        (electionDoc) => ({
+
+                            id:
+                                electionDoc.id,
+
+                            ...electionDoc.data()
+
+                        })
+                    );
+
+
+                electionLoading.style.display =
+                    "none";
+
+                electionList.style.display =
+                    "grid";
+
+
+                if (
+                    currentLoadedElections.length ===
+                    0
+                ) {
+
+                    electionList.innerHTML = `
+
+                        <div class="empty">
+
+                            No elections have been created yet.
+
+                            <div class="button-row">
+
+                                <button
+                                    id="createFirstElectionBtn"
+                                >
+                                    Create Election
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+
+                    document
+                        .getElementById(
+                            "createFirstElectionBtn"
+                        )
+                        .addEventListener(
+                            "click",
+                            () => {
+
+                                window.location.href =
+                                    "create-election.html";
+
+                            }
+                        );
+
+
+                    return;
+
+                }
+
+
+                const elections =
+                    [...currentLoadedElections];
+
+
+                elections.sort(
+                    (a, b) => {
+
+                        const aTime =
+                            getTimestampMilliseconds(
+                                a.createdAt
+                            );
+
+                        const bTime =
+                            getTimestampMilliseconds(
+                                b.createdAt
+                            );
+
+
+                        return bTime - aTime;
+
+                    }
+                );
+
+
+                renderElectionList(
+                    elections
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "loadAllElections error:",
+                    error
+                );
+
+
+                electionLoading.style.display =
+                    "none";
+
+                electionList.style.display =
+                    "block";
+
+
+                electionList.innerHTML = `
+
+                    <div class="empty">
+
+                        <strong>
+                            Failed to load elections.
+                        </strong>
+
+                        <br><br>
+
+                        ${escapeHtml(
+                            error.message
+                        )}
+
+                    </div>
+
+                `;
+
+
+                showMessage(
+                    "Failed to load elections: " +
+                    error.message,
+                    "error"
+                );
+
+            }
+
+        }
+
+
+        // =========================================================
+        // RENDER ELECTION LIST
+        // =========================================================
+
+        function renderElectionList(
+            elections
+        ) {
+
+            electionList.innerHTML =
+                "";
+
+
+            elections.forEach(
+                (election) => {
+
+                    const item =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    item.className =
+                        "election-item";
+
+
+                    const status =
+                        election.status ||
+                        "draft";
+
+
+                    const deleteAllowed =
+                        status === "draft";
+
+
+                    item.innerHTML = `
+
+                        <div class="election-item-info">
+
+                            <h3>
+                                ${escapeHtml(
+                                    election.electionName ||
+                                    "Unnamed Election"
+                                )}
+                            </h3>
+
+                            <p>
+                                Academic Session:
+                                ${escapeHtml(
+                                    election.academicSession ||
+                                    "Not specified"
+                                )}
+                            </p>
+
+                            <p>
+                                Status:
+                                <span
+                                    class="status ${getStatusClass(status)}"
+                                >
+                                    ${formatStatus(status)}
+                                </span>
+                            </p>
+
+                        </div>
+
+
+                        <div class="election-item-actions">
+
+                            <button
+                                class="manage-election-btn"
+                                data-id="${escapeHtml(election.id)}"
+                            >
+                                Manage
+                            </button>
+
+
+                            ${
+                                deleteAllowed
+                                    ? `
+                                        <button
+                                            class="delete-election-btn danger"
+                                            data-id="${escapeHtml(election.id)}"
+                                        >
+                                            Delete
+                                        </button>
+                                      `
+                                    : ""
+                            }
+
+                        </div>
+
+                    `;
+
+
+                    electionList.appendChild(
+                        item
+                    );
+
+                }
+            );
+
+
+            // =====================================================
+            // EVENT DELEGATION
+            // =====================================================
+
+            electionList
+                .querySelectorAll(
+                    ".manage-election-btn"
+                )
+                .forEach(
+                    (button) => {
+
+                        button.addEventListener(
+                            "click",
+                            () => {
+
+                                const id =
+                                    button.dataset.id;
+
+                                openElection(
+                                    id
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+
+            electionList
+                .querySelectorAll(
+                    ".delete-election-btn"
+                )
+                .forEach(
+                    (button) => {
+
+                        button.addEventListener(
+                            "click",
+                            () => {
+
+                                const id =
+                                    button.dataset.id;
+
+                                confirmDeleteElection(
+                                    id
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+        }
+
+
+        // =========================================================
+        // OPEN SELECTED ELECTION
+        // =========================================================
+
+        function openElection(
+            selectedId
+        ) {
+
+            if (!selectedId) {
+
+                return;
+
+            }
+
+
+            window.location.href =
+                "manage-elections.html?electionId=" +
+                encodeURIComponent(
+                    selectedId
+                );
+
+        }
+
+
+        // =========================================================
+        // DELETE ENTIRE ELECTION
+        // =========================================================
+
+        function confirmDeleteElection(
+            id
+        ) {
+
+            const election =
+                currentLoadedElections.find(
+                    item =>
+                        item.id === id
+                );
+
+
+            if (!election) {
+
+                showMessage(
+                    "The selected election could not be found.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const status =
+                election.status ||
+                "draft";
+
+
+            if (status !== "draft") {
+
+                showMessage(
+                    "Only draft elections can be deleted.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const electionName =
+                election.electionName ||
+                "this election";
+
+
+            openConfirmation(
+                "Delete Election",
+                "Are you sure you want to permanently delete \"" +
+                electionName +
+                "\"? This will delete the election and its related position records. This action cannot be undone.",
+                async () => {
+
+                    await deleteEntireElection(
+                        id
+                    );
+
+                },
+                true
+            );
+
+        }
+
+
+        // =========================================================
+        // DELETE ELECTION + RELATED POSITIONS
+        // =========================================================
+
+        async function deleteEntireElection(
+            id
+        ) {
+
+            try {
+
+                if (!currentUser) {
+
+                    throw new Error(
+                        "You are not authenticated."
+                    );
+
+                }
+
+
+                // -----------------------------------------------
+                // First verify the election still exists
+                // and belongs to this Principal.
+                // -----------------------------------------------
+
+                const electionRef =
+                    doc(
+                        db,
+                        "Elections",
+                        id
+                    );
+
+
+                const electionSnapshot =
+                    await getDoc(
+                        electionRef
+                    );
+
+
+                if (
+                    !electionSnapshot.exists()
+                ) {
+
+                    showMessage(
+                        "This election no longer exists.",
+                        "error"
+                    );
+
+                    await loadAllElections();
+
+                    return;
+
+                }
+
+
+                const data =
+                    electionSnapshot.data();
+
+
+                if (!manageElectionsAuthorized) {
+    showMessage(
+        "You are not authorized to delete this election.",
+        "error"
+    );
+    return;
+}
+
+                const status =
+                    data.status ||
+                    "draft";
+
+
+                if (status !== "draft") {
+
+                    showMessage(
+                        "Only draft elections can be deleted.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                // -----------------------------------------------
+                // Find related Positions documents
+                // -----------------------------------------------
+
+                const positionsRef =
+                    collection(
+                        db,
+                        "Positions"
+                    );
+
+
+                const positionQuery =
+                    query(
+                        positionsRef,
+                        where(
+                            "electionId",
+                            "==",
+                            id
+                        )
+                    );
+
+
+                const positionSnapshot =
+                    await getDocs(
+                        positionQuery
+                    );
+
+
+                // -----------------------------------------------
+                // Firestore batch
+                // -----------------------------------------------
+
+                const batch =
+                    writeBatch(
+                        db
+                    );
+
+
+                // Delete parent election
+                batch.delete(
+                    electionRef
+                );
+
+
+                // Delete related Positions documents
+                positionSnapshot.forEach(
+                    (positionDoc) => {
+
+                        batch.delete(
+                            positionDoc.ref
+                        );
+
+                    }
+                );
+
+
+                await batch.commit();
+
+
+                // -----------------------------------------------
+                // Reset current state
+                // -----------------------------------------------
+
+                currentLoadedElections =
+                    currentLoadedElections.filter(
+                        item =>
+                            item.id !== id
+                    );
+
+
+                electionId =
+                    null;
+
+                electionData =
+                    null;
+
+
+                showMessage(
+                    "Election deleted successfully.",
+                    "success"
+                );
+
+
+                // -----------------------------------------------
+                // Reload list
+                // -----------------------------------------------
+
+                await loadAllElections();
+
+
+            } catch (error) {
+
+                console.error(
+                    "deleteEntireElection error:",
+                    error
+                );
+
+
+                showMessage(
+                    "Failed to delete election: " +
+                    error.message,
+                    "error"
+                );
+
+            }
+
+        }
+
+
+        // =========================================================
+        // LOAD SELECTED ELECTION
+        // =========================================================
+
+        async function loadSelectedElection() {
+
+            try {
+
+                if (!electionId) {
+
+                    await loadAllElections();
+
+                    return;
+
+                }
+
+
+                const electionRef =
+                    doc(
+                        db,
+                        "Elections",
+                        electionId
+                    );
+
+
+                const snapshot =
+                    await getDoc(
+                        electionRef
+                    );
+
+
+                if (!snapshot.exists()) {
+
+                    showMessage(
+                        "The selected election could not be found.",
+                        "error"
+                    );
+
+
+                    electionId =
+                        null;
+
+
+                    await loadAllElections();
+
+                    return;
+
+                }
+
+
+                const selectedData =
+                    snapshot.data();
+
+if (
+    !manageElectionsAuthorized &&
+    !electionStatusAuthorized
+) {
+    showMessage(
+        "You are not authorized to access this election.",
+        "error"
+    );
+    electionId = null;
+    await loadAllElections();
+    return;
+}
+
+
+
+                electionData =
+                    selectedData;
+
+
+                await checkAutomaticVotingClosure();
+
+
+                electionListSection.style.display =
+                    "none";
+
+
+                managementSection.style.display =
+                    "block";
+
+
+                document.getElementById(
+                    "pageTitle"
+                ).textContent =
+                    "Manage Election";
+
+
+                await loadPositions();
+
+                displayElection();
+
+
+            } catch (error) {
+
+                console.error(
+                    "loadSelectedElection error:",
+                    error
+                );
+
+
+                showMessage(
+                    "Failed to load selected election: " +
+                    error.message,
+                    "error"
+                );
+
+            }
+
+        }
+
+
+        // =========================================================
+        // LOAD POSITIONS
+        // =========================================================
+
+        async function loadPositions() {
+
+            positions =
+                [];
+
+
+            // -----------------------------------------------------
+            // CASE 1:
+            // Positions are stored inside Elections.positions
+            // -----------------------------------------------------
+
+            if (
+                electionData &&
+                Array.isArray(
+                    electionData.positions
+                )
+            ) {
+
+                positions =
+                    electionData.positions.map(
+                        (position, index) => ({
+
+                            id:
+                                position.id ||
+                                String(index),
+
+                            name:
+                                position.name ||
+                                position.positionName ||
+                                "Unnamed Position",
+
+                            seats:
+                                Number(
+                                    position.seats ||
+                                    position.numberOfSeats ||
+                                    1
+                                ),
+
+                            embedded:
+                                true
+
+                        })
+                    );
+
+
+                renderPositions();
+
+                return;
+
+            }
+
+
+            // -----------------------------------------------------
+            // CASE 2:
+            // Positions are stored in Positions collection
+            // -----------------------------------------------------
+
+            try {
+
+                const positionsRef =
+                    collection(
+                        db,
+                        "Positions"
+                    );
+
+
+                const positionQuery =
+                    query(
+                        positionsRef,
+                        where(
+                            "electionId",
+                            "==",
+                            electionId
+                        )
+                    );
+
+
+                const snapshot =
+                    await getDocs(
+                        positionQuery
+                    );
+
+
+                snapshot.forEach(
+                    (positionDoc) => {
+
+                        const data =
+                            positionDoc.data();
+
+
+                        positions.push({
+
+                            id:
+                                positionDoc.id,
+
+                            name:
+                                data.name ||
+                                data.positionName ||
+                                "Unnamed Position",
+
+                            seats:
+                                Number(
+                                    data.seats ||
+                                    data.numberOfSeats ||
+                                    1
+                                ),
+
+                            embedded:
+                                false
+
+                        });
+
+                    }
+                );
+
+
+                renderPositions();
+
+
+            } catch (error) {
+
+                console.error(
+                    "loadPositions error:",
+                    error
+                );
+
+
+                renderPositions();
+
+
+                showMessage(
+                    "Positions could not be loaded: " +
+                    error.message,
+                    "error"
+                );
+
+            }
+
+        }
+
+
+        // =========================================================
+        // DISPLAY ELECTION
+        // =========================================================
+
+        function displayElection() {
+
+            if (!electionData) {
+
+                return;
+
+            }
+
+
+            document.getElementById(
+                "electionName"
+            ).textContent =
+                electionData.electionName ||
+                "—";
+
+
+            document.getElementById(
+                "academicSession"
+            ).textContent =
+                electionData.academicSession ||
+                "—";
+
+
+            document.getElementById(
+                "electionDescription"
+            ).textContent =
+                electionData.description ||
+                "No description provided.";
+
+
+            const status =
+                electionData.status ||
+                "draft";
+
+
+            const statusElement =
+                document.getElementById(
+                    "electionStatus"
+                );
+
+
+            statusElement.textContent =
+                formatStatus(status);
+
+
+            statusElement.className =
+                "status " +
+                getStatusClass(status);
+
+
+            document.getElementById(
+                "nominationStart"
+            ).textContent =
+                formatDate(
+                    electionData.nominationStart
+                );
+
+
+            document.getElementById(
+                "nominationEnd"
+            ).textContent =
+                formatDate(
+                    electionData.nominationEnd
+                );
+
+
+            document.getElementById(
+                "votingStart"
+            ).textContent =
+                formatDate(
+                    electionData.votingStart
+                );
+
+
+            document.getElementById(
+                "votingEnd"
+            ).textContent =
+                formatDate(
+                    electionData.votingEnd
+                );
+
+
+            updateControlButtons();
+
+        }
+
+
+        // =========================================================
+        // RENDER POSITIONS
+        // =========================================================
+
+        function renderPositions() {
+
+            const list =
+                document.getElementById(
+                    "positionsList"
+                );
+
+
+            list.innerHTML =
+                "";
+
+
+            if (
+                !positions ||
+                positions.length === 0
+            ) {
+
+                list.innerHTML = `
+
+                    <div class="empty">
+
+                        No positions have been added yet.
+
+                        <br><br>
+
+                        Add positions such as President,
+                        Vice President, Secretary, etc.
+
+                    </div>
+
+                `;
+
+                return;
+
+            }
+
+
+            const editable =
+                canEditStructure();
+
+
+            positions.forEach(
+                (position) => {
+
+                    const item =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    item.className =
+                        "position-item";
+
+
+                    item.innerHTML = `
+
+                        <div class="position-info">
+
+                            <h3>
+                                ${escapeHtml(
+                                    position.name
+                                )}
+                            </h3>
+
+                            <p>
+                                Winner:
+                                <strong>
+                                    ${position.seats}
+                                </strong>
+                            </p>
+
+                        </div>
+
+
+                        <div class="position-actions">
+
+                            <button
+                                class="edit-position-btn"
+                                data-id="${escapeHtml(position.id)}"
+                                ${editable ? "" : "disabled"}
+                            >
+                                Edit
+                            </button>
+
+
+                            <button
+                                class="delete-position-btn danger"
+                                data-id="${escapeHtml(position.id)}"
+                                ${editable ? "" : "disabled"}
+                            >
+                                Delete
+                            </button>
+
+                        </div>
+
+                    `;
+
+
+                    list.appendChild(
+                        item
+                    );
+
+                }
+            );
+
+                    
+            list
+                .querySelectorAll(
+                    ".edit-position-btn"
+                )
+                .forEach(
+                    (button) => {
+
+                        button.addEventListener(
+                            "click",
+                            () => {
+
+                                editPosition(
+                                    button.dataset.id
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+
+            list
+                .querySelectorAll(
+                    ".delete-position-btn"
+                )
+                .forEach(
+                    (button) => {
+
+                        button.addEventListener(
+                            "click",
+                            () => {
+
+                                confirmDeletePosition(
+                                    button.dataset.id
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+        }
+
+
+        // =========================================================
+        // ADD POSITION
+        // =========================================================
+
+        document
+            .getElementById(
+                "addPositionBtn"
+            )
+            .addEventListener(
+                "click",
+                () => {
+
+                    if (!canEditStructure()) {
+
+                        showMessage(
+                            "Positions cannot be changed after the election has been finalized.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    editingPositionId =
+                        null;
+
+
+                    document.getElementById(
+                        "positionModalTitle"
+                    ).textContent =
+                        "Add Position";
+
+
+                    document.getElementById(
+                        "positionNameInput"
+                    ).value =
+                        "";
+
+
+                    document.getElementById(
+                        "positionSeatsInput"
+                    ).value =
+                        "1";
+
+
+                    openModal(
+                        "positionModal"
+                    );
+
+                }
+            );
+
+
+        // =========================================================
+        // EDIT POSITION
+        // =========================================================
+
+        function editPosition(
+            id
+        ) {
+
+            if (!canEditStructure()) {
+
+                showMessage(
+                    "Positions cannot be changed after the election has been finalized.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const position =
+                positions.find(
+                    item =>
+                        item.id === id
+                );
+
+
+            if (!position) {
+
+                showMessage(
+                    "Position could not be found.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            editingPositionId =
+                id;
+
+
+            document.getElementById(
+                "positionModalTitle"
+            ).textContent =
+                "Edit Position";
+
+
+            document.getElementById(
+                "positionNameInput"
+            ).value =
+                position.name;
+
+
+            document.getElementById(
+                "positionSeatsInput"
+            ).value =
+                position.seats;
+
+
+            openModal(
+                "positionModal"
+            );
+
+        }
+
+
+        // =========================================================
+        // SAVE POSITION
+        // =========================================================
+
+        document
+            .getElementById(
+                "savePositionBtn"
+            )
+            .addEventListener(
+                "click",
+                async () => {
+
+                    if (!canEditStructure()) {
+
+                        showMessage(
+                            "The election structure is locked.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    const name =
+                        document
+                            .getElementById(
+                                "positionNameInput"
+                            )
+                            .value
+                            .trim();
+
+
+                    const seats =
+                        Number(
+                            document
+                                .getElementById(
+                                    "positionSeatsInput"
+                                )
+                                .value
+                        );
+
+
+                    if (!name) {
+
+                        alert(
+                            "Please enter a position name."
+                        );
+
+                        return;
+
+                    }
+
+
+                    if (
+                        seats !== 1
+                    ) {
+
+                        alert(
+                            "Each position has one winner. Add another position if you need another elected role."
+                        );
+
+                        return;
+
+                    }
+
+
+                    try {
+
+                        // -----------------------------------------
+                        // EDIT EXISTING POSITION
+                        // -----------------------------------------
+
+                        if (editingPositionId) {
+
+                            const position =
+                                positions.find(
+                                    item =>
+                                        item.id ===
+                                        editingPositionId
+                                );
+
+
+                            if (!position) {
+
+                                throw new Error(
+                                    "Position not found."
+                                );
+
+                            }
+
+
+                            // Embedded position
+                            if (
+                                position.embedded
+                            ) {
+
+                               const updatedPositions = positions.map(item => ({
+    id: item.id,
+    name: item.id === editingPositionId ? name : item.name,
+    seats: item.id === editingPositionId ? seats : item.seats
+}));
+
+
+                                await updateDoc(
+                                    doc(
+                                        db,
+                                        "Elections",
+                                        electionId
+                                    ),
+                                    {
+
+                                        positions:
+                                            updatedPositions,
+
+                                        updatedAt:
+                                            serverTimestamp(),
+
+                                        updatedBy:
+                                            currentUser.uid
+
+                                    }
+                                );
+
+
+                            } else {
+
+                                // Separate Positions document
+                                await updateDoc(
+                                    doc(
+                                        db,
+                                        "Positions",
+                                        editingPositionId
+                                    ),
+                                    {
+
+                                        name:
+                                            name,
+
+                                        seats:
+                                            seats,
+
+                                        updatedAt:
+                                            serverTimestamp(),
+
+                                        updatedBy:
+                                            currentUser.uid
+
+                                    }
+                                );
+
+                            }
+
+
+                        }
+
+                        // -----------------------------------------
+                        // ADD NEW POSITION
+                        // -----------------------------------------
+
+                        else {
+
+                            await addDoc(
+                                collection(
+                                    db,
+                                    "Positions"
+                                ),
+                                {
+
+                                    electionId:
+                                        electionId,
+
+                                    name:
+                                        name,
+
+                                    seats:
+                                        seats,
+
+                                    createdBy:
+                                        currentUser.uid,
+
+                                    createdAt:
+                                        serverTimestamp()
+
+                                }
+                            );
+
+                        }
+
+
+                        closeModal(
+                            "positionModal"
+                        );
+
+
+                        showMessage(
+                            "Position saved successfully.",
+                            "success"
+                        );
+
+
+                        await reloadElection();
+
+
+                    } catch (error) {
+
+                        console.error(
+                            "savePosition error:",
+                            error
+                        );
+
+
+                        showMessage(
+                            "Failed to save the position. Please try again.",
+        "error"
+                        );
+
+                    }
+
+                }
+            );
+
+
+        // =========================================================
+        // DELETE POSITION
+        // =========================================================
+
+        function confirmDeletePosition(
+            id
+        ) {
+
+            if (!canEditStructure()) {
+
+                showMessage(
+                    "Positions cannot be deleted after finalization.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const position =
+                positions.find(
+                    item =>
+                        item.id === id
+                );
+
+
+            if (!position) {
+
+                return;
+
+            }
+
+
+            openConfirmation(
+                "Delete Position",
+                "Are you sure you want to delete \"" +
+                position.name +
+                "\"?",
+                async () => {
+
+                    try {
+
+                        if (
+                            position.embedded
+                        ) {
+
+                            const updatedPositions =
+                                positions
+                                    .filter(
+                                        item =>
+                                            item.id !== id
+                                    )
+                                    .map(
+                                        item => ({
+
+                                            id:
+                                                item.id,
+
+                                            name:
+                                                item.name,
+
+                                            seats:
+                                                item.seats
+
+                                        })
+                                    );
+
+
+                            await updateDoc(
+                                doc(
+                                    db,
+                                    "Elections",
+                                    electionId
+                                ),
+                                {
+
+                                    positions:
+                                        updatedPositions,
+
+                                    updatedAt:
+                                        serverTimestamp(),
+
+                                    updatedBy:
+                                        currentUser.uid
+
+                                }
+                            );
+
+
+                        } else {
+
+                            await deleteDoc(
+                                doc(
+                                    db,
+                                    "Positions",
+                                    id
+                                )
+                            );
+
+                        }
+
+
+                        showMessage(
+                            "Position deleted successfully.",
+                            "success"
+                        );
+
+
+                        await reloadElection();
+
+
+                    } catch (error) {
+
+                        console.error(
+                            "delete position error:",
+                            error
+                        );
+
+
+                        showMessage(
+                            "Failed to delete position: " +
+                            error.message,
+                            "error"
+                        );
+
+                    }
+
+                },
+                true
+            );
+
+        }
+
+
+        // =========================================================
+        // EDIT ELECTION INFORMATION
+        // =========================================================
+
+        document
+            .getElementById(
+                "editElectionBtn"
+            )
+            .addEventListener(
+                "click",
+                () => {
+
+                    if (
+                        !canEditBasicInformation()
+                    ) {
+
+                        showMessage(
+                            "Election information cannot be edited at this stage.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    document.getElementById(
+                        "editElectionName"
+                    ).value =
+                        electionData.electionName ||
+                        "";
+
+
+                    document.getElementById(
+                        "editAcademicSession"
+                    ).value =
+                        electionData.academicSession ||
+                        "";
+
+
+                    document.getElementById(
+                        "editDescription"
+                    ).value =
+                        electionData.description ||
+                        "";
+
+
+                    openModal(
+                        "editElectionModal"
+                    );
+
+                }
+            );
+
+
+        // =========================================================
+        // SAVE ELECTION INFORMATION
+        // =========================================================
+
+        document
+            .getElementById(
+                "saveElectionBtn"
+            )
+            .addEventListener(
+                "click",
+                async () => {
+
+                    if (
+                        !canEditBasicInformation()
+                    ) {
+
+                        showMessage(
+                            "Election information cannot be edited at this stage.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    const name =
+                        document
+                            .getElementById(
+                                "editElectionName"
+                            )
+                            .value
+                            .trim();
+
+
+                    const academicSession =
+                        document
+                            .getElementById(
+                                "editAcademicSession"
+                            )
+                            .value
+                            .trim();
+
+
+                    const description =
+                        document
+                            .getElementById(
+                                "editDescription"
+                            )
+                            .value
+                            .trim();
+
+
+                    if (
+                        !name ||
+                        !academicSession
+                    ) {
+
+                        alert(
+                            "Election name and academic session are required."
+                        );
+
+                        return;
+
+                    }
+
+
+                    try {
+
+                        await updateDoc(
+                            doc(
+                                db,
+                                "Elections",
+                                electionId
+                            ),
+                            {
+
+                                electionName:
+                                    name,
+
+                                academicSession:
+                                    academicSession,
+
+                                description:
+                                    description,
+
+                                updatedAt:
+                                    serverTimestamp(),
+
+                                updatedBy:
+                                    currentUser.uid
+
+                            }
+                        );
+
+
+                        closeModal(
+                            "editElectionModal"
+                        );
+
+
+                        showMessage(
+                            "Election information updated successfully.",
+                            "success"
+                        );
+
+
+                        await reloadElection();
+
+
+                    } catch (error) {
+
+                        console.error(
+                            "save election error:",
+                            error
+                        );
+
+
+                        showMessage(
+                            "Failed to update election: " +
+                            error.message,
+                            "error"
+                        );
+
+                    }
+
+                }
+            );
+
+
+        // =========================================================
+        // EDIT SCHEDULE
+        // =========================================================
+
+        document
+            .getElementById(
+                "editScheduleBtn"
+            )
+            .addEventListener(
+                "click",
+                () => {
+
+                    if (
+                        !canEditBasicInformation()
+                    ) {
+
+                        showMessage(
+                            "The schedule cannot be edited after finalization.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    document.getElementById(
+                        "editNominationStart"
+                    ).value =
+                        convertToDateTimeLocal(
+                            electionData.nominationStart
+                        );
+
+
+                    document.getElementById(
+                        "editNominationEnd"
+                    ).value =
+                        convertToDateTimeLocal(
+                            electionData.nominationEnd
+                        );
+
+
+                    document.getElementById(
+                        "editVotingStart"
+                    ).value =
+                        convertToDateTimeLocal(
+                            electionData.votingStart
+                        );
+
+
+                    document.getElementById(
+                        "editVotingEnd"
+                    ).value =
+                        convertToDateTimeLocal(
+                            electionData.votingEnd
+                        );
+
+
+                    openModal(
+                        "editScheduleModal"
+                    );
+
+                }
+            );
+
+
+        // =========================================================
+        // SAVE SCHEDULE
+        // =========================================================
+
+        document
+            .getElementById(
+                "saveScheduleBtn"
+            )
+            .addEventListener(
+                "click",
+                async () => {
+
+                    if (
+                        !canEditBasicInformation()
+                    ) {
+
+                        showMessage(
+                            "The schedule cannot be edited at this stage.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    const nominationStart =
+                        document.getElementById(
+                            "editNominationStart"
+                        ).value;
+
+
+                    const nominationEnd =
+                        document.getElementById(
+                            "editNominationEnd"
+                        ).value;
+
+
+                    const votingStart =
+                        document.getElementById(
+                            "editVotingStart"
+                        ).value;
+
+
+                    const votingEnd =
+                        document.getElementById(
+                            "editVotingEnd"
+                        ).value;
+
+
+                    if (
+                        !nominationStart ||
+                        !nominationEnd ||
+                        !votingStart ||
+                        !votingEnd
+                    ) {
+
+                        alert(
+                            "Please fill in all schedule fields."
+                        );
+
+                        return;
+
+                    }
+
+
+                    const nominationStartDate =
+                        new Date(
+                            nominationStart
+                        );
+
+
+                    const nominationEndDate =
+                        new Date(
+                            nominationEnd
+                        );
+
+
+                    const votingStartDate =
+                        new Date(
+                            votingStart
+                        );
+
+
+                    const votingEndDate =
+                        new Date(
+                            votingEnd
+                        );
+
+
+                    if (
+                        nominationEndDate <=
+                        nominationStartDate
+                    ) {
+
+                        alert(
+                            "Nomination end must be after nomination start."
+                        );
+
+                        return;
+
+                    }
+
+
+                    if (
+                        votingStartDate <=
+                        nominationEndDate
+                    ) {
+
+                        alert(
+                            "Voting must start after nominations end."
+                        );
+
+                        return;
+
+                    }
+
+
+                    if (
+                        votingEndDate <=
+                        votingStartDate
+                    ) {
+
+                        alert(
+                            "Voting end must be after voting start."
+                        );
+
+                        return;
+
+                    }
+
+
+                    try {
+
+                        await updateDoc(
+                            doc(
+                                db,
+                                "Elections",
+                                electionId
+                            ),
+                            {
+
+                              nominationStart: Timestamp.fromDate(
+    new Date(nominationStart)
+),
+nominationEnd: Timestamp.fromDate(
+    new Date(nominationEnd)
+),
+votingStart: Timestamp.fromDate(
+    new Date(votingStart)
+),
+votingEnd: Timestamp.fromDate(
+    new Date(votingEnd)
+),
+                                updatedAt:
+                                    serverTimestamp(),
+
+                                updatedBy:
+                                    currentUser.uid
+
+                            }
+                        );
+
+
+                        closeModal(
+                            "editScheduleModal"
+                        );
+
+
+                        showMessage(
+                            "Election schedule updated successfully.",
+                            "success"
+                        );
+
+
+                        await reloadElection();
+
+
+                    } catch (error) {
+
+                        console.error(
+                            "save schedule error:",
+                            error
+                        );
+
+
+                        showMessage(
+                            "Failed to update schedule: " +
+                            error.message,
+                            "error"
+                        );
+
+                    }
+
+                }
+            );
+
+
+        // =========================================================
+        // FINALIZE ELECTION
+        // =========================================================
+
+        document
+            .getElementById(
+                "finalizeBtn"
+            )
+            .addEventListener(
+                "click",
+                () => {
+if (!manageElectionsAuthorized) {
+
+            showMessage(
+                "You are not authorized to finalize this election.",
+                "error"
+            );
+
+            return;
+
+        }
+
+                    if (
+                        electionData.status !==
+                        "draft"
+                    ) {
+
+                        showMessage(
+                            "Only a draft election can be finalized.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    if (
+                        positions.length === 0
+                    ) {
+
+                        showMessage(
+                            "Add at least one election position before finalizing.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    openConfirmation(
+                        "Finalize Election",
+                        "Are you sure you want to finalize this election? The election information, schedule and positions will become locked.",
+                        async () => {
+
+                            try {
+
+                                const batch = writeBatch(db);
+
+                                batch.update(
+                                    doc(db, "Elections", electionId),
+                                    {
+                                        status: "finalized",
+                                        finalizedBy: currentUser.uid,
+                                        finalizedAt: serverTimestamp(),
+                                        updatedAt: serverTimestamp(),
+                                        updatedBy: currentUser.uid
+                                    }
+                                );
+
+                                addAuditLogToBatch(batch, {
+                                    action: "ELECTION_FINALIZED",
+                                    targetType: "Elections",
+                                    targetId: electionId,
+                                    details: "Election finalized and configuration locked."
+                                });
+
+                                await batch.commit();
+
+
+                                showMessage(
+                                    "Election finalized successfully.",
+                                    "success"
+                                );
+
+
+                                await reloadElection();
+
+
+                            } catch (error) {
+
+                                console.error(
+                                    "finalize error:",
+                                    error
+                                );
+
+
+                                showMessage(
+                                    "Failed to finalize election: " +
+                                    error.message,
+                                    "error"
+                                );
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+
+        // =========================================================
+        // VOTING READINESS PRE-FLIGHT
+        // =========================================================
+
+        function getBoothDisplayName(booth) {
+            if (!booth) {
+                return "Unknown booth";
+            }
+
+            return booth.boothNumber ||
+                   booth.name ||
+                   booth.location ||
+                   booth.id ||
+                   "Unnamed booth";
+        }
+
+
+        function formatVotingReadinessIssues(issues) {
+            return (
+                "Voting cannot start yet:\n\n• " +
+                issues.join("\n• ")
+            );
+        }
+
+
+        async function getVotingReadinessReport() {
+            if (!electionId) {
+                return {
+                    ready: false,
+                    issues: ["No election is currently selected."]
+                };
+            }
+
+            const freshElectionRef =
+                doc(db, "Elections", electionId);
+
+            const nominationFormRef =
+                doc(db, "NominationForms", electionId);
+
+            const positionsQuery = query(
+                collection(db, "Positions"),
+                where("electionId", "==", electionId)
+            );
+
+            const votersQuery = query(
+                collection(db, "Voters"),
+                where("electionId", "==", electionId)
+            );
+
+            const boothsQuery = query(
+                collection(db, "Booths"),
+                where("electionId", "==", electionId)
+            );
+
+            const boothStaffQuery = query(
+                collection(db, "BoothStaff"),
+                where("electionId", "==", electionId)
+            );
+
+            const [
+                freshElectionSnapshot,
+                nominationFormSnapshot,
+                positionSnapshot,
+                voterSnapshot,
+                boothSnapshot,
+                boothStaffSnapshot
+            ] = await Promise.all([
+                getDoc(freshElectionRef),
+                getDoc(nominationFormRef),
+                getDocs(positionsQuery),
+                getDocs(votersQuery),
+                getDocs(boothsQuery),
+                getDocs(boothStaffQuery)
+            ]);
+
+            const issues = [];
+
+            if (!freshElectionSnapshot.exists()) {
+                return {
+                    ready: false,
+                    issues: ["The selected election no longer exists."]
+                };
+            }
+
+            const freshElection =
+                freshElectionSnapshot.data();
+
+            if (
+                freshElection.status !== "finalized" &&
+                freshElection.status !== "voting_stopped"
+            ) {
+                issues.push(
+                    "The election is not in a state from which voting can be started."
+                );
+            }
+
+            if (freshElection.voterListFinalized !== true) {
+                issues.push(
+                    "The voter list has not been finalized."
+                );
+            }
+
+            let allowedPositionIds = [];
+
+            if (!nominationFormSnapshot.exists()) {
+                issues.push(
+                    "The finalized nomination form is missing."
+                );
+            } else {
+                const nominationForm =
+                    nominationFormSnapshot.data();
+
+                if (
+                    nominationForm.electionId !== electionId ||
+                    !["finalized", "closed"].includes(nominationForm.formStatus)
+                ) {
+                    issues.push(
+                        "The nomination form must be finalized before voting can start. A formally closed form is also accepted."
+                    );
+                }
+
+                allowedPositionIds = Array.isArray(
+                    nominationForm.allowedPositionIds
+                )
+                    ? [
+                        ...new Set(
+                            nominationForm.allowedPositionIds.filter(
+                                value =>
+                                    typeof value === "string" &&
+                                    value.trim().length > 0
+                            )
+                        )
+                    ]
+                    : [];
+
+                if (allowedPositionIds.length === 0) {
+                    issues.push(
+                        "The finalized nomination form does not contain any official positions."
+                    );
+                }
+            }
+
+            const positionMap = new Map(
+                positionSnapshot.docs.map(item => [
+                    item.id,
+                    {
+                        id: item.id,
+                        ...item.data()
+                    }
+                ])
+            );
+
+            for (const positionId of allowedPositionIds) {
+                const position =
+                    positionMap.get(positionId);
+
+                if (!position) {
+                    issues.push(
+                        "An official nomination position no longer exists in the Positions collection."
+                    );
+                    continue;
+                }
+
+                const seats = Number(position.seats ?? position.numberOfSeats ?? 1);
+
+                if (seats !== 1) {
+                    issues.push(
+                        `${position.name || "An official position"} has ${seats} winners. This build supports one winner for each position.`
+                    );
+                }
+
+                /*
+                 * A position may legitimately receive no nominations.
+                 * It stays on the official ballot as an information-only
+                 * seat; voters can still vote in every contested position.
+                 */
+            }
+
+            const voters = voterSnapshot.docs.map(item => ({
+                id: item.id,
+                ...item.data()
+            }));
+
+            const eligibleVoters = voters.filter(
+                voter => voter.eligible === true
+            );
+
+            if (eligibleVoters.length === 0) {
+                issues.push(
+                    "No eligible voters are available for this election."
+                );
+            }
+
+            const booths = boothSnapshot.docs.map(item => ({
+                id: item.id,
+                ...item.data()
+            }));
+
+            const boothMap = new Map(
+                booths.map(booth => [booth.id, booth])
+            );
+
+            const votersWithoutValidBooth =
+                eligibleVoters.filter(voter =>
+                    !voter.boothId ||
+                    !boothMap.has(voter.boothId)
+                );
+
+            if (votersWithoutValidBooth.length > 0) {
+                issues.push(
+                    `${votersWithoutValidBooth.length} eligible voter${votersWithoutValidBooth.length === 1 ? " is" : "s are"} not assigned to a valid polling booth.`
+                );
+            }
+
+            const usedBoothIds = new Set(
+                eligibleVoters
+                    .map(voter => voter.boothId)
+                    .filter(boothId =>
+                        typeof boothId === "string" &&
+                        boothMap.has(boothId)
+                    )
+            );
+
+            if (
+                eligibleVoters.length > 0 &&
+                usedBoothIds.size === 0
+            ) {
+                issues.push(
+                    "No polling booth has eligible voters assigned."
+                );
+            }
+
+            const assignmentMap = new Map();
+
+            boothStaffSnapshot.docs.forEach(item => {
+                const assignment = {
+                    id: item.id,
+                    ...item.data()
+                };
+
+                const key =
+                    assignment.boothId || item.id;
+
+                if (key) {
+                    assignmentMap.set(key, assignment);
+                }
+            });
+
+            const requiredStaffUids = new Set();
+
+            for (const boothId of usedBoothIds) {
+                const booth = boothMap.get(boothId);
+                const assignment = assignmentMap.get(boothId);
+                const boothName = getBoothDisplayName(booth);
+
+                if (
+                    !assignment ||
+                    assignment.electionId !== electionId ||
+                    assignment.boothId !== boothId ||
+                    !assignment.poUid
+                ) {
+                    issues.push(
+                        `${boothName} does not have a Presiding Officer assigned.`
+                    );
+                    continue;
+                }
+
+                requiredStaffUids.add(
+                    assignment.poUid
+                );
+
+                if (assignment.apoUid) {
+                    requiredStaffUids.add(
+                        assignment.apoUid
+                    );
+
+                    if (
+                        assignment.apoUid ===
+                        assignment.poUid
+                    ) {
+                        issues.push(
+                            `${boothName} has the same person assigned as PO and APO.`
+                        );
+                    }
+                }
+            }
+
+            const staffSnapshots = await Promise.all(
+                [...requiredStaffUids].map(async uid => {
+                    const snapshot = await getDoc(
+                        doc(db, "Users", uid)
+                    );
+
+                    return [uid, snapshot];
+                })
+            );
+
+            const staffMap = new Map(
+                staffSnapshots.map(([uid, snapshot]) => [
+                    uid,
+                    snapshot.exists()
+                        ? snapshot.data()
+                        : null
+                ])
+            );
+
+            for (const boothId of usedBoothIds) {
+                const booth = boothMap.get(boothId);
+                const assignment = assignmentMap.get(boothId);
+                const boothName = getBoothDisplayName(booth);
+
+                if (!assignment?.poUid) {
+                    continue;
+                }
+
+                const po = staffMap.get(
+                    assignment.poUid
+                );
+
+                if (
+                    !po ||
+                    po.role !== "presiding_officer" ||
+                    po.status !== "active"
+                ) {
+                    issues.push(
+                        `${boothName} does not have an active Presiding Officer account.`
+                    );
+                }
+
+                if (assignment.apoUid) {
+                    const apo = staffMap.get(
+                        assignment.apoUid
+                    );
+
+                    if (
+                        !apo ||
+                        apo.role !== "assistant_presiding_officer" ||
+                        apo.status !== "active"
+                    ) {
+                        issues.push(
+                            `${boothName} has an invalid or inactive Assistant Presiding Officer account.`
+                        );
+                    }
+                }
+            }
+
+            return {
+                ready: issues.length === 0,
+                issues,
+                stats: {
+                    eligibleVoters: eligibleVoters.length,
+                    usedBooths: usedBoothIds.size,
+                    officialPositions: allowedPositionIds.length
+                }
+            };
+        }
+
+
+        // =========================================================
+        // START VOTING
+        // =========================================================
+
+        document
+            .getElementById(
+                "startVotingBtn"
+            )
+            .addEventListener(
+                "click",
+                async () => {
+                    if (!electionStatusAuthorized) {
+                        showMessage(
+                            "You are not authorized to start voting.",
+                            "error"
+                        );
+                        return;
+                    }
+
+                    if (
+                        electionData.status !== "finalized" &&
+                        electionData.status !== "voting_stopped"
+                    ) {
+                        showMessage(
+                            "The election must be finalized before voting can start.",
+                            "error"
+                        );
+                        return;
+                    }
+
+                    const startVotingBtn =
+                        document.getElementById(
+                            "startVotingBtn"
+                        );
+
+                    const originalButtonText =
+                        startVotingBtn.textContent;
+
+                    startVotingBtn.disabled = true;
+                    startVotingBtn.textContent =
+                        "Checking Readiness...";
+
+                    try {
+                        const readiness =
+                            await getVotingReadinessReport();
+
+                        if (!readiness.ready) {
+                            showMessage(
+                                formatVotingReadinessIssues(
+                                    readiness.issues
+                                ),
+                                "error"
+                            );
+                            return;
+                        }
+
+                        const stats = readiness.stats;
+
+                        openConfirmation(
+                            "Start Voting",
+                            "Voting readiness check passed. " +
+                            `${stats.eligibleVoters} eligible voter${stats.eligibleVoters === 1 ? "" : "s"}, ` +
+                            `${stats.usedBooths} polling booth${stats.usedBooths === 1 ? "" : "s"}, and ` +
+                            `${stats.officialPositions} official position${stats.officialPositions === 1 ? "" : "s"} are ready. ` +
+                            "Start voting now?",
+                            async () => {
+                                try {
+                                    /*
+                                     * Re-check immediately before the status write
+                                     * so stale page data cannot bypass readiness.
+                                     */
+                                    const finalReadiness =
+                                        await getVotingReadinessReport();
+
+                                    if (!finalReadiness.ready) {
+                                        showMessage(
+                                            formatVotingReadinessIssues(
+                                                finalReadiness.issues
+                                            ),
+                                            "error"
+                                        );
+                                        await reloadElection();
+                                        return;
+                                    }
+
+                                    const wasResume =
+                                        electionData.status === "voting_stopped";
+
+                                    const batch = writeBatch(db);
+
+                                    batch.update(
+                                        doc(db, "Elections", electionId),
+                                        {
+                                            status: "voting_active",
+                                            votingStartedBy: currentUser.uid,
+                                            votingStartedAt: serverTimestamp(),
+                                            updatedAt: serverTimestamp(),
+                                            updatedBy: currentUser.uid
+                                        }
+                                    );
+
+                                    addAuditLogToBatch(batch, {
+                                        action: wasResume
+                                            ? "VOTING_RESUMED"
+                                            : "VOTING_STARTED",
+                                        targetType: "Elections",
+                                        targetId: electionId,
+                                        details: wasResume
+                                            ? "Voting resumed after a stopped state."
+                                            : "Voting started after readiness validation passed."
+                                    });
+
+                                    await batch.commit();
+
+                                    showMessage(
+                                        "Voting has been started.",
+                                        "success"
+                                    );
+
+                                    await reloadElection();
+
+                                } catch (error) {
+                                    console.error(
+                                        "start voting error:",
+                                        error
+                                    );
+
+                                    showMessage(
+                                        "Failed to start voting: " +
+                                        error.message,
+                                        "error"
+                                    );
+                                }
+                            }
+                        );
+
+                    } catch (error) {
+                        console.error(
+                            "voting readiness check error:",
+                            error
+                        );
+
+                        showMessage(
+                            "Voting readiness could not be verified: " +
+                            error.message,
+                            "error"
+                        );
+
+                    } finally {
+                        startVotingBtn.textContent =
+                            originalButtonText.trim() ||
+                            "Start Voting";
+
+                        updateControlButtons();
+                    }
+                }
+            );
+
+
+        // =========================================================
+        // STOP VOTING
+        // =========================================================
+
+        document
+            .getElementById(
+                "stopVotingBtn"
+            )
+            .addEventListener(
+                "click",
+                () => {
+        if (!electionStatusAuthorized) {
+
+            showMessage(
+                "You are not authorized to stop voting.",
+                "error"
+            );
+
+            return;
+
+        }
+                    if (
+                        electionData.status !==
+                        "voting_active"
+                    ) {
+
+                        showMessage(
+                            "Voting is not currently active.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    openConfirmation(
+                        "Stop Voting",
+                        "Are you sure you want to stop voting? Recorded votes will remain stored. Voting can be restarted later.",
+                        async () => {
+
+                            try {
+
+                                const batch = writeBatch(db);
+
+                                batch.update(
+                                    doc(db, "Elections", electionId),
+                                    {
+                                        status: "voting_stopped",
+                                        votingStoppedBy: currentUser.uid,
+                                        votingStoppedAt: serverTimestamp(),
+                                        updatedAt: serverTimestamp(),
+                                        updatedBy: currentUser.uid
+                                    }
+                                );
+
+                                addAuditLogToBatch(batch, {
+                                    action: "VOTING_STOPPED",
+                                    targetType: "Elections",
+                                    targetId: electionId,
+                                    details: "Voting stopped by the Principal."
+                                });
+
+                                await batch.commit();
+
+
+                                showMessage(
+                                    "Voting has been stopped.",
+                                    "success"
+                                );
+
+
+                                await reloadElection();
+
+
+                            } catch (error) {
+
+                                console.error(
+                                    "stop voting error:",
+                                    error
+                                );
+
+
+                                showMessage(
+                                    "Failed to stop voting: " +
+                                    error.message,
+                                    "error"
+                                );
+
+                            }
+
+                        },
+                        true
+                    );
+
+                }
+            );
+
+
+        // =========================================================
+        // SAFE ELECTION CLOSURE CHECK
+        // =========================================================
+
+        async function getElectionClosureBlockers() {
+            const sessionQuery = query(
+                collection(db, "VotingSessions"),
+                where("electionId", "==", electionId)
+            );
+
+            const lockQuery = query(
+                collection(db, "BoothVotingState"),
+                where("electionId", "==", electionId)
+            );
+
+            const [sessionSnapshot, lockSnapshot] =
+                await Promise.all([
+                    getDocs(sessionQuery),
+                    getDocs(lockQuery)
+                ]);
+
+            const activeSessions =
+                sessionSnapshot.docs
+                    .map(item => ({
+                        id: item.id,
+                        ...item.data()
+                    }))
+                    .filter(session =>
+                        [
+                            "authorized",
+                            "ballot_open"
+                        ].includes(session.status)
+                    );
+
+            const activeLocks =
+                lockSnapshot.docs
+                    .map(item => ({
+                        id: item.id,
+                        ...item.data()
+                    }))
+                    .filter(lock => lock.status === "active");
+
+            return {
+                activeSessions,
+                activeLocks
+            };
+        }
+
+
+        function addElectionCloseCleanupToBatch(
+            batch,
+            blockers
+        ) {
+            const sessionsById =
+                new Map(
+                    blockers.activeSessions.map(session => [
+                        session.id,
+                        session
+                    ])
+                );
+
+            const cancelledSessionIds =
+                new Set();
+
+            const cancelSession =
+                (session) => {
+                    if (
+                        !session
+                        ||
+                        cancelledSessionIds.has(session.id)
+                    ) {
+                        return;
+                    }
+
+                    batch.update(
+                        doc(db, "VotingSessions", session.id),
+                        {
+                            status: "cancelled",
+                            cancelledBy: currentUser.uid,
+                            cancelledAt: serverTimestamp(),
+                            updatedAt: serverTimestamp()
+                        }
+                    );
+
+                    cancelledSessionIds.add(session.id);
+                };
+
+            blockers.activeSessions.forEach(cancelSession);
+
+            blockers.activeLocks.forEach(lock => {
+                const session =
+                    sessionsById.get(
+                        String(lock.activeSessionId || "")
+                    );
+
+                if (!session) {
+                    return;
+                }
+
+                cancelSession(session);
+
+                batch.update(
+                    doc(db, "BoothVotingState", lock.id),
+                    {
+                        status: "idle",
+                        activeSessionId: "",
+                        activeVoterId: "",
+                        releasedBy: currentUser.uid,
+                        releasedAt: serverTimestamp(),
+                        updatedAt: serverTimestamp()
+                    }
+                );
+            });
+
+            return cancelledSessionIds.size;
+        }
+
+
+        // =========================================================
+        // CLOSE ELECTION
+        // =========================================================
+
+        document
+            .getElementById(
+                "closeElectionBtn"
+            )
+            .addEventListener(
+                "click",
+                async () => {
+                            if (!electionStatusAuthorized) {
+
+            showMessage(
+                "You are not authorized to close this election.",
+                "error"
+            );
+
+            return;
+
+        }
+
+                    if (
+                        electionData.status !==
+                        "voting_stopped"
+                    ) {
+
+                        showMessage(
+                            "Voting must be stopped before the election can be permanently closed.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    const initialBlockers =
+                        await getElectionClosureBlockers();
+
+                    const unfinishedBallotCount =
+                        initialBlockers.activeSessions.length;
+
+                    const closeMessage =
+                        unfinishedBallotCount > 0
+                            ? `This will cancel ${unfinishedBallotCount} unfinished ballot${unfinishedBallotCount === 1 ? "" : "s"}. No incomplete vote will be counted. The election cannot be started again.`
+                            : "This will permanently close the election. It cannot be edited or started again.";
+
+
+                    openConfirmation(
+                        "Close Election Permanently",
+                        closeMessage,
+                        async () => {
+
+                            try {
+
+                                /* Re-check and cancel any still-open ballots in the same close batch. */
+                                const latestBlockers =
+                                    await getElectionClosureBlockers();
+
+                                const batch = writeBatch(db);
+
+                                const cancelledBallotCount =
+                                    addElectionCloseCleanupToBatch(
+                                        batch,
+                                        latestBlockers
+                                    );
+
+                                batch.update(
+                                    doc(db, "Elections", electionId),
+                                    {
+                                        status: "closed",
+                                        closedBy: currentUser.uid,
+                                        closedAt: serverTimestamp(),
+                                        updatedBy: currentUser.uid,
+                                        updatedAt: serverTimestamp()
+                                    }
+                                );
+
+                                addAuditLogToBatch(batch, {
+                                    action: "ELECTION_CLOSED",
+                                    targetType: "Elections",
+                                    targetId: electionId,
+                                    details: cancelledBallotCount > 0
+                                        ? `Election permanently closed. ${cancelledBallotCount} unfinished ballot(s) were cancelled without recording a vote.`
+                                        : "Election permanently closed."
+                                });
+
+                                await batch.commit();
+
+
+                                showMessage(
+                                    "Election permanently closed.",
+                                    "success"
+                                );
+
+
+                                await reloadElection();
+
+
+                            } catch (error) {
+
+                                console.error(
+                                    "close election error:",
+                                    error
+                                );
+
+
+                                showMessage(
+                                    "Failed to close election: " +
+                                    error.message,
+                                    "error"
+                                );
+
+                            }
+
+                        },
+                        true
+                    );
+
+                }
+            );
+
+
+        // =========================================================
+        // AUTOMATIC VOTING-END CLOSURE
+        // =========================================================
+
+       async function checkAutomaticVotingClosure() {
+    if (!electionData || !electionId) {
+        return;
+    }
+
+    if (
+        electionData.status !==
+        "voting_active"
+    ) {
+        return;
+    }
+
+    if (!electionStatusAuthorized) {
+        return;
+    }
+
+    const votingEnd =
+        electionData.votingEnd;
+
+    if (!votingEnd) {
+        return;
+    }
+
+    let votingEndTime;
+
+    if (
+        typeof votingEnd.toDate ===
+        "function"
+    ) {
+        votingEndTime =
+            votingEnd.toDate();
+    } else {
+        votingEndTime =
+            new Date(votingEnd);
+    }
+
+    if (
+        Number.isNaN(
+            votingEndTime.getTime()
+        )
+    ) {
+        return;
+    }
+
+    const currentTime =
+        new Date();
+
+    if (
+        currentTime <
+        votingEndTime
+    ) {
+        return;
+    }
+
+    try {
+        const batch = writeBatch(db);
+
+        batch.update(
+            doc(db, "Elections", electionId),
+            {
+                status: "voting_stopped",
+                votingStoppedBy: currentUser.uid,
+                votingStoppedAt: serverTimestamp(),
+                updatedBy: currentUser.uid,
+                updatedAt: serverTimestamp()
+            }
+        );
+
+        addAuditLogToBatch(batch, {
+            action: "VOTING_STOPPED",
+            targetType: "Elections",
+            targetId: electionId,
+            details: "Voting stopped automatically because the scheduled voting end time was reached."
+        });
+
+        await batch.commit();
+
+        electionData.status =
+            "voting_stopped";
+
+        electionData.votingStoppedBy =
+            currentUser.uid;
+
+        updateControlButtons();
+
+        showMessage(
+            "Voting period has ended. Voting has been stopped automatically.",
+            "success"
+        );
+
+    } catch (error) {
+        console.error(
+            "Automatic voting closure error:",
+            error
+        );
+    }
+}
+
+
+        // =========================================================
+        // PERIODIC VOTING TIME CHECK
+        // =========================================================
+
+        setInterval(
+            async () => {
+
+                if (
+                    electionData &&
+                    electionData.status ===
+                    "voting_active"
+                ) {
+
+                    await checkAutomaticVotingClosure();
+
+                }
+
+            },
+            30000
+        );
+
+
+                // =========================================================
+        // BUTTON STATE CONTROL
+        // =========================================================
+
+        function updateControlButtons() {
+
+            if (!electionData) {
+                return;
+            }
+
+
+            const status =
+                electionData.status;
+
+
+            // -----------------------------------------------------
+            // GET BUTTONS
+            // -----------------------------------------------------
+
+            const finalizeBtn =
+                document.getElementById(
+                    "finalizeBtn"
+                );
+
+            const startVotingBtn =
+                document.getElementById(
+                    "startVotingBtn"
+                );
+
+            const stopVotingBtn =
+                document.getElementById(
+                    "stopVotingBtn"
+                );
+
+            const closeElectionBtn =
+                document.getElementById(
+                    "closeElectionBtn"
+                );
+
+            const editElectionBtn =
+                document.getElementById(
+                    "editElectionBtn"
+                );
+
+            const editScheduleBtn =
+                document.getElementById(
+                    "editScheduleBtn"
+                );
+
+            const addPositionBtn =
+                document.getElementById(
+                    "addPositionBtn"
+                );
+
+
+            // -----------------------------------------------------
+            // DEFAULT: EVERYTHING DISABLED
+            // -----------------------------------------------------
+
+            finalizeBtn.disabled = true;
+            startVotingBtn.disabled = true;
+            stopVotingBtn.disabled = true;
+            closeElectionBtn.disabled = true;
+
+            editElectionBtn.disabled = true;
+            editScheduleBtn.disabled = true;
+            addPositionBtn.disabled = true;
+
+
+            // -----------------------------------------------------
+            // DRAFT
+            // -----------------------------------------------------
+
+            if (
+                status === "draft"
+            ) {
+
+                // Manage Elections duty
+                if (
+                    manageElectionsAuthorized
+                ) {
+
+                    finalizeBtn.disabled = false;
+                    editElectionBtn.disabled = false;
+                    editScheduleBtn.disabled = false;
+                    addPositionBtn.disabled = false;
+
+                }
+
+
+                document.getElementById(
+                    "votingControlDescription"
+                ).textContent =
+                    "Complete the election setup and finalize it before voting can start.";
+
+            }
+
+
+            // -----------------------------------------------------
+            // FINALIZED
+            // -----------------------------------------------------
+
+            else if (
+                status === "finalized"
+            ) {
+
+                // Election Status duty
+                if (
+                    electionStatusAuthorized
+                ) {
+
+                    startVotingBtn.disabled = false;
+
+                }
+
+
+                document.getElementById(
+                    "votingControlDescription"
+                ).textContent =
+                    "The election has been finalized. Before voting starts, the system will verify the voter list, finalized candidates and polling-booth readiness.";
+
+            }
+
+
+            // -----------------------------------------------------
+            // VOTING ACTIVE
+            // -----------------------------------------------------
+
+            else if (
+                status === "voting_active"
+            ) {
+
+                // Election Status duty
+                if (
+                    electionStatusAuthorized
+                ) {
+
+                    stopVotingBtn.disabled = false;
+
+                }
+
+
+                document.getElementById(
+                    "votingControlDescription"
+                ).textContent =
+                    "Voting is currently active. Election information, schedule and positions are locked.";
+
+            }
+
+
+            // -----------------------------------------------------
+            // VOTING STOPPED
+            // -----------------------------------------------------
+
+            else if (
+                status === "voting_stopped"
+            ) {
+
+                /*
+                 * Election information, schedule and positions remain
+                 * locked after voting has started.
+                 */
+
+                /*
+                 * Principal may restart voting or permanently close
+                 * the election.
+                 */
+                if (
+                    electionStatusAuthorized
+                ) {
+
+                    startVotingBtn.disabled = false;
+                    closeElectionBtn.disabled = false;
+
+                }
+
+
+                document.getElementById(
+                    "votingControlDescription"
+                ).textContent =
+                    "Voting is currently stopped. The election structure and schedule are locked. You may restart voting or permanently close the election.";
+
+            }
+
+
+            // -----------------------------------------------------
+            // CLOSED
+            // -----------------------------------------------------
+
+            else if (
+                status === "closed"
+            ) {
+
+                document.getElementById(
+                    "votingControlDescription"
+                ).textContent =
+                    "This election has been permanently closed. No further changes or voting are allowed.";
+
+            }
+
+
+            // -----------------------------------------------------
+            // RENDER POSITIONS
+            // -----------------------------------------------------
+
+            renderPositions();
+
+        }
+        // =========================================================
+        // PERMISSION HELPERS
+        // =========================================================
+
+        function canEditPositions() {
+    if (!electionData) {
+        return false;
+    }
+
+    return (
+        manageElectionsAuthorized &&
+        electionData.status === "draft"
+    );
+}
+
+
+       function canEditStructure() {
+    if (!electionData) {
+        return false;
+    }
+
+    return (
+        manageElectionsAuthorized &&
+        electionData.status === "draft"
+    );
+}
+
+
+       function canEditBasicInformation() {
+
+    if (!electionData) {
+        return false;
+    }
+
+    return (
+        manageElectionsAuthorized &&
+        electionData.status === "draft"
+    );
+
+}
+        // =========================================================
+        // RELOAD SELECTED ELECTION
+        // =========================================================
+
+        async function reloadElection() {
+
+            if (!electionId) {
+
+                return;
+
+            }
+
+
+            try {
+
+                const electionRef =
+                    doc(
+                        db,
+                        "Elections",
+                        electionId
+                    );
+
+
+                const snapshot =
+                    await getDoc(
+                        electionRef
+                    );
+
+
+                if (!snapshot.exists()) {
+
+                    showMessage(
+                        "The election no longer exists.",
+                        "error"
+                    );
+
+
+                    electionId =
+                        null;
+
+                    electionData =
+                        null;
+
+
+                    await loadAllElections();
+
+                    return;
+
+                }
+
+
+                electionData =
+                    snapshot.data();
+
+
+              if (
+    !manageElectionsAuthorized &&
+    !electionStatusAuthorized
+) {
+    showMessage(
+        "You are not authorized to access this election.",
+        "error"
+    );
+    return;
+}
+
+                await checkAutomaticVotingClosure();
+
+                await loadPositions();
+
+                displayElection();
+
+
+            } catch (error) {
+
+                console.error(
+                    "reloadElection error:",
+                    error
+                );
+
+
+                showMessage(
+                    "Failed to reload election: " +
+                    error.message,
+                    "error"
+                );
+
+            }
+
+        }
+
+
+        // =========================================================
+        // CONFIRMATION MODAL
+        // =========================================================
+
+        function openConfirmation(
+            title,
+            message,
+            action,
+            danger = false
+        ) {
+
+            document.getElementById(
+                "modalTitle"
+            ).textContent =
+                title;
+
+
+            document.getElementById(
+                "modalMessage"
+            ).textContent =
+                message;
+
+
+            pendingAction =
+                action;
+
+
+            const confirmButton =
+                document.getElementById(
+                    "confirmModalBtn"
+                );
+
+
+            if (danger) {
+
+                confirmButton.className =
+                    "danger-confirm";
+
+            } else {
+
+                confirmButton.className =
+                    "success";
+
+            }
+
+
+            openModal(
+                "confirmModal"
+            );
+
+        }
+
+
+        document
+            .getElementById(
+                "confirmModalBtn"
+            )
+            .addEventListener(
+                "click",
+                async () => {
+
+                    const action =
+                        pendingAction;
+
+
+                    pendingAction =
+                        null;
+
+
+                    closeModal(
+                        "confirmModal"
+                    );
+
+
+                    if (action) {
+
+                        await action();
+
+                    }
+
+                }
+            );
+
+
+        document
+            .getElementById(
+                "cancelModalBtn"
+            )
+            .addEventListener(
+                "click",
+                () => {
+
+                    pendingAction =
+                        null;
+
+
+                    closeModal(
+                        "confirmModal"
+                    );
+
+                }
+            );
+
+
+        // =========================================================
+        // MODAL HELPERS
+        // =========================================================
+
+        function openModal(
+            id
+        ) {
+
+            const modal =
+                document.getElementById(
+                    id
+                );
+
+
+            if (modal) {
+
+                modal.style.display =
+                    "flex";
+
+            }
+
+        }
+
+
+        function closeModal(
+            id
+        ) {
+
+            const modal =
+                document.getElementById(
+                    id
+                );
+
+
+            if (modal) {
+
+                modal.style.display =
+                    "none";
+
+            }
+
+        }
+
+
+        // =========================================================
+        // CANCEL EDIT ELECTION
+        // =========================================================
+
+        document
+            .getElementById(
+                "cancelEditElectionBtn"
+            )
+            .addEventListener(
+                "click",
+                () => {
+
+                    closeModal(
+                        "editElectionModal"
+                    );
+
+                }
+            );
+
+
+        // =========================================================
+        // CANCEL EDIT SCHEDULE
+        // =========================================================
+
+        document
+            .getElementById(
+                "cancelEditScheduleBtn"
+            )
+            .addEventListener(
+                "click",
+                () => {
+
+                    closeModal(
+                        "editScheduleModal"
+                    );
+
+                }
+            );
+
+
+        // =========================================================
+        // CANCEL POSITION
+        // =========================================================
+
+        document
+            .getElementById(
+                "cancelPositionBtn"
+            )
+            .addEventListener(
+                "click",
+                () => {
+
+                    closeModal(
+                        "positionModal"
+                    );
+
+                }
+            );
+
+
+        // =========================================================
+        // CLICK OUTSIDE MODAL TO CLOSE
+        // =========================================================
+
+        document
+            .querySelectorAll(
+                ".modal"
+            )
+            .forEach(
+                (modal) => {
+
+                    modal.addEventListener(
+                        "click",
+                        (event) => {
+
+                            if (
+                                event.target ===
+                                modal
+                            ) {
+
+                                modal.style.display =
+                                    "none";
+
+                                pendingAction =
+                                    null;
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+
+        // =========================================================
+        // BACK TO ELECTION LIST
+        // =========================================================
+
+        document
+            .getElementById(
+                "backToElectionsBtn"
+            )
+            .addEventListener(
+                "click",
+                () => {
+
+                    window.location.href =
+                        "manage-elections.html";
+
+                }
+            );
+
+
+               // =========================================================
+        // BACK TO DASHBOARD
+        // =========================================================
+
+        document
+            .getElementById(
+                "backBtn"
+            )
+            .addEventListener(
+                "click",
+                () => {
+
+                    window.location.href =
+                        getDashboardForRole(
+                            currentUserData.role
+                        );
+
+                }
+            );
+
+
+        // =========================================================
+        // MESSAGE FUNCTION
+        // =========================================================
+        function showMessage(
+            message,
+            type
+        ) {
+
+            messageBox.textContent =
+                message;
+
+
+            messageBox.className =
+                "message " +
+                (
+                    type === "success"
+                        ? "success-message"
+                        : "error-message"
+                );
+
+
+            messageBox.style.display =
+                "block";
+
+
+            setTimeout(
+                () => {
+
+                    messageBox.style.display =
+                        "none";
+
+                },
+                5000
+            );
+
+        }
+
+
+        // =========================================================
+        // STATUS FORMATTER
+        // =========================================================
+
+        function formatStatus(
+            status
+        ) {
+
+            const statuses = {
+
+                draft:
+                    "Draft",
+
+                finalized:
+                    "Finalized",
+
+                voting_active:
+                    "Voting Active",
+
+                voting_stopped:
+                    "Voting Stopped",
+
+                voting_closed:
+                    "Voting Stopped",
+
+                closed:
+                    "Closed"
+
+            };
+
+
+            return (
+                statuses[status] ||
+                "Unknown"
+            );
+
+        }
+
+
+        // =========================================================
+        // STATUS CSS CLASS
+        // =========================================================
+
+        function getStatusClass(
+            status
+        ) {
+
+            if (
+                status ===
+                "draft"
+            ) {
+
+                return "draft";
+
+            }
+
+
+            if (
+                status ===
+                "finalized"
+            ) {
+
+                return "finalized";
+
+            }
+
+
+            if (
+                status ===
+                "voting_active"
+            ) {
+
+                return "active";
+
+            }
+
+
+            if (
+                status ===
+                "voting_stopped" ||
+                status ===
+                "voting_closed"
+            ) {
+
+                return "stopped";
+
+            }
+
+
+            if (
+                status ===
+                "closed"
+            ) {
+
+                return "closed";
+
+            }
+
+
+            return "finalized";
+
+        }
+
+
+        // =========================================================
+        // DATE FORMATTER
+        // Handles:
+        // 1. Firestore Timestamp
+        // 2. JavaScript Date
+        // 3. ISO string
+        // 4. Firebase timestamp-like object
+        // =========================================================
+
+        function formatDate(
+            value
+        ) {
+
+            if (!value) {
+
+                return "—";
+
+            }
+
+
+            try {
+
+                let date;
+
+
+                // Firestore Timestamp
+                if (
+                    typeof value ===
+                    "object" &&
+                    typeof value.toDate ===
+                    "function"
+                ) {
+
+                    date =
+                        value.toDate();
+
+                }
+
+                // Firebase timestamp-like object
+                else if (
+                    typeof value ===
+                    "object" &&
+                    typeof value.seconds ===
+                    "number"
+                ) {
+
+                    date =
+                        new Date(
+                            value.seconds * 1000
+                        );
+
+                }
+
+                // JavaScript Date
+                else if (
+                    value instanceof Date
+                ) {
+
+                    date =
+                        value;
+
+                }
+
+                // String / number
+                else {
+
+                    date =
+                        new Date(
+                            value
+                        );
+
+                }
+
+
+                if (
+                    isNaN(
+                        date.getTime()
+                    )
+                ) {
+
+                    return String(
+                        value
+                    );
+
+                }
+
+
+                return date.toLocaleString();
+
+            } catch (error) {
+
+                console.error(
+                    "formatDate error:",
+                    error
+                );
+
+
+                return String(
+                    value
+                );
+
+            }
+
+        }
+
+
+        // =========================================================
+        // TIMESTAMP -> MILLISECONDS
+        // =========================================================
+
+        function getTimestampMilliseconds(
+            value
+        ) {
+
+            if (!value) {
+
+                return 0;
+
+            }
+
+
+            try {
+
+                if (
+                    typeof value ===
+                    "object" &&
+                    typeof value.toDate ===
+                    "function"
+                ) {
+
+                    return value
+                        .toDate()
+                        .getTime();
+
+                }
+
+
+                if (
+                    typeof value ===
+                    "object" &&
+                    typeof value.seconds ===
+                    "number"
+                ) {
+
+                    return (
+                        value.seconds *
+                        1000
+                    );
+
+                }
+
+
+                if (
+                    value instanceof Date
+                ) {
+
+                    return value.getTime();
+
+                }
+
+
+                const date =
+                    new Date(
+                        value
+                    );
+
+
+                if (
+                    isNaN(
+                        date.getTime()
+                    )
+                ) {
+
+                    return 0;
+
+                }
+
+
+                return date.getTime();
+
+            } catch {
+
+                return 0;
+
+            }
+
+        }
+
+
+        // =========================================================
+        // CONVERT DATE VALUE TO DATETIME-LOCAL FORMAT
+        // =========================================================
+
+        function convertToDateTimeLocal(
+            value
+        ) {
+
+            if (!value) {
+
+                return "";
+
+            }
+
+
+            try {
+
+                let date;
+
+
+                if (
+                    typeof value ===
+                    "object" &&
+                    typeof value.toDate ===
+                    "function"
+                ) {
+
+                    date =
+                        value.toDate();
+
+                }
+
+                else if (
+                    typeof value ===
+                    "object" &&
+                    typeof value.seconds ===
+                    "number"
+                ) {
+
+                    date =
+                        new Date(
+                            value.seconds * 1000
+                        );
+
+                }
+
+                else {
+
+                    date =
+                        new Date(
+                            value
+                        );
+
+                }
+
+
+                if (
+                    isNaN(
+                        date.getTime()
+                    )
+                ) {
+
+                    return "";
+
+                }
+
+
+                const year =
+                    date.getFullYear();
+
+
+                const month =
+                    String(
+                        date.getMonth() + 1
+                    ).padStart(
+                        2,
+                        "0"
+                    );
+
+
+                const day =
+                    String(
+                        date.getDate()
+                    ).padStart(
+                        2,
+                        "0"
+                    );
+
+
+                const hours =
+                    String(
+                        date.getHours()
+                    ).padStart(
+                        2,
+                        "0"
+                    );
+
+
+                const minutes =
+                    String(
+                        date.getMinutes()
+                    ).padStart(
+                        2,
+                        "0"
+                    );
+
+
+                return (
+                    year +
+                    "-" +
+                    month +
+                    "-" +
+                    day +
+                    "T" +
+                    hours +
+                    ":" +
+                    minutes
+                );
+
+            } catch {
+
+                return "";
+
+            }
+
+        }
+
+
+        // =========================================================
+        // HTML ESCAPE
+        // =========================================================
+
+        function escapeHtml(
+            value
+        ) {
+
+            return String(
+                value ?? ""
+            )
+
+                .replaceAll(
+                    "&",
+                    "&amp;"
+                )
+
+                .replaceAll(
+                    "<",
+                    "&lt;"
+                )
+
+                .replaceAll(
+                    ">",
+                    "&gt;"
+                )
+
+                .replaceAll(
+                    '"',
+                    "&quot;"
+                )
+
+                .replaceAll(
+                    "'",
+                    "&#039;"
+                );
+
+        }
+
+
+    </script>
+
+
+</body>
+
+</html>

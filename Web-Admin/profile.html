@@ -1,0 +1,2532 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>My Profile</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6f8;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        /* ================================
+           HEADER
+        ================================= */
+
+        .header {
+            background: #1976d2;
+            color: white;
+            padding: 18px 30px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .header-title h1 {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .header-title p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        /* ================================
+           PROFILE MENU
+        ================================= */
+
+        .profile-menu {
+            position: relative;
+        }
+
+        .profile-btn {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+
+            border: none;
+            background: transparent;
+            color: white;
+
+            font-size: 14px;
+            font-weight: 600;
+
+            cursor: pointer;
+            padding: 7px 10px;
+        }
+
+        .profile-avatar {
+            width: 34px;
+            height: 34px;
+
+            border-radius: 50%;
+
+            background: white;
+            color: #1976d2;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-weight: 700;
+        }
+
+        .profile-arrow {
+            font-size: 10px;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+
+            right: 0;
+            top: 48px;
+
+            width: 230px;
+
+            background: white;
+
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.15);
+
+            z-index: 2000;
+
+            overflow: hidden;
+        }
+
+        .profile-dropdown.hidden {
+            display: none;
+        }
+
+        .profile-dropdown-header {
+            padding: 15px;
+
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .dropdown-name {
+            font-size: 14px;
+            font-weight: 700;
+
+            color: #0f172a;
+
+            margin-bottom: 4px;
+        }
+
+        .dropdown-role {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .profile-dropdown button {
+            width: 100%;
+
+            border: none;
+
+            background: white;
+
+            padding: 12px 15px;
+
+            text-align: left;
+
+            font-size: 14px;
+
+            color: #334155;
+
+            cursor: pointer;
+        }
+
+        /* IMPORTANT:
+           No hover animation,
+           no underline,
+           no transition.
+        */
+
+        .profile-dropdown button:focus {
+            outline: 2px solid #1976d2;
+            outline-offset: -2px;
+        }
+
+        /* ================================
+           CONTAINER
+        ================================= */
+
+        .container {
+            max-width: 760px;
+
+            margin: 30px auto;
+
+            padding: 0 20px;
+        }
+
+        .back-link {
+            display: inline-block;
+
+            margin-bottom: 20px;
+
+            color: #1976d2;
+
+            text-decoration: none;
+
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+        .back-link:focus {
+            outline: 2px solid #1976d2;
+            outline-offset: 2px;
+        }
+
+        /* ================================
+           PAGE MESSAGE
+        ================================= */
+
+        .page-message {
+            padding: 11px 12px;
+
+            margin-bottom: 18px;
+
+            border-radius: 6px;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+
+            display: none;
+        }
+
+        .page-message.success {
+            display: block;
+
+            background: #e8f5e9;
+
+            color: #2e7d32;
+
+            border: 1px solid #c8e6c9;
+        }
+
+        .page-message.error {
+            display: block;
+
+            background: #ffe5e5;
+
+            color: #b00020;
+
+            border: 1px solid #ffcdd2;
+        }
+
+        /* ================================
+           CARD
+        ================================= */
+
+        .card {
+            background: white;
+
+            border: 1px solid #e2e8f0;
+
+            border-radius: 10px;
+
+            padding: 25px;
+
+            margin-bottom: 18px;
+
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .card h2 {
+            font-size: 19px;
+
+            margin-bottom: 7px;
+
+            color: #0f172a;
+        }
+
+        .description {
+            color: #64748b;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+
+            margin-bottom: 20px;
+        }
+
+        /* ================================
+           INFORMATION
+        ================================= */
+
+        .info-list {
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 14px;
+        }
+
+        .info-row {
+            display: grid;
+
+            grid-template-columns: 150px 1fr;
+
+            gap: 15px;
+
+            padding-bottom: 12px;
+
+            border-bottom: 1px solid #eef2f6;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+
+            padding-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+
+            color: #64748b;
+
+            font-size: 14px;
+        }
+
+        .info-value {
+            color: #1e293b;
+
+            font-size: 14px;
+
+            word-break: break-word;
+        }
+
+        /* ================================
+           ACTION CARD
+        ================================= */
+
+        .action-card {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 20px;
+        }
+
+        .action-text {
+            flex: 1;
+        }
+
+        .action-text h3 {
+            font-size: 16px;
+
+            margin-bottom: 5px;
+        }
+
+        .action-text p {
+            color: #64748b;
+
+            font-size: 13px;
+
+            line-height: 1.4;
+        }
+
+        /* ================================
+           BUTTONS
+        ================================= */
+
+        .btn {
+            padding: 10px 16px;
+
+            border: none;
+
+            border-radius: 6px;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: #1976d2;
+
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+
+            color: #334155;
+        }
+
+        .btn:focus {
+            outline: 2px solid #1976d2;
+
+            outline-offset: 2px;
+        }
+
+        .btn:disabled {
+            opacity: 0.65;
+
+            cursor: not-allowed;
+        }
+
+        /* ================================
+           MODAL
+        ================================= */
+
+        .modal {
+            position: fixed;
+
+            inset: 0;
+
+            background: rgba(0, 0, 0, 0.45);
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            padding: 20px;
+
+            z-index: 3000;
+        }
+
+        .modal.hidden {
+            display: none;
+        }
+
+        .modal-content {
+            width: 100%;
+
+            max-width: 500px;
+
+            background: white;
+
+            border-radius: 10px;
+
+            padding: 25px;
+
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.18);
+
+            max-height: 90vh;
+
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 19px;
+        }
+
+        .close-btn {
+            border: none;
+
+            background: transparent;
+
+            color: #666;
+
+            font-size: 26px;
+
+            cursor: pointer;
+
+            padding: 0;
+        }
+
+        .close-btn:focus {
+            outline: 2px solid #1976d2;
+        }
+
+        /* ================================
+           FORM
+        ================================= */
+
+        .form-group {
+            margin-bottom: 17px;
+        }
+
+        .form-group label {
+            display: block;
+
+            margin-bottom: 6px;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            color: #334155;
+        }
+
+        .form-control {
+            width: 100%;
+
+            padding: 11px 12px;
+
+            border: 1px solid #cbd5e1;
+
+            border-radius: 6px;
+
+            font-size: 14px;
+
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+
+            border-color: #1976d2;
+        }
+
+        .form-note {
+            margin-top: 6px;
+
+            color: #64748b;
+
+            font-size: 12px;
+
+            line-height: 1.4;
+        }
+
+        /* ================================
+           ALERT
+        ================================= */
+
+        .alert {
+            display: none;
+
+            padding: 11px 12px;
+
+            margin-bottom: 17px;
+
+            border-radius: 6px;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+        .alert.success {
+            display: block;
+
+            background: #e8f5e9;
+
+            color: #2e7d32;
+
+            border: 1px solid #c8e6c9;
+        }
+
+        .alert.error {
+            display: block;
+
+            background: #ffe5e5;
+
+            color: #b00020;
+
+            border: 1px solid #ffcdd2;
+        }
+
+        /* ================================
+           MODAL ACTIONS
+        ================================= */
+
+        .modal-actions {
+            display: flex;
+
+            gap: 10px;
+
+            margin-top: 20px;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+        }
+
+        /* ================================
+           MOBILE
+        ================================= */
+
+        @media (max-width: 600px) {
+
+            .header {
+                padding: 15px 20px;
+            }
+
+            .header-title h1 {
+                font-size: 19px;
+            }
+
+            .header-title p {
+                font-size: 11px;
+            }
+
+            .container {
+                margin: 20px auto;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .info-row {
+                grid-template-columns: 1fr;
+
+                gap: 5px;
+            }
+
+            .action-card {
+                flex-direction: column;
+
+                align-items: flex-start;
+            }
+
+            .action-card .btn {
+                width: 100%;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .profile-dropdown {
+                right: 0;
+
+                width: 210px;
+            }
+
+        }
+
+    </style>
+
+        <link rel="stylesheet" href="assets/css/navigation.css?v=20260913-nav">
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+</head>
+
+
+<body>
+
+    <!-- ================================
+         HEADER
+    ================================= -->
+
+    <div class="header">
+
+        <div class="header-title">
+
+            <h1>My Profile</h1>
+
+            <p>
+                Update your account and security settings.
+            </p>
+
+        </div>
+
+
+        <div class="profile-menu">
+
+            <button
+                type="button"
+                id="profileBtn"
+                class="profile-btn"
+                aria-expanded="false"
+            >
+
+                <span
+                    id="profileAvatar"
+                    class="profile-avatar"
+                >
+                    P
+                </span>
+
+                <span id="profileName">
+                    Profile
+                </span>
+
+                <span class="profile-arrow">
+                    ▼
+                </span>
+
+            </button>
+
+
+            <div
+                id="profileDropdown"
+                class="profile-dropdown hidden"
+            >
+
+                <div class="profile-dropdown-header">
+
+                    <div
+                        id="dropdownName"
+                        class="dropdown-name"
+                    >
+                        Loading...
+                    </div>
+
+                    <div
+                        id="dropdownRole"
+                        class="dropdown-role"
+                    >
+                        Loading...
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="profileHomeBtn"
+                >
+                    My Profile
+                </button>
+
+
+                <button
+                    type="button"
+                    id="signOutBtn"
+                >
+                    Sign Out
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="container">
+
+        <!-- ================================
+             BACK TO DASHBOARD
+        ================================= -->
+
+        <nav class="page-navigation" aria-label="Page navigation">
+            <a
+                id="backLink"
+                class="back-link back-dashboard-button"
+                href="#"
+            >
+                Back to Dashboard
+            </a>
+        </nav>
+
+
+        <!-- ================================
+             PAGE MESSAGE
+        ================================= -->
+
+        <div
+            id="pageMessage"
+            class="page-message"
+        ></div>
+
+
+       <!-- ================================
+     PERSONAL INFORMATION
+================================= -->
+
+<div class="card">
+
+    <h2>
+        Personal Information
+    </h2>
+
+    <div class="info-list">
+
+        <div class="info-row">
+
+            <div class="info-label">
+                Full Name
+            </div>
+
+            <div
+                id="displayName"
+                class="info-value"
+            >
+                Loading...
+            </div>
+
+        </div>
+
+        <div class="info-row">
+
+            <div class="info-label">
+                Email Address
+            </div>
+
+            <div
+                id="displayEmail"
+                class="info-value"
+            >
+                Loading...
+            </div>
+
+        </div>
+
+        <div class="info-row">
+
+            <div class="info-label">
+                Role
+            </div>
+
+            <div
+                id="displayRole"
+                class="info-value"
+            >
+                Loading...
+            </div>
+
+        </div>
+
+    </div>
+
+    <button
+        type="button"
+        id="openEditBtn"
+        class="btn btn-primary"
+        style="display: none; margin-top: 20px;"
+    >
+        Edit Information
+    </button>
+
+</div>
+
+
+<!-- ================================
+     INSTITUTION INFORMATION
+================================= -->
+
+<div
+    id="institutionCard"
+    class="card"
+    style="display: none;"
+>
+
+    <h2>
+        Institution Information
+    </h2>
+
+    <div class="info-list">
+
+        <div class="info-row">
+
+            <div class="info-label">
+                Institution Name
+            </div>
+
+            <div
+                id="displayInstitutionName"
+                class="info-value"
+            >
+                Loading...
+            </div>
+
+        </div>
+
+    </div>
+
+    <button
+        type="button"
+        id="openInstitutionBtn"
+        class="btn btn-primary"
+        style="margin-top: 20px;"
+    >
+        Edit Institution Name
+    </button>
+
+</div>
+
+
+        <!-- ================================
+             ACCOUNT SECURITY
+        ================================= -->
+
+        <div class="card action-card">
+
+            <div class="action-text">
+
+                <h3>
+                    Password
+                </h3>
+
+                <p>
+                    Choose a new password for this account.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="openPasswordBtn"
+                class="btn btn-primary"
+            >
+                Change Password
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================
+         EDIT PERSONAL MODAL
+    ================================= -->
+
+    <div
+        id="editModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h2>
+                    Edit Personal Information
+                </h2>
+
+                <button
+                    type="button"
+                    id="closeEditBtn"
+                    class="close-btn"
+                    aria-label="Close"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div
+                id="editAlert"
+                class="alert"
+            ></div>
+
+
+            <form id="editForm">
+
+                <div class="form-group">
+
+                    <label for="editName">
+                        Full Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="editName"
+                        class="form-control"
+                        maxlength="100"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="editEmail">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="editEmail"
+                        class="form-control"
+                        required
+                    >
+
+                </div>
+
+
+                <p class="form-note">
+                    If you change your email, we send a verification link.
+                    Open the link, then sign in again. Your system email changes only after verification.
+                </p>
+
+
+                <div class="modal-actions">
+
+                    <button
+                        type="submit"
+                        id="saveEditBtn"
+                        class="btn btn-primary"
+                    >
+                        Save Changes
+                    </button>
+
+                    <button
+                        type="button"
+                        id="cancelEditBtn"
+                        class="btn btn-secondary"
+                    >
+                        Cancel
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================
+         INSTITUTION MODAL
+    ================================= -->
+
+    <div
+        id="institutionModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h2>
+                    Edit Institution Name
+                </h2>
+
+                <button
+                    type="button"
+                    id="closeInstitutionBtn"
+                    class="close-btn"
+                    aria-label="Close"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div
+                id="institutionAlert"
+                class="alert"
+            ></div>
+
+
+            <form id="institutionForm">
+
+                <div class="form-group">
+
+                    <label for="institutionNameInput">
+                        Institution Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="institutionNameInput"
+                        class="form-control"
+                        maxlength="150"
+                        placeholder="Enter institution name"
+                        required
+                    >
+
+                </div>
+
+                <div class="modal-actions">
+
+                    <button
+                        type="submit"
+                        id="saveInstitutionBtn"
+                        class="btn btn-primary"
+                    >
+                        Save Institution Name
+                    </button>
+
+                    <button
+                        type="button"
+                        id="cancelInstitutionBtn"
+                        class="btn btn-secondary"
+                    >
+                        Cancel
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================
+         PASSWORD MODAL
+    ================================= -->
+
+    <div
+        id="passwordModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h2>
+                    Change Password
+                </h2>
+
+                <button
+                    type="button"
+                    id="closePasswordBtn"
+                    class="close-btn"
+                    aria-label="Close"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div
+                id="passwordAlert"
+                class="alert"
+            ></div>
+
+
+            <form id="passwordForm">
+
+                <div class="form-group">
+
+                    <label for="newPassword">
+                        New Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="newPassword"
+                        class="form-control"
+                        placeholder="Enter new password"
+                        autocomplete="new-password"
+                        minlength="8"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="confirmPassword">
+                        Confirm New Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        class="form-control"
+                        placeholder="Enter password again"
+                        autocomplete="new-password"
+                        minlength="8"
+                        required
+                    >
+
+                </div>
+
+
+                <p class="form-note">
+                    Password must contain at least 8 characters.
+                </p>
+
+
+                <div class="modal-actions">
+
+                    <button
+                        type="submit"
+                        id="savePasswordBtn"
+                        class="btn btn-primary"
+                    >
+                        Change Password
+                    </button>
+
+                    <button
+                        type="button"
+                        id="cancelPasswordBtn"
+                        class="btn btn-secondary"
+                    >
+                        Cancel
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================
+         JAVASCRIPT
+    ================================= -->
+
+<script type="module">
+
+import { auth, db } from "./js/firebase.js";
+
+import {
+    getCurrentUserProfile
+} from "./js/auth.js";
+
+import {
+    goToDashboard
+} from "./js/navigation.js";
+
+import {
+    reload,
+    updateProfile,
+    verifyBeforeUpdateEmail,
+    updatePassword,
+    signOut
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import {
+    doc,
+    getDoc,
+    updateDoc,
+    setDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+
+/* =====================================================
+   CURRENT USER
+===================================================== */
+
+let currentUser = null;
+let currentUserData = null;
+
+
+/* =====================================================
+   HTML ELEMENTS
+===================================================== */
+
+const profileBtn =
+    document.getElementById("profileBtn");
+
+const profileDropdown =
+    document.getElementById("profileDropdown");
+
+const profileName =
+    document.getElementById("profileName");
+
+const profileAvatar =
+    document.getElementById("profileAvatar");
+
+const dropdownName =
+    document.getElementById("dropdownName");
+
+const dropdownRole =
+    document.getElementById("dropdownRole");
+
+const profileHomeBtn =
+    document.getElementById("profileHomeBtn");
+
+const signOutBtn =
+    document.getElementById("signOutBtn");
+
+const backLink =
+    document.getElementById("backLink");
+
+const pageMessage =
+    document.getElementById("pageMessage");
+
+const displayName =
+    document.getElementById("displayName");
+
+const displayEmail =
+    document.getElementById("displayEmail");
+
+const displayRole =
+    document.getElementById("displayRole");
+
+
+const openEditBtn =
+    document.getElementById("openEditBtn");
+
+const editModal =
+    document.getElementById("editModal");
+
+const closeEditBtn =
+    document.getElementById("closeEditBtn");
+
+const cancelEditBtn =
+    document.getElementById("cancelEditBtn");
+
+const editForm =
+    document.getElementById("editForm");
+
+const editName =
+    document.getElementById("editName");
+
+const editEmail =
+    document.getElementById("editEmail");
+
+const editAlert =
+    document.getElementById("editAlert");
+
+const institutionCard =
+    document.getElementById("institutionCard");
+
+
+const displayInstitutionName =
+    document.getElementById("displayInstitutionName");
+
+const openInstitutionBtn =
+    document.getElementById("openInstitutionBtn");
+
+const institutionModal =
+    document.getElementById("institutionModal");
+
+const closeInstitutionBtn =
+    document.getElementById("closeInstitutionBtn");
+
+const cancelInstitutionBtn =
+    document.getElementById("cancelInstitutionBtn");
+
+const institutionForm =
+    document.getElementById("institutionForm");
+
+const institutionNameInput =
+    document.getElementById("institutionNameInput");
+
+const institutionAlert =
+    document.getElementById("institutionAlert");
+
+const openPasswordBtn =
+    document.getElementById("openPasswordBtn");
+
+const passwordModal =
+    document.getElementById("passwordModal");
+
+const closePasswordBtn =
+    document.getElementById("closePasswordBtn");
+
+const cancelPasswordBtn =
+    document.getElementById("cancelPasswordBtn");
+
+const passwordForm =
+    document.getElementById("passwordForm");
+
+const newPassword =
+    document.getElementById("newPassword");
+
+const confirmPassword =
+    document.getElementById("confirmPassword");
+
+const passwordAlert =
+    document.getElementById("passwordAlert");
+
+
+/* =====================================================
+   ROLE LABELS
+===================================================== */
+
+const ROLE_LABELS = {
+
+    principal:
+        "Principal",
+
+    sub_admin:
+        "Sub-Admin",
+
+    election_commission:
+        "Election Commission",
+
+    presiding_officer:
+        "Presiding Officer",
+
+    assistant_presiding_officer:
+        "Assistant Presiding Officer"
+
+};
+
+
+/* =====================================================
+   MESSAGE
+===================================================== */
+
+function showMessage(message, type = "error") {
+
+    if (!pageMessage) {
+        return;
+    }
+
+    pageMessage.textContent = message;
+
+    pageMessage.className =
+        "page-message " + type;
+
+}
+
+
+/* =====================================================
+   MODAL MESSAGE
+===================================================== */
+
+function showAlert(element, message, type) {
+
+    if (!element) {
+        return;
+    }
+
+    element.textContent = message;
+
+    element.className =
+        "alert " + type;
+
+}
+
+
+/* =====================================================
+   LOAD PROFILE
+===================================================== */
+
+async function loadProfile() {
+
+    console.log("PROFILE: Starting profile load...");
+
+
+    /*
+       getCurrentUserProfile() returns:
+
+       {
+           user: Firebase Auth user,
+           data: Firestore Users/{uid} data
+       }
+    */
+
+    const profileResult =
+        await getCurrentUserProfile();
+
+
+    console.log(
+        "PROFILE: Authentication result:",
+        profileResult
+    );
+
+
+    if (
+        !profileResult ||
+        !profileResult.user
+    ) {
+
+        window.location.href =
+            "login.html";
+
+        return;
+
+    }
+
+
+    if (
+        !profileResult.data
+    ) {
+
+        showMessage(
+            "Your user profile could not be found in the system.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    /*
+       IMPORTANT:
+
+       These two assignments are the correct
+       structure for your auth.js.
+    */
+
+    currentUser =
+        profileResult.user;
+
+    currentUserData =
+        profileResult.data;
+
+    if (currentUserData.status !== "active") {
+        await signOut(auth);
+        window.location.href = "login.html";
+        return;
+    }
+
+
+    console.log(
+        "PROFILE: Firestore user data:",
+        currentUserData
+    );
+
+
+    /*
+       Reload Firebase Auth information.
+    */
+
+    try {
+
+        await reload(currentUser);
+
+    } catch (error) {
+
+        console.warn(
+            "PROFILE: Auth reload failed:",
+            error
+        );
+
+    }
+
+
+    /* =================================================
+       ROLE
+    ================================================= */
+
+    const role =
+        currentUserData.role || "";
+
+
+    console.log(
+        "PROFILE: Detected role:",
+        role
+    );
+
+
+    /* =================================================
+       NAME
+    ================================================= */
+
+    const name =
+        currentUserData.name ||
+        currentUser.displayName ||
+        currentUser.email ||
+        "User";
+
+
+    /* =================================================
+       EMAIL
+    ================================================= */
+
+    if (
+        role === "principal"
+        &&
+        currentUser.email
+        &&
+        currentUserData.email !== currentUser.email
+    ) {
+        try {
+            await updateDoc(
+                doc(db, "Users", currentUser.uid),
+                {
+                    email: currentUser.email,
+                    updatedAt: serverTimestamp()
+                }
+            );
+            currentUserData.email = currentUser.email;
+        } catch (error) {
+            console.warn("PROFILE: Verified email could not be synced:", error);
+        }
+    }
+
+    const email =
+        currentUser.email ||
+        currentUserData.email ||
+        "";
+
+
+    /* =================================================
+       ROLE LABEL
+    ================================================= */
+
+    const roleLabel =
+        ROLE_LABELS[role] ||
+        role ||
+        "User";
+
+
+    /* =================================================
+       PERSONAL INFORMATION
+    ================================================= */
+
+    displayName.textContent =
+        name;
+
+    displayEmail.textContent =
+        email;
+
+    displayRole.textContent =
+        roleLabel;
+
+
+    /* =================================================
+       HEADER PROFILE
+    ================================================= */
+
+    profileName.textContent =
+        name;
+
+    profileAvatar.textContent =
+        name.charAt(0).toUpperCase();
+
+
+    /* =================================================
+       DROPDOWN
+    ================================================= */
+
+    dropdownName.textContent =
+        name;
+
+    dropdownRole.textContent =
+        roleLabel;
+
+
+    /* =================================================
+       EDIT FORM
+    ================================================= */
+
+    editName.value =
+        name;
+
+    editEmail.value =
+        email;
+
+
+    /* =================================================
+       BACK TO DASHBOARD
+    ================================================= */
+
+    setupBackButton(role);
+
+
+    /* =================================================
+       PRINCIPAL-ONLY FEATURES
+    ================================================= */
+
+   if (role === "principal") {
+
+    openEditBtn.style.display =
+        "inline-block";
+
+    institutionCard.style.display =
+        "block";
+
+    await loadInstitution();
+
+} else {
+
+    openEditBtn.style.display =
+        "none";
+
+    institutionCard.style.display =
+        "none";
+
+}
+console.log(
+    "PROFILE: Profile loaded successfully."
+);
+
+}
+
+/* =====================================================
+   BACK TO DASHBOARD
+===================================================== */
+
+function setupBackButton(role) {
+
+    if (!backLink) {
+        return;
+    }
+
+
+    if (!role) {
+
+        backLink.style.display =
+            "none";
+
+        return;
+
+    }
+
+
+    backLink.style.display =
+        "inline-block";
+
+
+    backLink.onclick =
+        function(event) {
+
+            event.preventDefault();
+
+            goToDashboard(role);
+
+        };
+
+}
+
+
+/* =====================================================
+   LOAD INSTITUTION
+===================================================== */
+
+async function loadInstitution() {
+
+    let institutionName =
+        currentUserData.collegeName ||
+        currentUserData.institutionName ||
+        "";
+
+
+    /*
+       Display the value already stored in
+       the Principal's Users document.
+    */
+
+    displayInstitutionName.textContent =
+        institutionName ||
+        "Not configured";
+
+
+    institutionNameInput.value =
+        institutionName;
+
+
+    /*
+       Also check the central institution document.
+       If it exists, use it as the current system value.
+    */
+
+    try {
+
+        const institutionRef =
+            doc(
+                db,
+                "Institutions",
+                "main"
+            );
+
+
+        const institutionSnapshot =
+            await getDoc(institutionRef);
+
+
+        if (
+            institutionSnapshot.exists()
+        ) {
+
+            const institutionData =
+                institutionSnapshot.data();
+
+
+            if (
+                institutionData.name
+            ) {
+
+                institutionName =
+                    institutionData.name;
+
+                displayInstitutionName.textContent =
+                    institutionName;
+
+                institutionNameInput.value =
+                    institutionName;
+
+            }
+
+        }
+
+    } catch (error) {
+
+        /*
+           Do not make the whole profile page
+           fail simply because the optional
+           Institutions document cannot be read.
+        */
+
+        console.warn(
+            "PROFILE: Could not read central institution document:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   PROFILE DROPDOWN
+===================================================== */
+
+profileBtn.addEventListener(
+    "click",
+    function(event) {
+
+        event.stopPropagation();
+
+        profileDropdown.classList.toggle(
+            "hidden"
+        );
+
+
+        profileBtn.setAttribute(
+            "aria-expanded",
+            profileDropdown.classList.contains(
+                "hidden"
+            )
+                ? "false"
+                : "true"
+        );
+
+    }
+);
+
+
+document.addEventListener(
+    "click",
+    function(event) {
+
+        if (
+            !profileDropdown.contains(
+                event.target
+            ) &&
+            !profileBtn.contains(
+                event.target
+            )
+        ) {
+
+            profileDropdown.classList.add(
+                "hidden"
+            );
+
+            profileBtn.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   MY PROFILE BUTTON
+===================================================== */
+
+profileHomeBtn.addEventListener(
+    "click",
+    function() {
+
+        profileDropdown.classList.add(
+            "hidden"
+        );
+
+    }
+);
+
+
+/* =====================================================
+   SIGN OUT
+===================================================== */
+
+signOutBtn.addEventListener(
+    "click",
+    async function() {
+
+        signOutBtn.disabled =
+            true;
+
+        try {
+
+            await signOut(auth);
+
+            window.location.href =
+                "login.html";
+
+        } catch (error) {
+
+            console.error(
+                "PROFILE: Sign out failed:",
+                error
+            );
+
+            alert(
+                "Unable to sign out. Please try again."
+            );
+
+            signOutBtn.disabled =
+                false;
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   OPEN EDIT PROFILE
+===================================================== */
+
+openEditBtn.addEventListener(
+    "click",
+    function() {
+
+        if (
+            !currentUserData ||
+            currentUserData.role !==
+                "principal"
+        ) {
+
+            alert(
+                "Only the Principal can edit this information."
+            );
+
+            return;
+
+        }
+
+
+        editModal.classList.remove(
+            "hidden"
+        );
+
+    }
+);
+
+
+/* =====================================================
+   CLOSE EDIT PROFILE
+===================================================== */
+
+function closeEditModal() {
+
+    editModal.classList.add(
+        "hidden"
+    );
+
+    editAlert.className =
+        "alert";
+
+    editAlert.textContent =
+        "";
+
+}
+
+
+closeEditBtn.addEventListener(
+    "click",
+    closeEditModal
+);
+
+
+cancelEditBtn.addEventListener(
+    "click",
+    closeEditModal
+);
+
+
+/* =====================================================
+   SAVE PROFILE
+===================================================== */
+
+editForm.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+
+        if (
+            !currentUser ||
+            !currentUserData
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            currentUserData.role !==
+                "principal"
+        ) {
+
+            showAlert(
+                editAlert,
+                "Only the Principal can edit this information.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        const newName =
+            editName.value.trim();
+
+        const newEmail =
+            editEmail.value.trim();
+
+
+        if (!newName) {
+
+            showAlert(
+                editAlert,
+                "Please enter your name.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (!newEmail) {
+
+            showAlert(
+                editAlert,
+                "Please enter an email address.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        const oldName =
+            currentUserData.name ||
+            "";
+
+        const oldEmail =
+            currentUser.email ||
+            currentUserData.email ||
+            "";
+
+
+        try {
+
+            /*
+               If email changed, Firebase
+               handles verification.
+            */
+
+            if (
+                newEmail !== oldEmail
+            ) {
+
+                await verifyBeforeUpdateEmail(
+                    currentUser,
+                    newEmail
+                );
+
+                showAlert(
+                    editAlert,
+                    "A verification email has been sent. Open the link, then sign in again to complete the email change.",
+                    "success"
+                );
+
+            }
+
+
+            /*
+               Update Firebase Auth display name only after
+               the email-verification request has succeeded.
+            */
+
+            if (
+                newName !== oldName
+            ) {
+
+                await updateProfile(
+                    currentUser,
+                    {
+                        displayName:
+                            newName
+                    }
+                );
+
+            }
+
+
+            /*
+               Keep Firestore aligned only with the verified Auth email.
+               The email is synced on the next signed-in profile load.
+            */
+
+            await updateDoc(
+                doc(
+                    db,
+                    "Users",
+                    currentUser.uid
+                ),
+                {
+                    name:
+                        newName,
+
+                    updatedAt:
+                        serverTimestamp()
+                }
+            );
+
+
+            currentUserData.name =
+                newName;
+
+
+            displayName.textContent =
+                newName;
+
+            displayEmail.textContent =
+                currentUser.email || oldEmail;
+
+            profileName.textContent =
+                newName;
+
+            dropdownName.textContent =
+                newName;
+
+            profileAvatar.textContent =
+                newName
+                    .charAt(0)
+                    .toUpperCase();
+
+
+            if (
+                newEmail === oldEmail
+            ) {
+
+                showAlert(
+                    editAlert,
+                    "Personal information updated successfully.",
+                    "success"
+                );
+
+            }
+
+
+        } catch (error) {
+
+            console.error(
+                "PROFILE: Profile update failed:",
+                error
+            );
+
+
+            showAlert(
+                editAlert,
+                error.code === "auth/requires-recent-login"
+                    ? "For security, sign in again and then try this change."
+                    : "Unable to update personal information. Please try again.",
+                "error"
+            );
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   OPEN INSTITUTION
+===================================================== */
+
+openInstitutionBtn.addEventListener(
+    "click",
+    function() {
+
+        if (
+            !currentUserData ||
+            currentUserData.role !==
+                "principal"
+        ) {
+
+            alert(
+                "Only the Principal can update the institution name."
+            );
+
+            return;
+
+        }
+
+
+        institutionModal.classList.remove(
+            "hidden"
+        );
+
+    }
+);
+
+
+/* =====================================================
+   CLOSE INSTITUTION MODAL
+===================================================== */
+
+function closeInstitutionModal() {
+
+    institutionModal.classList.add(
+        "hidden"
+    );
+
+    institutionAlert.className =
+        "alert";
+
+    institutionAlert.textContent =
+        "";
+
+}
+
+
+closeInstitutionBtn.addEventListener(
+    "click",
+    closeInstitutionModal
+);
+
+
+cancelInstitutionBtn.addEventListener(
+    "click",
+    closeInstitutionModal
+);
+
+
+/* =====================================================
+   SAVE INSTITUTION
+===================================================== */
+
+institutionForm.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+
+        if (
+            !currentUserData ||
+            currentUserData.role !==
+                "principal"
+        ) {
+
+            showAlert(
+                institutionAlert,
+                "Only the Principal can update the institution name.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        const institutionName =
+            institutionNameInput.value.trim();
+
+
+        if (!institutionName) {
+
+            showAlert(
+                institutionAlert,
+                "Please enter the institution name.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            /*
+               Update the Principal's Users document.
+            */
+
+            await updateDoc(
+                doc(
+                    db,
+                    "Users",
+                    currentUser.uid
+                ),
+                {
+                    collegeName:
+                        institutionName,
+
+                    updatedAt:
+                        serverTimestamp()
+                }
+            );
+
+
+            /*
+               Maintain the central institution
+               document used by the system.
+            */
+
+            await setDoc(
+                doc(
+                    db,
+                    "Institutions",
+                    "main"
+                ),
+                {
+                    name:
+                        institutionName,
+
+                    updatedAt:
+                        serverTimestamp(),
+
+                    updatedBy:
+                        currentUser.uid
+                },
+                {
+                    merge: true
+                }
+            );
+
+
+            currentUserData.collegeName =
+                institutionName;
+
+
+            displayInstitutionName.textContent =
+                institutionName;
+
+
+            showAlert(
+                institutionAlert,
+                "Institution name updated successfully.",
+                "success"
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "PROFILE: Institution update failed:",
+                error
+            );
+
+
+            showAlert(
+                institutionAlert,
+                "Unable to update the institution name. Please check your permissions.",
+                "error"
+            );
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   OPEN PASSWORD MODAL
+===================================================== */
+
+openPasswordBtn.addEventListener(
+    "click",
+    function() {
+
+        passwordModal.classList.remove(
+            "hidden"
+        );
+
+    }
+);
+
+
+/* =====================================================
+   CLOSE PASSWORD MODAL
+===================================================== */
+
+function closePasswordModal() {
+
+    passwordModal.classList.add(
+        "hidden"
+    );
+
+    passwordAlert.className =
+        "alert";
+
+    passwordAlert.textContent =
+        "";
+
+    passwordForm.reset();
+
+}
+
+
+closePasswordBtn.addEventListener(
+    "click",
+    closePasswordModal
+);
+
+
+cancelPasswordBtn.addEventListener(
+    "click",
+    closePasswordModal
+);
+
+
+/* =====================================================
+   CHANGE PASSWORD
+===================================================== */
+
+passwordForm.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+
+        const password =
+            newPassword.value;
+
+        const confirmation =
+            confirmPassword.value;
+
+
+        if (
+            password.length < 8
+        ) {
+
+            showAlert(
+                passwordAlert,
+                "Password must contain at least 8 characters.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (
+            password !== confirmation
+        ) {
+
+            showAlert(
+                passwordAlert,
+                "Passwords do not match.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            await updatePassword(
+                currentUser,
+                password
+            );
+
+
+            showAlert(
+                passwordAlert,
+                "Password changed successfully.",
+                "success"
+            );
+
+
+            passwordForm.reset();
+
+
+        } catch (error) {
+
+            console.error(
+                "PROFILE: Password change failed:",
+                error
+            );
+
+
+            if (
+                error.code ===
+                "auth/requires-recent-login"
+            ) {
+
+                showAlert(
+                    passwordAlert,
+                    "For security, please sign in again before changing your password.",
+                    "error"
+                );
+
+            } else {
+
+                showAlert(
+                    passwordAlert,
+                    "Unable to change your password. Please try again.",
+                    "error"
+                );
+
+            }
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   START
+===================================================== */
+
+loadProfile().catch(
+    function(error) {
+
+        console.error(
+            "PROFILE: Fatal loading error:",
+            error
+        );
+
+
+        showMessage(
+            "Unable to load your profile. Please open the browser console for the exact error.",
+            "error"
+        );
+
+    }
+);
+</script>
+
+</body>
+</html>

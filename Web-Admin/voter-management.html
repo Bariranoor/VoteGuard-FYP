@@ -1,0 +1,3762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Voter List</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            color: #222;
+        }
+
+        .topbar {
+            height: 64px;
+            background: #ffffff;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+        }
+
+        .brand {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1976d2;
+        }
+
+        .back-btn {
+            border: none;
+            background: #1976d2;
+            color: white;
+            padding: 9px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .back-btn:hover {
+            background: #1565c0;
+        }
+
+        .container {
+            max-width: 1250px;
+            margin: 0 auto;
+            padding: 28px;
+        }
+
+        .page-header {
+            margin-bottom: 20px;
+        }
+
+        .page-header h1 {
+            margin: 0 0 6px;
+            font-size: 27px;
+        }
+
+        .page-header p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .message {
+            display: none;
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin-bottom: 18px;
+            font-size: 14px;
+        }
+
+        .message.success {
+            display: block;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+
+        .message.error {
+            display: block;
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+
+        .election-box {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 7px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        .election-box label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .election-select {
+            width: 100%;
+            max-width: 600px;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .election-info {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .lock-message {
+            display: none;
+            margin-top: 12px;
+            padding: 10px 12px;
+            background: #fff3cd;
+            border: 1px solid #ffe69c;
+            color: #664d03;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 24px;
+        }
+
+        .summary-card {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 7px;
+            padding: 18px;
+        }
+
+        .summary-card .label {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 9px;
+        }
+
+        .summary-card .value {
+            font-size: 27px;
+            font-weight: 700;
+            color: #1976d2;
+        }
+
+        .section {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 7px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 17px 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .section-header p {
+            margin: 4px 0 0;
+            color: #777;
+            font-size: 12px;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            font-family: inherit;
+        }
+
+        .primary-btn,
+        .secondary-btn,
+        .danger-btn {
+            border: none;
+            padding: 9px 13px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .primary-btn {
+            background: #1976d2;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background: #1565c0;
+        }
+
+        .secondary-btn {
+            background: #eeeeee;
+            color: #333;
+        }
+
+        .secondary-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .danger-btn {
+            background: #c62828;
+            color: white;
+        }
+
+        .danger-btn:hover {
+            background: #b71c1c;
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .filters {
+            padding: 16px 20px;
+            border-bottom: 1px solid #ddd;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .filters input,
+        .filters select {
+            width: 100%;
+            padding: 9px 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 13px;
+            background: white;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #fafafa;
+            color: #555;
+            font-weight: 600;
+        }
+
+        td {
+            color: #333;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-eligible {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-not-eligible {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .badge-voted {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .badge-not-voted {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .action-btn {
+            border: 1px solid #1976d2;
+            color: #1976d2;
+            background: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .action-btn:hover {
+            background: #e3f2fd;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 35px 20px;
+            color: #777;
+            font-size: 14px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: white;
+            border-radius: 8px;
+            padding: 22px;
+        }
+
+        .modal-content.large {
+            max-width: 900px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 19px;
+        }
+
+        .close-btn {
+            border: none;
+            background: transparent;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 9px 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .form-note {
+            font-size: 12px;
+            color: #777;
+            margin-top: 5px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .upload-info {
+            background: #f7f9fb;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .validation-summary {
+            display: none;
+            background: #f7f9fb;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 13px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        .validation-summary.show {
+            display: block;
+        }
+
+        .validation-summary strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .preview-table {
+            max-height: 280px;
+            overflow: auto;
+            border: 1px solid #ddd;
+            margin-top: 12px;
+        }
+
+        .preview-table table {
+            min-width: 750px;
+        }
+
+        .preview-errors {
+            margin-top: 12px;
+            color: #c62828;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 900px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filters {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .topbar {
+                padding: 0 15px;
+            }
+
+            .container {
+                padding: 18px 12px;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .brand {
+                font-size: 16px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="assets/css/navigation.css?v=20260913-nav">
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+</head>
+
+<body>
+
+<div class="topbar">
+    <div class="brand">VoteGuard — Election Commission</div>
+</div>
+
+<div class="container">
+
+    <nav class="page-navigation" aria-label="Page navigation">
+        <button class="secondary back-dashboard-button" id="backBtn" type="button">Back to Dashboard</button>
+    </nav>
+
+    <div class="page-header">
+        <h1>Voter List</h1>
+        <p>Add students who can vote. Check the list before you finalize it.</p>
+    </div>
+
+    <div id="successMessage" class="message"></div>
+    <div id="errorMessage" class="message"></div>
+
+    <!-- ELECTION SELECTION -->
+
+    <div class="election-box">
+
+        <label for="electionSelect">
+            Select Election
+        </label>
+
+        <select id="electionSelect" class="election-select">
+            <option value="">Loading elections...</option>
+        </select>
+
+        <div id="electionInfo" class="election-info"></div>
+
+        <div id="lockMessage" class="lock-message">
+            This list is finalized and locked. Student details and voting eligibility cannot be changed.
+        </div>
+
+    </div>
+
+
+    <!-- SUMMARY -->
+
+    <div class="summary-grid">
+
+        <div class="summary-card">
+            <div class="label">Total Students</div>
+            <div class="value" id="totalVoters">0</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="label">Can Vote</div>
+            <div class="value" id="eligibleVoters">0</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="label">Cannot Vote</div>
+            <div class="value" id="notEligibleVoters">0</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="label">Voted</div>
+            <div class="value" id="votedVoters">0</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="label">Not Voted</div>
+            <div class="value" id="notVotedVoters">0</div>
+        </div>
+
+    </div>
+
+
+    <!-- OFFICIAL VOTER LIST -->
+
+    <div class="section">
+
+        <div class="section-header">
+
+            <div>
+                <h2>Voter List</h2>
+                <p>Students for the selected election.</p>
+            </div>
+
+            <div class="toolbar">
+
+                <button
+                    class="secondary-btn"
+                    id="uploadBtn"
+                    disabled
+                >
+                    Upload List
+                </button>
+
+                <button
+                    class="secondary-btn"
+                    id="addVoterBtn"
+                    disabled
+                >
+                    Add Student
+                </button>
+
+                <button
+                    class="secondary-btn"
+                    id="validateBtn"
+                    disabled
+                >
+                    Check List
+                </button>
+
+                <button
+                    class="secondary-btn"
+                    id="exportBtn"
+                    disabled
+                >
+                    Download List
+                </button>
+
+                <button
+                    class="success"
+                    id="finalizeBtn"
+                    disabled
+                >
+                    Finalize List
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- FILTERS -->
+
+        <div class="filters">
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search name or roll number..."
+            >
+
+            <select id="classFilter">
+                <option value="">All Classes</option>
+            </select>
+
+            <select id="sectionFilter">
+                <option value="">All Sections</option>
+            </select>
+
+            <select id="statusFilter">
+                <option value="">All Status</option>
+                <option value="eligible">Eligible</option>
+                <option value="not_eligible">Not Eligible</option>
+                <option value="voted">Voted</option>
+                <option value="not_voted">Not Voted</option>
+            </select>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Roll Number</th>
+                        <th>Class</th>
+                        <th>Section</th>
+                        <th>Eligibility</th>
+                        <th>Voting Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody id="voterTableBody">
+                </tbody>
+
+            </table>
+
+            <div
+                id="emptyState"
+                class="empty-state"
+                style="display:none;"
+            >
+                No students found for the selected election.
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     UPLOAD MODAL
+========================= -->
+
+<div class="modal" id="uploadModal">
+
+    <div class="modal-content large">
+
+        <div class="modal-header">
+
+            <h2>Upload Voter List</h2>
+
+            <button
+                class="close-btn"
+                id="closeUploadBtn"
+            >
+                &times;
+            </button>
+
+        </div>
+
+        <div class="upload-info">
+
+            Upload an Excel or CSV file containing these columns:
+
+            <strong>
+                Student Name, Roll Number, Class, Section, Eligibility
+            </strong>
+
+            <br>
+
+            Eligibility must be either
+            <strong>Eligible</strong>
+            or
+            <strong>Not Eligible</strong>.
+
+            <br>
+
+            The file will be validated before anything is saved to Firestore.
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="voterFile">
+                Select File
+            </label>
+
+            <input
+                type="file"
+                id="voterFile"
+                accept=".xlsx,.xls,.csv"
+            >
+
+        </div>
+
+        <div
+            id="uploadValidationSummary"
+            class="validation-summary"
+        ></div>
+
+        <div
+            id="previewContainer"
+            class="preview-table"
+            style="display:none;"
+        ></div>
+
+        <div
+            id="previewErrors"
+            class="preview-errors"
+        ></div>
+
+        <div class="modal-actions">
+
+            <button
+                class="secondary-btn"
+                id="cancelUploadBtn"
+            >
+                Cancel
+            </button>
+
+            <button
+                class="success"
+                id="saveUploadedVotersBtn"
+                disabled
+            >
+                Save Valid Voters
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     ADD / EDIT MODAL
+========================= -->
+
+<div class="modal" id="voterModal">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2 id="voterModalTitle">
+                Add Voter
+            </h2>
+
+            <button
+                class="close-btn"
+                id="closeVoterModalBtn"
+            >
+                &times;
+            </button>
+
+        </div>
+
+        <form id="voterForm">
+
+            <div class="form-group">
+
+                <label for="studentName">
+                    Student Name
+                </label>
+
+                <input
+                    type="text"
+                    id="studentName"
+                    required
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="rollNumber">
+                    Roll Number
+                </label>
+
+                <input
+                    type="text"
+                    id="rollNumber"
+                    required
+                >
+
+                <div
+                    id="rollNumberNote"
+                    class="form-note"
+                >
+                    Roll number cannot be changed after the voter is created.
+                </div>
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="className">
+                    Class
+                </label>
+
+                <input
+                    type="text"
+                    id="className"
+                    required
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="section">
+                    Section
+                </label>
+
+                <input
+                    type="text"
+                    id="section"
+                    required
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="eligibility">
+                    Eligibility
+                </label>
+
+                <select id="eligibility" required>
+
+                    <option value="eligible">
+                        Eligible
+                    </option>
+
+                    <option value="not_eligible">
+                        Not Eligible
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="eligibilityReason">
+                    Eligibility Reason
+                </label>
+
+                <textarea
+                    id="eligibilityReason"
+                    placeholder="Optional reason for ineligibility..."
+                ></textarea>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Voting Status
+                </label>
+
+                <input
+                    type="text"
+                    id="votingStatusDisplay"
+                    value="Not Voted"
+                    readonly
+                >
+
+                <div class="form-note">
+                    Voting status is controlled by the voting process and cannot be edited here.
+                </div>
+
+            </div>
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="secondary-btn"
+                    id="cancelVoterBtn"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="primary-btn"
+                    id="saveVoterBtn"
+                >
+                    Save Voter
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     FINALIZE CONFIRMATION
+========================= -->
+
+<div class="modal" id="finalizeModal">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2>Finalize List</h2>
+
+            <button
+                class="close-btn"
+                id="closeFinalizeBtn"
+            >
+                &times;
+            </button>
+
+        </div>
+
+        <p style="font-size:14px; line-height:1.6; color:#555;">
+            Finalizing the voter list will lock the list for this election.
+            After finalization, voters cannot be added, removed, or edited
+            through Voter Management.
+        </p>
+
+        <p style="font-size:14px; line-height:1.6;">
+            Please make sure the voter list has been reviewed and validated.
+        </p>
+
+        <div class="modal-actions">
+
+            <button
+                class="secondary-btn"
+                id="cancelFinalizeBtn"
+            >
+                Cancel
+            </button>
+
+            <button
+                class="success"
+                id="confirmFinalizeBtn"
+            >
+                Confirm Finalization
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- SheetJS for Excel/CSV processing -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+
+<script type="module">
+
+import { auth, db } from "./js/firebase.js";
+
+import {
+    collection,
+    getDocs,
+    query,
+    where,
+    doc,
+    addDoc,
+    updateDoc,
+    writeBatch,
+    serverTimestamp,
+    setDoc
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+import {
+    getDashboardForRole
+} from "./js/navigation.js";
+
+
+/* =====================================================
+   STATE
+===================================================== */
+
+let currentUser = null;
+let currentUserData = null;
+
+let currentElectionId = null;
+let currentElection = null;
+
+let voters = [];
+
+let editingVoterId = null;
+
+let uploadRows = [];
+let uploadErrors = [];
+
+let pageAuthorized = false;
+
+
+/* =====================================================
+   ELEMENTS
+===================================================== */
+
+const electionSelect =
+    document.getElementById("electionSelect");
+
+const electionInfo =
+    document.getElementById("electionInfo");
+
+const lockMessage =
+    document.getElementById("lockMessage");
+
+const uploadBtn =
+    document.getElementById("uploadBtn");
+
+const addVoterBtn =
+    document.getElementById("addVoterBtn");
+
+const validateBtn =
+    document.getElementById("validateBtn");
+
+const exportBtn =
+    document.getElementById("exportBtn");
+
+const finalizeBtn =
+    document.getElementById("finalizeBtn");
+
+const voterTableBody =
+    document.getElementById("voterTableBody");
+
+const emptyState =
+    document.getElementById("emptyState");
+
+const searchInput =
+    document.getElementById("searchInput");
+
+const classFilter =
+    document.getElementById("classFilter");
+
+const sectionFilter =
+    document.getElementById("sectionFilter");
+
+const statusFilter =
+    document.getElementById("statusFilter");
+
+const totalVoters =
+    document.getElementById("totalVoters");
+
+const eligibleVoters =
+    document.getElementById("eligibleVoters");
+
+const notEligibleVoters =
+    document.getElementById("notEligibleVoters");
+
+const votedVoters =
+    document.getElementById("votedVoters");
+
+const notVotedVoters =
+    document.getElementById("notVotedVoters");
+
+
+/* =====================================================
+   MESSAGE HELPERS
+===================================================== */
+
+let messageTimer = null;
+
+function showMessage(type, text) {
+
+    const success =
+        document.getElementById("successMessage");
+
+    const error =
+        document.getElementById("errorMessage");
+
+    success.className = "message";
+    error.className = "message";
+
+    success.textContent = "";
+    error.textContent = "";
+
+    if (type === "success") {
+
+        success.textContent = text;
+        success.className = "message success";
+
+    } else {
+
+        error.textContent = text;
+        error.className = "message error";
+    }
+
+    clearTimeout(messageTimer);
+
+    messageTimer = setTimeout(() => {
+
+        success.className = "message";
+        error.className = "message";
+
+    }, 5000);
+}
+
+
+/* =====================================================
+   AUTHORIZATION
+===================================================== */
+
+async function checkAccess(user) {
+
+    if (!user) {
+
+        window.location.href = "login.html";
+        return false;
+    }
+
+    currentUser = user;
+
+    const userSnapshot =
+        await getDocs(
+            query(
+                collection(db, "Users"),
+                where("__name__", "==", user.uid)
+            )
+        );
+
+    if (userSnapshot.empty) {
+
+        showMessage(
+            "error",
+            "Your user profile could not be found."
+        );
+
+        return false;
+    }
+
+    const userData =
+        userSnapshot.docs[0].data();
+
+    currentUserData = userData;
+
+    if (userData.status === "disabled") {
+
+        showMessage(
+            "error",
+            "Your account is disabled."
+        );
+
+        return false;
+    }
+
+
+    /* PRINCIPAL */
+
+    if (userData.role === "principal") {
+
+        pageAuthorized = true;
+        return true;
+    }
+
+
+    /* ELECTION COMMISSION */
+
+    if (userData.role !== "election_commission") {
+
+        showMessage(
+            "error",
+            "You are not authorized to access Voter Management."
+        );
+
+        return false;
+    }
+
+
+    const ecRef =
+        doc(db, "ElectionCommission", user.uid);
+
+    const ecSnapshot =
+        await getDocs(
+            query(
+                collection(db, "ElectionCommission"),
+                where("__name__", "==", user.uid)
+            )
+        );
+
+    if (ecSnapshot.empty) {
+
+        showMessage(
+            "error",
+            "Your Election Commission profile could not be found."
+        );
+
+        return false;
+    }
+
+    const ecData =
+        ecSnapshot.docs[0].data();
+
+    if (ecData.status !== "active") {
+
+        showMessage(
+            "error",
+            "Your Election Commission account is disabled."
+        );
+
+        return false;
+    }
+
+    const duties =
+        Array.isArray(ecData.duties)
+            ? ecData.duties
+            : [];
+
+    if (!duties.includes("Voter Management")) {
+
+        showMessage(
+            "error",
+            "You do not have the Voter Management duty."
+        );
+
+        return false;
+    }
+
+    pageAuthorized = true;
+
+    return true;
+}
+
+
+/* =====================================================
+   PRIVATE VOTER VERIFICATION INDEX
+===================================================== */
+
+function normalizeVerificationValue(value) {
+    return String(value ?? "").trim();
+}
+
+async function createVerificationId(electionId, rollNumber) {
+    const input = `${electionId}:${normalizeVerificationValue(rollNumber)}`;
+    const bytes = new TextEncoder().encode(input);
+    const hash = await crypto.subtle.digest("SHA-256", bytes);
+    return [...new Uint8Array(hash)]
+        .map(byte => byte.toString(16).padStart(2, "0"))
+        .join("");
+}
+async function createVerificationHash(value) {
+
+    const normalized =
+        normalizeVerificationValue(value);
+
+    const bytes =
+        new TextEncoder().encode(normalized);
+
+    const hash =
+        await crypto.subtle.digest(
+            "SHA-256",
+            bytes
+        );
+
+    return [...new Uint8Array(hash)]
+        .map(byte =>
+            byte.toString(16).padStart(2, "0")
+        )
+        .join("");
+}
+async function syncVoterVerification(voter) {
+
+    if (!voter?.id || !voter.electionId) {
+        return;
+    }
+
+    const verificationId =
+        await createVerificationId(
+            voter.electionId,
+            voter.rollNumber
+        );
+
+    /*
+     * PRIVATE verification record.
+     * Contains the official voter information.
+     * This is used by the secure NominationApplications
+     * Firestore rule.
+     */
+    await setDoc(
+        doc(
+            db,
+            "VoterVerification",
+            verificationId
+        ),
+        {
+            electionId:
+                voter.electionId,
+
+            voterId:
+                voter.id,
+
+            rollNumber:
+                String(
+                    voter.rollNumber || ""
+                ).trim(),
+
+            name:
+                String(
+                    voter.name || ""
+                ).trim(),
+
+            className:
+                String(
+                    voter.className || ""
+                ).trim(),
+
+            section:
+                String(
+                    voter.section || ""
+                ).trim(),
+
+            eligible:
+    voter.eligible === true,
+
+syncedBy:
+    currentUser.uid,
+
+syncedAt:
+    serverTimestamp(),
+
+updatedAt:
+    serverTimestamp()
+        },
+        {
+    merge: false
+}
+    );
+
+    /*
+     * PUBLIC-SAFE verification record.
+     *
+     * Only Name + Roll Number hashes and eligibility
+     * are required for student verification.
+     *
+     * Class and Section are intentionally NOT stored
+     * here because they are not eligibility criteria.
+     */
+    await setDoc(
+        doc(
+            db,
+            "PublicVoterVerification",
+            verificationId
+        ),
+        {
+            electionId:
+                voter.electionId,
+
+            rollNumberHash:
+                await createVerificationHash(
+                    voter.rollNumber
+                ),
+
+            nameHash:
+                await createVerificationHash(
+                    voter.name
+                ),
+
+            eligible:
+                voter.eligible === true,
+
+            updatedAt:
+                serverTimestamp()
+        },
+        {
+            merge: true
+        }
+    );
+}
+
+async function syncAllVoterVerificationRecords() {
+
+    if (!currentElectionId) {
+        return;
+    }
+
+    for (const voter of voters) {
+        await syncVoterVerification(voter);
+    }
+}
+
+/* =====================================================
+   LOAD ELECTIONS
+===================================================== */
+
+async function loadElections() {
+
+    electionSelect.innerHTML =
+        `<option value="">Loading elections...</option>`;
+
+    try {
+
+        const snapshot =
+            await getDocs(collection(db, "Elections"));
+
+        electionSelect.innerHTML =
+            `<option value="">Select an election</option>`;
+
+        const elections = [];
+
+        snapshot.forEach((documentSnapshot) => {
+
+            const data =
+                documentSnapshot.data();
+
+            elections.push({
+                id: documentSnapshot.id,
+                ...data
+            });
+
+        });
+
+        elections.sort((a, b) => {
+
+            const first =
+                (a.electionName || "").toLowerCase();
+
+            const second =
+                (b.electionName || "").toLowerCase();
+
+            return first.localeCompare(second);
+        });
+
+        elections.forEach((election) => {
+
+            const option =
+                document.createElement("option");
+
+            option.value = election.id;
+
+            option.textContent =
+                election.electionName ||
+                "Unnamed Election";
+
+            electionSelect.appendChild(option);
+        });
+
+        if (elections.length === 0) {
+
+            electionInfo.textContent =
+                "No elections have been created yet.";
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        electionSelect.innerHTML =
+            `<option value="">Unable to load elections</option>`;
+
+        showMessage(
+            "error",
+            "Could not load elections. Please try again."
+        );
+    }
+}
+
+
+/* =====================================================
+   ELECTION SELECTION
+===================================================== */
+
+async function selectElection(electionId) {
+
+    currentElectionId = electionId;
+    currentElection = null;
+    voters = [];
+
+    resetFilters();
+    resetSummary();
+    renderVoters();
+
+    if (!electionId) {
+
+        electionInfo.textContent = "";
+
+        setManagementControls(false);
+
+        return;
+    }
+
+    try {
+
+        const electionSnapshot =
+            await getDocs(
+                query(
+                    collection(db, "Elections"),
+                    where("__name__", "==", electionId)
+                )
+            );
+
+        if (electionSnapshot.empty) {
+
+            showMessage(
+                "error",
+                "Selected election could not be found."
+            );
+
+            return;
+        }
+
+        currentElection = {
+            id: electionId,
+            ...electionSnapshot.docs[0].data()
+        };
+
+        updateElectionInformation();
+
+        await loadVoters();
+
+        updateLockState();
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            "error",
+            "Could not load the selected election."
+        );
+    }
+}
+
+
+/* =====================================================
+   ELECTION INFORMATION
+===================================================== */
+
+function updateElectionInformation() {
+
+    if (!currentElection) {
+
+        electionInfo.textContent = "";
+        return;
+    }
+
+    const status =
+        formatElectionStatus(
+            currentElection.status
+        );
+
+    electionInfo.textContent =
+        `Status: ${status}`;
+
+    if (currentElection.academicSession) {
+
+        electionInfo.textContent +=
+            ` | Academic Session: ${currentElection.academicSession}`;
+    }
+}
+
+
+/* =====================================================
+   ELECTION STATUS
+===================================================== */
+
+function formatElectionStatus(status) {
+
+    const statuses = {
+
+        draft: "Draft",
+
+        finalized: "Finalized",
+
+        voting_active: "Voting Active",
+
+        voting_stopped: "Voting Stopped",
+
+        closed: "Closed"
+    };
+
+    return statuses[status] || status || "Unknown";
+}
+
+
+/* =====================================================
+   VOTER LIST LOCK STATE
+===================================================== */
+
+function isVoterListLocked() {
+
+    if (!currentElection) {
+        return true;
+    }
+
+    return currentElection.voterListFinalized === true
+        ||
+        currentElection.status === "voting_active"
+        ||
+        currentElection.status === "voting_stopped"
+        ||
+        currentElection.status === "closed";
+}
+
+
+function updateLockState() {
+
+    if (!currentElection) {
+
+        lockMessage.style.display = "none";
+
+        setManagementControls(false);
+
+        return;
+    }
+
+    const locked =
+        isVoterListLocked();
+
+    if (
+        currentElection.voterListFinalized === true
+    ) {
+
+        lockMessage.textContent =
+            "This voter list has been finalized and is now locked. Voter information and eligibility can no longer be changed.";
+
+        lockMessage.style.display = "block";
+
+    } else if (
+        currentElection.status === "voting_active"
+        ||
+        currentElection.status === "voting_stopped"
+        ||
+        currentElection.status === "closed"
+    ) {
+
+        lockMessage.textContent =
+            "Voting has started or the election has progressed beyond voter-list preparation. Voter information can no longer be changed.";
+
+        lockMessage.style.display = "block";
+
+    } else {
+
+        lockMessage.style.display = "none";
+    }
+
+    setManagementControls(!locked);
+}
+
+
+function setManagementControls(enabled) {
+
+    uploadBtn.disabled =
+        !enabled || !currentElectionId;
+
+    addVoterBtn.disabled =
+        !enabled || !currentElectionId;
+
+    validateBtn.disabled =
+        !currentElectionId;
+
+    exportBtn.disabled =
+        !currentElectionId;
+
+    finalizeBtn.disabled =
+        !enabled ||
+        !currentElectionId ||
+        voters.length === 0 ||
+        currentElection?.voterListFinalized === true;
+}
+
+
+/* =====================================================
+   LOAD VOTERS
+===================================================== */
+
+async function loadVoters() {
+
+    if (!currentElectionId) {
+
+        voters = [];
+        renderVoters();
+        return;
+    }
+
+    try {
+
+        const voterQuery =
+            query(
+                collection(db, "Voters"),
+                where(
+                    "electionId",
+                    "==",
+                    currentElectionId
+                )
+            );
+
+        const snapshot =
+            await getDocs(voterQuery);
+
+        voters = [];
+
+        snapshot.forEach((documentSnapshot) => {
+
+            voters.push({
+                id: documentSnapshot.id,
+                ...documentSnapshot.data()
+            });
+
+        });
+
+        voters.sort((a, b) => {
+
+            return String(a.rollNumber || "")
+                .localeCompare(
+                    String(b.rollNumber || ""),
+                    undefined,
+                    {
+                        numeric: true,
+                        sensitivity: "base"
+                    }
+                );
+        });
+
+        updateSummary();
+        populateFilters();
+        renderVoters();
+
+        setManagementControls(!isVoterListLocked());
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            "error",
+            "Could not load voters for this election."
+        );
+    }
+}
+
+
+/* =====================================================
+   SUMMARY
+===================================================== */
+
+function resetSummary() {
+
+    totalVoters.textContent = "0";
+    eligibleVoters.textContent = "0";
+    notEligibleVoters.textContent = "0";
+    votedVoters.textContent = "0";
+    notVotedVoters.textContent = "0";
+}
+
+
+function updateSummary() {
+
+    const total =
+        voters.length;
+
+    const eligible =
+        voters.filter(
+            voter => voter.eligible === true
+        ).length;
+
+    const notEligible =
+        voters.filter(
+            voter => voter.eligible !== true
+        ).length;
+
+    const voted =
+        voters.filter(
+            voter =>
+                voter.participationStatus === "voted"
+        ).length;
+
+    const notVoted =
+        voters.filter(
+            voter =>
+                voter.participationStatus !== "voted"
+        ).length;
+
+    totalVoters.textContent = total;
+    eligibleVoters.textContent = eligible;
+    notEligibleVoters.textContent = notEligible;
+    votedVoters.textContent = voted;
+    notVotedVoters.textContent = notVoted;
+}
+
+
+/* =====================================================
+   FILTERS
+===================================================== */
+
+function resetFilters() {
+
+    searchInput.value = "";
+    classFilter.value = "";
+    sectionFilter.value = "";
+    statusFilter.value = "";
+
+    classFilter.innerHTML =
+        `<option value="">All Classes</option>`;
+
+    sectionFilter.innerHTML =
+        `<option value="">All Sections</option>`;
+}
+
+
+function populateFilters() {
+
+    const classes =
+        [...new Set(
+            voters
+                .map(voter => voter.className)
+                .filter(Boolean)
+        )]
+        .sort();
+
+    const sections =
+        [...new Set(
+            voters
+                .map(voter => voter.section)
+                .filter(Boolean)
+        )]
+        .sort();
+
+    classFilter.innerHTML =
+        `<option value="">All Classes</option>`;
+
+    sectionFilter.innerHTML =
+        `<option value="">All Sections</option>`;
+
+    classes.forEach(className => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = className;
+        option.textContent = className;
+
+        classFilter.appendChild(option);
+    });
+
+    sections.forEach(section => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = section;
+        option.textContent = section;
+
+        sectionFilter.appendChild(option);
+    });
+}
+
+
+/* =====================================================
+   FILTERED VOTERS
+===================================================== */
+
+function getFilteredVoters() {
+
+    const search =
+        searchInput.value
+            .trim()
+            .toLowerCase();
+
+    const selectedClass =
+        classFilter.value;
+
+    const selectedSection =
+        sectionFilter.value;
+
+    const selectedStatus =
+        statusFilter.value;
+
+    return voters.filter(voter => {
+
+        const matchesSearch =
+            !search
+            ||
+            String(voter.name || "")
+                .toLowerCase()
+                .includes(search)
+            ||
+            String(voter.rollNumber || "")
+                .toLowerCase()
+                .includes(search);
+
+        const matchesClass =
+            !selectedClass
+            ||
+            voter.className === selectedClass;
+
+        const matchesSection =
+            !selectedSection
+            ||
+            voter.section === selectedSection;
+
+        let matchesStatus = true;
+
+        if (selectedStatus === "eligible") {
+
+            matchesStatus =
+                voter.eligible === true;
+
+        } else if (
+            selectedStatus === "not_eligible"
+        ) {
+
+            matchesStatus =
+                voter.eligible !== true;
+
+        } else if (
+            selectedStatus === "voted"
+        ) {
+
+            matchesStatus =
+                voter.participationStatus === "voted";
+
+        } else if (
+            selectedStatus === "not_voted"
+        ) {
+
+            matchesStatus =
+                voter.participationStatus !== "voted";
+        }
+
+        return (
+            matchesSearch
+            &&
+            matchesClass
+            &&
+            matchesSection
+            &&
+            matchesStatus
+        );
+    });
+}
+
+
+/* =====================================================
+   HTML ESCAPE
+===================================================== */
+
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+/* =====================================================
+   RENDER TABLE
+===================================================== */
+
+function renderVoters() {
+
+    const filtered =
+        getFilteredVoters();
+
+    voterTableBody.innerHTML = "";
+
+    if (filtered.length === 0) {
+
+        emptyState.style.display = "block";
+
+        return;
+    }
+
+    emptyState.style.display = "none";
+
+    filtered.forEach(voter => {
+
+        const row =
+            document.createElement("tr");
+
+        const eligibilityBadge =
+            voter.eligible === true
+                ? `<span class="badge badge-eligible">Eligible</span>`
+                : `<span class="badge badge-not-eligible">Not Eligible</span>`;
+
+        const participationBadge =
+            voter.participationStatus === "voted"
+                ? `<span class="badge badge-voted">Voted</span>`
+                : `<span class="badge badge-not-voted">Not Voted</span>`;
+
+        const actionButton =
+            isVoterListLocked()
+                ? `<button
+                       class="action-btn"
+                       data-action="view"
+                       data-id="${escapeHtml(voter.id)}"
+                   >
+                       View
+                   </button>`
+                : `<button
+                       class="action-btn"
+                       data-action="edit"
+                       data-id="${escapeHtml(voter.id)}"
+                   >
+                       Edit
+                   </button>`;
+
+        row.innerHTML = `
+            <td>${escapeHtml(voter.name)}</td>
+            <td>${escapeHtml(voter.rollNumber)}</td>
+            <td>${escapeHtml(voter.className)}</td>
+            <td>${escapeHtml(voter.section)}</td>
+            <td>${eligibilityBadge}</td>
+            <td>${participationBadge}</td>
+            <td>${actionButton}</td>
+        `;
+
+        voterTableBody.appendChild(row);
+    });
+}
+
+
+/* =====================================================
+   VALIDATE CURRENT LIST
+===================================================== */
+
+function validateCurrentVoterList() {
+
+    const errors = [];
+
+    const rollNumbers =
+        new Set();
+
+    voters.forEach((voter, index) => {
+
+        const rowNumber =
+            index + 1;
+
+        const name =
+            String(voter.name || "").trim();
+
+        const roll =
+            String(voter.rollNumber || "").trim();
+
+        const className =
+            String(voter.className || "").trim();
+
+        const section =
+            String(voter.section || "").trim();
+
+        if (!name) {
+
+            errors.push(
+                `Row ${rowNumber}: Student name is missing.`
+            );
+        }
+
+        if (!roll) {
+
+            errors.push(
+                `Row ${rowNumber}: Roll number is missing.`
+            );
+        }
+
+        if (!className) {
+
+            errors.push(
+                `Row ${rowNumber}: Class is missing.`
+            );
+        }
+
+        if (!section) {
+
+            errors.push(
+                `Row ${rowNumber}: Section is missing.`
+            );
+        }
+
+        if (
+            typeof voter.eligible !== "boolean"
+        ) {
+
+            errors.push(
+                `Row ${rowNumber}: Eligibility value is invalid.`
+            );
+        }
+
+        if (roll) {
+
+            const normalizedRoll =
+                roll.toLowerCase();
+
+            if (
+                rollNumbers.has(normalizedRoll)
+            ) {
+
+                errors.push(
+                    `Row ${rowNumber}: Duplicate roll number "${roll}".`
+                );
+
+            } else {
+
+                rollNumbers.add(normalizedRoll);
+            }
+        }
+
+    });
+
+    if (voters.length === 0) {
+
+        errors.push(
+            "The voter list is empty."
+        );
+    }
+
+    if (errors.length > 0) {
+
+        showMessage(
+            "error",
+            `Validation failed. ${errors.length} issue(s) found.`
+        );
+
+        alert(
+            "Voter list validation failed:\n\n"
+            +
+            errors.slice(0, 20).join("\n")
+            +
+            (
+                errors.length > 20
+                    ? "\n\nOnly the first 20 issues are shown."
+                    : ""
+            )
+        );
+
+        return false;
+    }
+
+    showMessage(
+        "success",
+        "Voter list validation completed successfully. No validation errors were found."
+    );
+
+    return true;
+}
+
+
+/* =====================================================
+   ADD VOTER
+===================================================== */
+
+function openAddVoterModal() {
+
+    if (isVoterListLocked()) {
+
+        showMessage(
+            "error",
+            "The voter list is locked."
+        );
+
+        return;
+    }
+
+    editingVoterId = null;
+
+    document.getElementById("voterModalTitle")
+        .textContent = "Add Voter";
+
+    document.getElementById("studentName")
+        .value = "";
+
+    document.getElementById("rollNumber")
+        .value = "";
+
+    document.getElementById("rollNumber")
+        .disabled = false;
+
+    document.getElementById("className")
+        .value = "";
+
+    document.getElementById("section")
+        .value = "";
+
+    document.getElementById("eligibility")
+        .value = "eligible";
+
+    document.getElementById("eligibilityReason")
+        .value = "";
+
+    document.getElementById("votingStatusDisplay")
+        .value = "Not Voted";
+
+    document.getElementById("voterModal")
+        .classList.add("show");
+}
+
+
+/* =====================================================
+   EDIT / VIEW VOTER
+===================================================== */
+
+function openVoter(voterId, readOnly = false) {
+
+    const voter =
+        voters.find(
+            item => item.id === voterId
+        );
+
+    if (!voter) {
+
+        showMessage(
+            "error",
+            "Voter record could not be found."
+        );
+
+        return;
+    }
+
+    editingVoterId =
+        voterId;
+
+    document.getElementById("voterModalTitle")
+        .textContent =
+        readOnly
+            ? "Voter Details"
+            : "Edit Voter";
+
+    document.getElementById("studentName")
+        .value = voter.name || "";
+
+    document.getElementById("rollNumber")
+        .value = voter.rollNumber || "";
+
+    document.getElementById("rollNumber")
+        .disabled = true;
+
+    document.getElementById("className")
+        .value = voter.className || "";
+
+    document.getElementById("section")
+        .value = voter.section || "";
+
+    document.getElementById("eligibility")
+        .value =
+        voter.eligible === true
+            ? "eligible"
+            : "not_eligible";
+
+    document.getElementById("eligibilityReason")
+        .value =
+        voter.eligibilityReason || "";
+
+    document.getElementById("votingStatusDisplay")
+        .value =
+        voter.participationStatus === "voted"
+            ? "Voted"
+            : "Not Voted";
+
+    const formFields = [
+        "studentName",
+        "className",
+        "section",
+        "eligibility",
+        "eligibilityReason"
+    ];
+
+    formFields.forEach(id => {
+
+        document.getElementById(id)
+            .disabled = readOnly;
+    });
+
+    document.getElementById("saveVoterBtn")
+        .style.display =
+        readOnly
+            ? "none"
+            : "inline-block";
+
+    document.getElementById("voterModal")
+        .classList.add("show");
+}
+
+
+/* =====================================================
+   SAVE MANUAL VOTER
+===================================================== */
+
+async function saveVoter(event) {
+
+    event.preventDefault();
+
+    if (!currentElectionId) {
+
+        showMessage(
+            "error",
+            "Please select an election first."
+        );
+
+        return;
+    }
+
+    if (isVoterListLocked()) {
+
+        showMessage(
+            "error",
+            "The voter list is locked."
+        );
+
+        return;
+    }
+
+    const name =
+        document.getElementById("studentName")
+            .value.trim();
+
+    const rollNumber =
+        document.getElementById("rollNumber")
+            .value.trim();
+
+    const className =
+        document.getElementById("className")
+            .value.trim();
+
+    const section =
+        document.getElementById("section")
+            .value.trim();
+
+    const eligibility =
+        document.getElementById("eligibility")
+            .value;
+
+    const eligibilityReason =
+        document.getElementById("eligibilityReason")
+            .value.trim();
+
+    if (
+        !name ||
+        !rollNumber ||
+        !className ||
+        !section
+    ) {
+
+        showMessage(
+            "error",
+            "Please complete all required voter fields."
+        );
+
+        return;
+    }
+
+    const normalizedRoll =
+        rollNumber.toLowerCase();
+
+    const duplicate =
+        voters.some(voter => {
+
+            if (
+                editingVoterId
+                &&
+                voter.id === editingVoterId
+            ) {
+                return false;
+            }
+
+            return String(voter.rollNumber || "")
+                .trim()
+                .toLowerCase()
+                === normalizedRoll;
+        });
+
+    if (duplicate) {
+
+        showMessage(
+            "error",
+            "A voter with this roll number already exists in the selected election."
+        );
+
+        return;
+    }
+
+    const eligible =
+        eligibility === "eligible";
+
+    try {
+
+        const saveButton =
+            document.getElementById("saveVoterBtn");
+
+        saveButton.disabled = true;
+
+        if (editingVoterId) {
+
+            const voterRef =
+                doc(
+                    db,
+                    "Voters",
+                    editingVoterId
+                );
+
+            await updateDoc(
+                voterRef,
+                {
+                    name,
+                    className,
+                    section,
+                    eligible,
+                    eligibilityReason,
+                    updatedAt: serverTimestamp()
+                }
+            );
+
+            showMessage(
+                "success",
+                "Voter information updated successfully."
+            );
+
+        } else {
+
+            await addDoc(
+                collection(db, "Voters"),
+                {
+                    electionId: currentElectionId,
+                    name,
+                    rollNumber,
+                    className,
+                    section,
+                    eligible,
+                    eligibilityReason,
+                    participationStatus: "not_voted",
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                }
+            );
+
+            showMessage(
+                "success",
+                "Voter added successfully."
+            );
+        }
+
+        closeVoterModal();
+
+        await loadVoters();
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            "error",
+            "Could not save the voter. Please check your permissions and try again."
+        );
+
+    } finally {
+
+        document.getElementById("saveVoterBtn")
+            .disabled = false;
+    }
+}
+
+
+/* =====================================================
+   UPLOAD HELPERS
+===================================================== */
+
+function normalizeHeader(header) {
+
+    return String(header || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[\s_-]+/g, "");
+}
+
+
+function normalizeEligibility(value) {
+
+    const normalized =
+        String(value || "")
+            .trim()
+            .toLowerCase();
+
+    if (
+        normalized === "eligible"
+        ||
+        normalized === "yes"
+        ||
+        normalized === "true"
+        ||
+        normalized === "1"
+    ) {
+
+        return true;
+    }
+
+    if (
+        normalized === "not eligible"
+        ||
+        normalized === "noteligible"
+        ||
+        normalized === "no"
+        ||
+        normalized === "false"
+        ||
+        normalized === "0"
+    ) {
+
+        return false;
+    }
+
+    return null;
+}
+
+
+/* =====================================================
+   READ UPLOAD FILE
+===================================================== */
+
+async function processUploadFile(file) {
+
+    uploadRows = [];
+    uploadErrors = [];
+
+    if (!file) {
+        return;
+    }
+
+    try {
+
+        const arrayBuffer =
+            await file.arrayBuffer();
+
+        const workbook =
+            XLSX.read(
+                arrayBuffer,
+                {
+                    type: "array"
+                }
+            );
+
+        if (
+            !workbook.SheetNames
+            ||
+            workbook.SheetNames.length === 0
+        ) {
+
+            throw new Error(
+                "The uploaded file does not contain a worksheet."
+            );
+        }
+
+        const worksheet =
+            workbook.Sheets[
+                workbook.SheetNames[0]
+            ];
+
+        const rawRows =
+            XLSX.utils.sheet_to_json(
+                worksheet,
+                {
+                    defval: ""
+                }
+            );
+
+        if (rawRows.length === 0) {
+
+            throw new Error(
+                "The uploaded file contains no data rows."
+            );
+        }
+
+        const firstRow =
+            rawRows[0];
+
+        const headerMap = {};
+
+        Object.keys(firstRow).forEach(header => {
+
+            headerMap[
+                normalizeHeader(header)
+            ] = header;
+        });
+
+        const requiredHeaders = [
+            "studentname",
+            "rollnumber",
+            "class",
+            "section",
+            "eligibility"
+        ];
+
+        const missingHeaders =
+            requiredHeaders.filter(
+                header => !headerMap[header]
+            );
+
+        if (missingHeaders.length > 0) {
+
+            throw new Error(
+                "Missing required column(s): "
+                +
+                missingHeaders.join(", ")
+            );
+        }
+
+
+        const existingRollNumbers =
+            new Set(
+                voters.map(
+                    voter =>
+                        String(voter.rollNumber || "")
+                            .trim()
+                            .toLowerCase()
+                )
+            );
+
+        const fileRollNumbers =
+            new Set();
+
+        rawRows.forEach((row, index) => {
+
+            const rowNumber =
+                index + 2;
+
+            const name =
+                String(
+                    row[headerMap.studentname] || ""
+                ).trim();
+
+            const rollNumber =
+                String(
+                    row[headerMap.rollnumber] || ""
+                ).trim();
+
+            const className =
+                String(
+                    row[headerMap.class] || ""
+                ).trim();
+
+            const section =
+                String(
+                    row[headerMap.section] || ""
+                ).trim();
+
+            const eligibilityValue =
+                row[headerMap.eligibility];
+
+            const eligible =
+                normalizeEligibility(
+                    eligibilityValue
+                );
+
+            if (!name) {
+
+                uploadErrors.push(
+                    `Row ${rowNumber}: Student name is missing.`
+                );
+            }
+
+            if (!rollNumber) {
+
+                uploadErrors.push(
+                    `Row ${rowNumber}: Roll number is missing.`
+                );
+            }
+
+            if (!className) {
+
+                uploadErrors.push(
+                    `Row ${rowNumber}: Class is missing.`
+                );
+            }
+
+            if (!section) {
+
+                uploadErrors.push(
+                    `Row ${rowNumber}: Section is missing.`
+                );
+            }
+
+            if (eligible === null) {
+
+                uploadErrors.push(
+                    `Row ${rowNumber}: Eligibility must be Eligible or Not Eligible.`
+                );
+            }
+
+            const normalizedRoll =
+                rollNumber.toLowerCase();
+
+            if (rollNumber) {
+
+                if (
+                    fileRollNumbers.has(normalizedRoll)
+                ) {
+
+                    uploadErrors.push(
+                        `Row ${rowNumber}: Duplicate roll number "${rollNumber}" in uploaded file.`
+                    );
+
+                } else {
+
+                    fileRollNumbers.add(
+                        normalizedRoll
+                    );
+                }
+
+                if (
+                    existingRollNumbers.has(
+                        normalizedRoll
+                    )
+                ) {
+
+                    uploadErrors.push(
+                        `Row ${rowNumber}: Roll number "${rollNumber}" already exists in this election.`
+                    );
+                }
+            }
+
+            if (
+                name
+                &&
+                rollNumber
+                &&
+                className
+                &&
+                section
+                &&
+                eligible !== null
+                &&
+                !uploadErrors.some(
+                    error =>
+                        error.startsWith(
+                            `Row ${rowNumber}:`
+                        )
+                )
+            ) {
+
+                uploadRows.push({
+
+                    electionId:
+                        currentElectionId,
+
+                    name,
+
+                    rollNumber,
+
+                    className,
+
+                    section,
+
+                    eligible,
+
+                    eligibilityReason:
+                        eligible
+                            ? ""
+                            : "Marked Not Eligible in voter list.",
+
+                    participationStatus:
+                        "not_voted"
+                });
+            }
+        });
+
+        renderUploadPreview();
+
+    } catch (error) {
+
+        console.error(error);
+
+        uploadRows = [];
+        uploadErrors = [];
+
+        document.getElementById(
+            "uploadValidationSummary"
+        ).className =
+            "validation-summary show";
+
+        document.getElementById(
+            "uploadValidationSummary"
+        ).innerHTML =
+            `<strong>File Error</strong>${escapeHtml(error.message)}`;
+
+        document.getElementById(
+            "previewContainer"
+        ).style.display = "none";
+
+        document.getElementById(
+            "previewErrors"
+        ).textContent = "";
+
+        document.getElementById(
+            "saveUploadedVotersBtn"
+        ).disabled = true;
+    }
+}
+
+
+/* =====================================================
+   UPLOAD PREVIEW
+===================================================== */
+
+function renderUploadPreview() {
+
+    const summary =
+        document.getElementById(
+            "uploadValidationSummary"
+        );
+
+    const preview =
+        document.getElementById(
+            "previewContainer"
+        );
+
+    const errors =
+        document.getElementById(
+            "previewErrors"
+        );
+
+    summary.className =
+        "validation-summary show";
+
+    summary.innerHTML = `
+        <strong>Import Validation</strong>
+        Total valid rows: ${uploadRows.length}<br>
+        Errors found: ${uploadErrors.length}
+    `;
+
+    if (uploadRows.length > 0) {
+
+        let html = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Roll Number</th>
+                        <th>Class</th>
+                        <th>Section</th>
+                        <th>Eligibility</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        uploadRows
+            .slice(0, 100)
+            .forEach(row => {
+
+                html += `
+                    <tr>
+                        <td>${escapeHtml(row.name)}</td>
+                        <td>${escapeHtml(row.rollNumber)}</td>
+                        <td>${escapeHtml(row.className)}</td>
+                        <td>${escapeHtml(row.section)}</td>
+                        <td>
+                            ${
+                                row.eligible
+                                    ? "Eligible"
+                                    : "Not Eligible"
+                            }
+                        </td>
+                    </tr>
+                `;
+            });
+
+        html += `
+                </tbody>
+            </table>
+        `;
+
+        preview.innerHTML = html;
+        preview.style.display = "block";
+
+    } else {
+
+        preview.innerHTML = "";
+        preview.style.display = "none";
+    }
+
+
+    if (uploadErrors.length > 0) {
+
+        errors.innerHTML =
+            "<strong>Errors:</strong><br>"
+            +
+            uploadErrors
+                .slice(0, 30)
+                .map(error =>
+                    escapeHtml(error)
+                )
+                .join("<br>")
+            +
+            (
+                uploadErrors.length > 30
+                    ? "<br>Only the first 30 errors are shown."
+                    : ""
+            );
+
+    } else {
+
+        errors.innerHTML =
+            "<strong style='color:#2e7d32;'>No import errors found.</strong>";
+    }
+
+
+    document.getElementById(
+        "saveUploadedVotersBtn"
+    ).disabled =
+        uploadRows.length === 0
+        ||
+        uploadErrors.length > 0;
+}
+
+
+/* =====================================================
+   SAVE UPLOADED VOTERS
+===================================================== */
+
+async function saveUploadedVoters() {
+
+    if (
+        uploadRows.length === 0
+        ||
+        uploadErrors.length > 0
+    ) {
+
+        showMessage(
+            "error",
+            "The uploaded list cannot be saved until all validation errors are resolved."
+        );
+
+        return;
+    }
+
+    if (
+        !currentElectionId
+        ||
+        isVoterListLocked()
+    ) {
+
+        showMessage(
+            "error",
+            "The voter list cannot be modified."
+        );
+
+        return;
+    }
+
+    const saveButton =
+        document.getElementById(
+            "saveUploadedVotersBtn"
+        );
+
+    saveButton.disabled = true;
+
+    try {
+
+        /*
+         * Firestore batch writes are used so the import
+         * is much safer than writing every voter separately.
+         *
+         * Firestore batch limit is 500 operations.
+         */
+
+        const chunks = [];
+
+        for (
+            let i = 0;
+            i < uploadRows.length;
+            i += 500
+        ) {
+
+            chunks.push(
+                uploadRows.slice(
+                    i,
+                    i + 500
+                )
+            );
+        }
+
+        for (const chunk of chunks) {
+
+            const batch =
+                writeBatch(db);
+
+            chunk.forEach(row => {
+
+                const voterRef =
+                    doc(
+                        collection(
+                            db,
+                            "Voters"
+                        )
+                    );
+
+                batch.set(
+                    voterRef,
+                    {
+                        electionId:
+                            currentElectionId,
+
+                        name:
+                            row.name,
+
+                        rollNumber:
+                            row.rollNumber,
+
+                        className:
+                            row.className,
+
+                        section:
+                            row.section,
+
+                        eligible:
+                            row.eligible,
+
+                        eligibilityReason:
+                            row.eligibilityReason,
+
+                        participationStatus:
+                            "not_voted",
+
+                        createdAt:
+                            serverTimestamp(),
+
+                        updatedAt:
+                            serverTimestamp()
+                    }
+                );
+            });
+
+            await batch.commit();
+        }
+
+        showMessage(
+            "success",
+            `${uploadRows.length} voter(s) imported successfully.`
+        );
+
+        closeUploadModal();
+
+        await loadVoters();
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            "error",
+            "The voter list could not be imported."
+        );
+
+    } finally {
+
+        saveButton.disabled = false;
+    }
+}
+
+
+/* =====================================================
+   FINALIZATION
+===================================================== */
+
+function openFinalizeModal() {
+
+    if (!currentElectionId) {
+
+        showMessage(
+            "error",
+            "Please select an election first."
+        );
+
+        return;
+    }
+
+    if (voters.length === 0) {
+
+        showMessage(
+            "error",
+            "You cannot finalize an empty voter list."
+        );
+
+        return;
+    }
+
+    if (currentElection.voterListFinalized === true) {
+
+        showMessage(
+            "error",
+            "The voter list is already finalized."
+        );
+
+        return;
+    }
+
+    if (isVoterListLocked()) {
+
+        showMessage(
+            "error",
+            "The voter list cannot be finalized at this stage."
+        );
+
+        return;
+    }
+
+    document.getElementById(
+        "finalizeModal"
+    ).classList.add("show");
+}
+
+
+async function finalizeVoterList() {
+
+    if (!currentElectionId) {
+        return;
+    }
+
+    if (
+        !validateCurrentVoterList()
+    ) {
+
+        return;
+    }
+
+    if (
+        currentElection.voterListFinalized === true
+    ) {
+
+        return;
+    }
+
+    const button =
+        document.getElementById(
+            "confirmFinalizeBtn"
+        );
+
+    button.disabled = true;
+
+    try {
+
+        // Ensure every official voter has a synchronized private verification record before locking the list.
+        await syncAllVoterVerificationRecords();
+
+        const electionRef =
+            doc(
+                db,
+                "Elections",
+                currentElectionId
+            );
+
+        await updateDoc(
+            electionRef,
+            {
+                voterListFinalized: true,
+
+                voterListFinalizedBy:
+                    currentUser.uid,
+
+                voterListFinalizedAt:
+                    serverTimestamp(),
+
+                updatedBy:
+                    currentUser.uid,
+
+                updatedAt:
+                    serverTimestamp()
+            }
+        );
+
+        currentElection.voterListFinalized =
+            true;
+
+        currentElection.voterListFinalizedBy =
+            currentUser.uid;
+
+        closeFinalizeModal();
+
+        updateLockState();
+
+        renderVoters();
+
+        showMessage(
+            "success",
+            "The voter list has been finalized successfully and is now locked."
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            "error",
+            "The voter list could not be finalized."
+        );
+
+    } finally {
+
+        button.disabled = false;
+    }
+}
+
+
+/* =====================================================
+   EXPORT CSV
+===================================================== */
+
+function exportVoterList() {
+
+    if (!currentElectionId) {
+
+        showMessage(
+            "error",
+            "Please select an election first."
+        );
+
+        return;
+    }
+
+    if (voters.length === 0) {
+
+        showMessage(
+            "error",
+            "There are no voters to export."
+        );
+
+        return;
+    }
+
+    const headers = [
+        "Student Name",
+        "Roll Number",
+        "Class",
+        "Section",
+        "Eligibility",
+        "Voting Status"
+    ];
+
+    const rows =
+        voters.map(voter => [
+
+            voter.name || "",
+
+            voter.rollNumber || "",
+
+            voter.className || "",
+
+            voter.section || "",
+
+            voter.eligible === true
+                ? "Eligible"
+                : "Not Eligible",
+
+            voter.participationStatus === "voted"
+                ? "Voted"
+                : "Not Voted"
+        ]);
+
+    const csvRows = [
+        headers,
+        ...rows
+    ];
+
+    const csv =
+        csvRows
+            .map(row =>
+                row.map(value => {
+
+                    const text =
+                        String(value)
+                            .replace(/"/g, '""');
+
+                    return `"${text}"`;
+
+                }).join(",")
+            )
+            .join("\n");
+
+    const blob =
+        new Blob(
+            [csv],
+            {
+                type: "text/csv;charset=utf-8;"
+            }
+        );
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const link =
+        document.createElement("a");
+
+    link.href = url;
+
+    link.download =
+        `${
+            currentElection.electionName
+                || "election"
+        }_voter_list.csv`;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+}
+
+
+/* =====================================================
+   MODAL HELPERS
+===================================================== */
+
+function openUploadModal() {
+
+    if (
+        !currentElectionId
+        ||
+        isVoterListLocked()
+    ) {
+        return;
+    }
+
+    uploadRows = [];
+    uploadErrors = [];
+
+    document.getElementById(
+        "voterFile"
+    ).value = "";
+
+    document.getElementById(
+        "uploadValidationSummary"
+    ).className =
+        "validation-summary";
+
+    document.getElementById(
+        "uploadValidationSummary"
+    ).innerHTML = "";
+
+    document.getElementById(
+        "previewContainer"
+    ).innerHTML = "";
+
+    document.getElementById(
+        "previewContainer"
+    ).style.display = "none";
+
+    document.getElementById(
+        "previewErrors"
+    ).innerHTML = "";
+
+    document.getElementById(
+        "saveUploadedVotersBtn"
+    ).disabled = true;
+
+    document.getElementById(
+        "uploadModal"
+    ).classList.add("show");
+}
+
+
+function closeUploadModal() {
+
+    document.getElementById(
+        "uploadModal"
+    ).classList.remove("show");
+}
+
+
+function closeVoterModal() {
+
+    document.getElementById(
+        "voterModal"
+    ).classList.remove("show");
+
+    document.getElementById(
+        "voterForm"
+    ).reset();
+
+    document.getElementById(
+        "studentName"
+    ).disabled = false;
+
+    document.getElementById(
+        "className"
+    ).disabled = false;
+
+    document.getElementById(
+        "section"
+    ).disabled = false;
+
+    document.getElementById(
+        "eligibility"
+    ).disabled = false;
+
+    document.getElementById(
+        "eligibilityReason"
+    ).disabled = false;
+
+    document.getElementById(
+        "saveVoterBtn"
+    ).style.display = "inline-block";
+
+    editingVoterId = null;
+}
+
+
+function closeFinalizeModal() {
+
+    document.getElementById(
+        "finalizeModal"
+    ).classList.remove("show");
+}
+
+
+/* =====================================================
+   EVENT LISTENERS
+===================================================== */
+
+electionSelect.addEventListener(
+    "change",
+    async () => {
+
+        await selectElection(
+            electionSelect.value
+        );
+    }
+);
+
+
+searchInput.addEventListener(
+    "input",
+    renderVoters
+);
+
+
+classFilter.addEventListener(
+    "change",
+    renderVoters
+);
+
+
+sectionFilter.addEventListener(
+    "change",
+    renderVoters
+);
+
+
+statusFilter.addEventListener(
+    "change",
+    renderVoters
+);
+
+
+uploadBtn.addEventListener(
+    "click",
+    openUploadModal
+);
+
+
+addVoterBtn.addEventListener(
+    "click",
+    openAddVoterModal
+);
+
+
+validateBtn.addEventListener(
+    "click",
+    validateCurrentVoterList
+);
+
+
+exportBtn.addEventListener(
+    "click",
+    exportVoterList
+);
+
+
+finalizeBtn.addEventListener(
+    "click",
+    openFinalizeModal
+);
+
+
+document.getElementById(
+    "voterFile"
+).addEventListener(
+    "change",
+    async event => {
+
+        const file =
+            event.target.files[0];
+
+        if (file) {
+
+            await processUploadFile(file);
+        }
+    }
+);
+
+
+document.getElementById(
+    "saveUploadedVotersBtn"
+).addEventListener(
+    "click",
+    saveUploadedVoters
+);
+
+
+document.getElementById(
+    "closeUploadBtn"
+).addEventListener(
+    "click",
+    closeUploadModal
+);
+
+
+document.getElementById(
+    "cancelUploadBtn"
+).addEventListener(
+    "click",
+    closeUploadModal
+);
+
+
+document.getElementById(
+    "closeVoterModalBtn"
+).addEventListener(
+    "click",
+    closeVoterModal
+);
+
+
+document.getElementById(
+    "cancelVoterBtn"
+).addEventListener(
+    "click",
+    closeVoterModal
+);
+
+
+document.getElementById(
+    "voterForm"
+).addEventListener(
+    "submit",
+    saveVoter
+);
+
+
+document.getElementById(
+    "closeFinalizeBtn"
+).addEventListener(
+    "click",
+    closeFinalizeModal
+);
+
+
+document.getElementById(
+    "cancelFinalizeBtn"
+).addEventListener(
+    "click",
+    closeFinalizeModal
+);
+
+
+document.getElementById(
+    "confirmFinalizeBtn"
+).addEventListener(
+    "click",
+    finalizeVoterList
+);
+
+
+voterTableBody.addEventListener(
+    "click",
+    event => {
+
+        const button =
+            event.target.closest(
+                "button[data-action]"
+            );
+
+        if (!button) {
+            return;
+        }
+
+        const voterId =
+            button.dataset.id;
+
+        const action =
+            button.dataset.action;
+
+        if (action === "edit") {
+
+            openVoter(
+                voterId,
+                false
+            );
+
+        } else if (action === "view") {
+
+            openVoter(
+                voterId,
+                true
+            );
+        }
+    }
+);
+
+
+document.getElementById(
+    "backBtn"
+).addEventListener(
+    "click",
+    () => {
+
+        if (currentUserData?.role) {
+
+            window.location.href =
+                getDashboardForRole(
+                    currentUserData.role
+                );
+
+        } else {
+
+            window.location.href =
+                "ec-dashboard.html";
+        }
+    }
+);
+
+
+/* =====================================================
+   AUTH INITIALIZATION
+===================================================== */
+
+let authHandled = false;
+
+onAuthStateChanged(
+    auth,
+    async user => {
+
+        if (authHandled) {
+            return;
+        }
+
+        authHandled = true;
+
+        try {
+
+            const authorized =
+                await checkAccess(user);
+
+            if (!authorized) {
+
+                setTimeout(() => {
+
+                    if (
+                        currentUserData?.role === "principal"
+                        ||
+                        currentUserData?.role === "election_commission"
+                    ) {
+                        window.location.href =
+                            getDashboardForRole(
+                                currentUserData.role
+                            );
+                    } else {
+                        window.location.href =
+                            "login.html";
+                    }
+
+                }, 1200);
+
+                return;
+            }
+
+            await loadElections();
+
+        } catch (error) {
+
+            console.error(error);
+
+            showMessage(
+                "error",
+                "An error occurred while checking your access."
+            );
+        }
+    }
+);
+
+</script>
+
+</body>
+</html>

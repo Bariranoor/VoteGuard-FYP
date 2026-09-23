@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Accept Invitation
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            color: #222;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #1976d2;
+            color: white;
+            padding: 24px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0 0 6px;
+            font-size: 24px;
+        }
+
+        .header p {
+            margin: 0;
+            opacity: 0.92;
+            font-size: 13px;
+        }
+
+        .container {
+            max-width: 620px;
+            margin: 36px auto;
+            padding: 0 16px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.04);
+        }
+
+        .card h2 {
+            margin: 0 0 8px;
+            font-size: 21px;
+        }
+
+        .description {
+            margin: 0 0 20px;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        .message {
+            display: none;
+            padding: 12px 14px;
+            border-radius: 5px;
+            margin-bottom: 18px;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+        .message.error {
+            display: block;
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+
+        .message.success {
+            display: block;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+
+        .message.info {
+            display: block;
+            background: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #90caf9;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 7px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 0 2px rgba(25,118,210,.1);
+        }
+
+        .field-note {
+            font-size: 12px;
+            color: #777;
+            margin-top: 6px;
+            line-height: 1.45;
+        }
+
+        .btn {
+            width: 100%;
+            border: none;
+            border-radius: 5px;
+            background: #1976d2;
+            color: white;
+            padding: 11px 15px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #1565c0;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .secondary-btn {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: white;
+            color: #333;
+            padding: 10px 15px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .secondary-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .invitation-details {
+            display: none;
+            border: 1px solid #dfe5ec;
+            background: #f8fafc;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: 130px 1fr;
+            gap: 10px;
+            padding: 7px 0;
+            border-bottom: 1px solid #e8edf2;
+            font-size: 14px;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            color: #222;
+            word-break: break-word;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .success-panel {
+            display: none;
+            text-align: center;
+        }
+
+        .success-panel.active {
+            display: block;
+        }
+
+        .success-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: #e8f5e9;
+            color: #2e7d32;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin: 0 auto 14px;
+        }
+
+        .security-note {
+            margin-top: 18px;
+            padding: 12px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 600px) {
+
+            .container {
+                margin: 20px auto;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .detail-row {
+                grid-template-columns: 1fr;
+                gap: 3px;
+            }
+
+        }
+
+    </style>
+
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+    <h1>
+        Account Invitation
+    </h1>
+
+    <p>
+        Controlled Institutional Election Management System
+    </p>
+
+</div>
+
+
+<div class="container">
+
+    <div class="card">
+
+        <div
+            id="message"
+            class="message"
+        ></div>
+
+
+        <!-- =============================================
+             STEP 1 - EMAIL VERIFICATION
+        ============================================== -->
+
+        <section
+            id="emailStep"
+            class="step active"
+        >
+
+            <h2>
+                Verify Invitation Email
+            </h2>
+
+            <p class="description">
+                Enter the email address that received this invitation.
+                This verification is required before invitation details
+                can be shown.
+            </p>
+
+
+            <form id="emailForm">
+
+                <div class="form-group">
+
+                    <label for="invitedEmail">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="invitedEmail"
+                        autocomplete="email"
+                        required
+                        placeholder="Enter the invited email address"
+                    >
+
+                    <div class="field-note">
+                        Use exactly the email address where this
+                        invitation was received.
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    id="verifyEmailBtn"
+                    class="btn"
+                >
+                    Verify Email & Continue
+                </button>
+
+            </form>
+
+
+            <div class="security-note">
+
+                Invitation details are intentionally not publicly
+                readable. Firebase verifies the recipient first,
+                then Firestore allows the invitation to be loaded.
+
+            </div>
+
+        </section>
+
+
+        <!-- =============================================
+             STEP 2 - ACCOUNT REGISTRATION
+        ============================================== -->
+
+        <section
+            id="registrationStep"
+            class="step"
+        >
+
+            <h2>
+                Complete Registration
+            </h2>
+
+            <p class="description">
+                Review the invitation details and create a
+                password for your account.
+            </p>
+
+
+            <div
+                id="invitationDetails"
+                class="invitation-details"
+            >
+
+                <div class="detail-row">
+
+                    <div class="detail-label">
+                        Name
+                    </div>
+
+                    <div
+                        class="detail-value"
+                        id="detailName"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <div class="detail-label">
+                        Email
+                    </div>
+
+                    <div
+                        class="detail-value"
+                        id="detailEmail"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <div class="detail-label">
+                        Role
+                    </div>
+
+                    <div
+                        class="detail-value"
+                        id="detailRole"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <form id="registrationForm">
+
+                <div class="form-group">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        autocomplete="new-password"
+                        required
+                        minlength="6"
+                        placeholder="Minimum 6 characters"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="confirmPassword">
+                        Confirm Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        autocomplete="new-password"
+                        required
+                        minlength="6"
+                        placeholder="Re-enter your password"
+                    >
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    id="completeBtn"
+                    class="btn"
+                >
+                    Complete Registration
+                </button>
+
+            </form>
+
+        </section>
+
+
+        <!-- =============================================
+             SUCCESS
+        ============================================== -->
+
+        <section
+            id="successStep"
+            class="success-panel"
+        >
+
+            <div class="success-icon">
+                ✓
+            </div>
+
+
+            <h2>
+                Registration Complete
+            </h2>
+
+
+            <p
+                class="description"
+                id="successText"
+            >
+                Your account has been created successfully.
+            </p>
+
+
+            <a
+                href="login.html"
+                class="secondary-btn"
+            >
+                Go to Login
+            </a>
+
+        </section>
+
+    </div>
+
+</div>
+
+
+<script type="module">
+
+
+import {
+    auth,
+    db
+} from "./js/firebase.js";
+
+
+import {
+    isSignInWithEmailLink,
+    signInWithEmailLink,
+    updatePassword,
+    signOut,
+    onAuthStateChanged
+} from
+"https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+
+import {
+    doc,
+    getDoc,
+    writeBatch,
+    serverTimestamp
+} from
+"https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+
+const $ =
+    id =>
+        document.getElementById(id);
+
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+const invitationId =
+    params.get(
+        "invitationId"
+    );
+
+
+let invitationData =
+    null;
+
+
+let invitedUser =
+    null;
+
+
+let registrationCompleted =
+    false;
+
+
+const allowedRoles = [
+
+    "sub_admin",
+
+    "election_commission",
+
+    "presiding_officer",
+
+    "assistant_presiding_officer"
+
+];
+
+
+const roleLabels = {
+
+    sub_admin:
+        "Sub-Admin",
+
+    election_commission:
+        "Election Commission Member",
+
+    presiding_officer:
+        "Presiding Officer",
+
+    assistant_presiding_officer:
+        "Assistant Presiding Officer"
+
+};
+
+
+/* =====================================================
+   MESSAGE
+===================================================== */
+
+function showMessage(
+    text,
+    type = "error"
+) {
+
+    const box =
+        $("message");
+
+
+    box.textContent =
+        text;
+
+
+    box.className =
+        `message ${type}`;
+}
+
+
+function hideMessage() {
+
+    const box =
+        $("message");
+
+
+    box.textContent =
+        "";
+
+
+    box.className =
+        "message";
+}
+
+
+/* =====================================================
+   PAGE STEP
+===================================================== */
+
+function showStep(
+    stepId
+) {
+
+    [
+        "emailStep",
+        "registrationStep"
+    ]
+    .forEach(
+        id => {
+
+            $(id)
+                .classList
+                .toggle(
+                    "active",
+                    id === stepId
+                );
+
+        }
+    );
+
+
+    $("successStep")
+        .classList
+        .toggle(
+            "active",
+            stepId ===
+                "successStep"
+        );
+}
+
+
+/* =====================================================
+   EMAIL HELPER
+===================================================== */
+
+function normalizedEmail(
+    value
+) {
+
+    return String(
+        value || ""
+    )
+        .trim()
+        .toLowerCase();
+}
+
+
+/* =====================================================
+   INVITATION EXPIRY
+===================================================== */
+
+function invitationExpired(
+    data
+) {
+
+    if (
+        !data?.expiresAt
+    ) {
+
+        return false;
+    }
+
+
+    let expiresAtMs =
+        null;
+
+
+    if (
+        typeof data.expiresAt.toMillis ===
+        "function"
+    ) {
+
+        expiresAtMs =
+            data.expiresAt
+                .toMillis();
+
+    }
+
+
+    else if (
+        typeof data.expiresAt.toDate ===
+        "function"
+    ) {
+
+        expiresAtMs =
+            data.expiresAt
+                .toDate()
+                .getTime();
+
+    }
+
+
+    else if (
+        data.expiresAt instanceof Date
+    ) {
+
+        expiresAtMs =
+            data.expiresAt
+                .getTime();
+
+    }
+
+
+    else if (
+        typeof data.expiresAt ===
+        "number"
+    ) {
+
+        expiresAtMs =
+            data.expiresAt;
+    }
+
+
+    return (
+
+        expiresAtMs !==
+            null
+
+        &&
+
+        Date.now() >
+            expiresAtMs
+
+    );
+}
+
+
+/* =====================================================
+   SHOW INVITATION DETAILS
+===================================================== */
+
+function renderInvitation() {
+
+    $("detailName")
+        .textContent =
+        invitationData?.name ||
+        "—";
+
+
+    $("detailEmail")
+        .textContent =
+        invitationData?.email ||
+        "—";
+
+
+    $("detailRole")
+        .textContent =
+
+        roleLabels[
+            invitationData?.role
+        ]
+
+        ||
+
+        invitationData?.role
+
+        ||
+
+        "—";
+
+
+    $("invitationDetails")
+        .style.display =
+        "block";
+}
+
+
+/* =====================================================
+   LOAD INVITATION AFTER AUTHENTICATION
+===================================================== */
+
+async function loadInvitationForAuthenticatedUser(
+    user
+) {
+
+    if (
+        !invitationId
+    ) {
+
+        throw new Error(
+            "The invitation link is missing its invitation ID."
+        );
+    }
+
+
+    if (
+        !user?.email
+    ) {
+
+        throw new Error(
+            "Firebase could not verify an email address for this invitation."
+        );
+    }
+
+
+    const invitationRef =
+        doc(
+            db,
+            "Invitations",
+            invitationId
+        );
+
+
+    /*
+     * IMPORTANT:
+     *
+     * This happens AFTER Firebase authentication.
+     *
+     * Therefore the current Firestore rule:
+     *
+     * allow get: if request.auth != null;
+     *
+     * is satisfied.
+     */
+
+    const invitationSnap =
+        await getDoc(
+            invitationRef
+        );
+
+
+    if (
+        !invitationSnap.exists()
+    ) {
+
+        throw new Error(
+            "This invitation does not exist or is no longer available."
+        );
+    }
+
+
+    const data =
+        invitationSnap.data();
+
+
+    if (
+        !allowedRoles.includes(
+            data.role
+        )
+    ) {
+
+        throw new Error(
+            "This invitation contains an unsupported account role."
+        );
+    }
+
+
+    if (
+        normalizedEmail(
+            data.email
+        )
+        !==
+        normalizedEmail(
+            user.email
+        )
+    ) {
+
+        throw new Error(
+            "This invitation belongs to a different email address."
+        );
+    }
+
+
+    if (
+        data.status ===
+        "accepted"
+    ) {
+
+        throw new Error(
+            "This invitation has already been accepted."
+        );
+    }
+
+
+    if (
+        data.status !==
+        "pending"
+    ) {
+
+        throw new Error(
+            "This invitation is no longer active."
+        );
+    }
+
+
+    if (
+        invitationExpired(
+            data
+        )
+    ) {
+
+        throw new Error(
+            "This invitation has expired. Please ask an administrator for a new invitation."
+        );
+    }
+
+
+    if (
+        !data.name
+        ||
+        !data.email
+        ||
+        !data.role
+        ||
+        !data.createdBy
+    ) {
+
+        throw new Error(
+            "The invitation record is incomplete. Please ask an administrator to create a new invitation."
+        );
+    }
+
+
+    invitationData =
+        data;
+
+
+    invitedUser =
+        user;
+
+
+    renderInvitation();
+
+
+    hideMessage();
+
+
+    showStep(
+        "registrationStep"
+    );
+}
+
+
+/* =====================================================
+   FIREBASE EMAIL-LINK SIGN IN
+===================================================== */
+
+async function verifyEmailAndSignIn(
+    email
+) {
+
+    if (
+        !isSignInWithEmailLink(
+            auth,
+            window.location.href
+        )
+    ) {
+
+        throw new Error(
+            "This is not a valid Firebase sign-in invitation link, or the link has expired."
+        );
+    }
+
+
+    const credential =
+        await signInWithEmailLink(
+
+            auth,
+
+            email,
+
+            window.location.href
+
+        );
+
+
+    await loadInvitationForAuthenticatedUser(
+        credential.user
+    );
+}
+
+
+/* =====================================================
+   START INVITATION
+===================================================== */
+
+async function startInvitation() {
+
+    hideMessage();
+
+
+    if (
+        !invitationId
+    ) {
+
+        showMessage(
+            "Invalid invitation link: invitation ID is missing."
+        );
+
+
+        $("emailForm")
+            .style.display =
+            "none";
+
+
+        return;
+    }
+
+
+    /*
+     * DO NOT read Invitations here while signed out.
+     *
+     * That was the bug in the previous page.
+     */
+
+
+    const currentUser =
+        auth.currentUser;
+
+
+    /*
+     * This also supports retrying registration
+     * if Firebase already restored the correct
+     * authenticated invitation session.
+     */
+
+    if (
+        currentUser?.email
+    ) {
+
+        try {
+
+            await loadInvitationForAuthenticatedUser(
+                currentUser
+            );
+
+
+            return;
+
+        } catch (error) {
+
+            console.warn(
+                "Existing session could not be used for invitation:",
+                error
+            );
+
+        }
+
+    }
+
+
+    showStep(
+        "emailStep"
+    );
+}
+
+
+/* =====================================================
+   VERIFY EMAIL FORM
+===================================================== */
+
+$("emailForm")
+    .addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+
+            hideMessage();
+
+
+            const email =
+                normalizedEmail(
+                    $("invitedEmail")
+                        .value
+                );
+
+
+            const button =
+                $("verifyEmailBtn");
+
+
+            if (
+                !email
+            ) {
+
+                showMessage(
+                    "Enter the email address that received this invitation."
+                );
+
+
+                return;
+            }
+
+
+            button.disabled =
+                true;
+
+
+            button.textContent =
+                "Verifying...";
+
+
+            try {
+
+                /*
+                 * If another administrator/user is still
+                 * logged in within this browser, remove
+                 * that session first.
+                 */
+
+                if (
+                    auth.currentUser
+
+                    &&
+
+                    normalizedEmail(
+                        auth.currentUser.email
+                    )
+                    !==
+                    email
+                ) {
+
+                    await signOut(
+                        auth
+                    );
+                }
+
+
+                await verifyEmailAndSignIn(
+                    email
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Invitation sign-in error:",
+                    error
+                );
+
+
+                let message =
+
+                    error?.message
+
+                    ||
+
+                    "The invitation could not be verified.";
+
+
+                if (
+                    error?.code ===
+                    "auth/invalid-action-code"
+                ) {
+
+                    message =
+                        "This invitation sign-in link is invalid or has already been used.";
+                }
+
+
+                else if (
+                    error?.code ===
+                    "auth/expired-action-code"
+                ) {
+
+                    message =
+                        "This invitation sign-in link has expired. Please request a new invitation.";
+                }
+
+
+                else if (
+                    error?.code ===
+                    "auth/invalid-email"
+                ) {
+
+                    message =
+                        "The email address is invalid.";
+                }
+
+
+                else if (
+                    error?.code ===
+                    "auth/network-request-failed"
+                ) {
+
+                    message =
+                        "Network error. Check your internet connection and try again.";
+                }
+
+
+                showMessage(
+                    message
+                );
+
+            } finally {
+
+                button.disabled =
+                    false;
+
+
+                button.textContent =
+                    "Verify Email & Continue";
+            }
+
+        }
+    );
+
+
+/* =====================================================
+   COMPLETE REGISTRATION
+===================================================== */
+
+$("registrationForm")
+    .addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+
+            hideMessage();
+
+
+            if (
+                !invitationData
+                ||
+                !invitedUser
+                ||
+                !invitationId
+            ) {
+
+                showMessage(
+                    "The invitation has not been verified yet."
+                );
+
+
+                return;
+            }
+
+
+            if (
+                registrationCompleted
+            ) {
+
+                return;
+            }
+
+
+            const password =
+                $("password")
+                    .value;
+
+
+            const confirmPassword =
+                $("confirmPassword")
+                    .value;
+
+
+            const button =
+                $("completeBtn");
+
+
+            if (
+                password.length <
+                6
+            ) {
+
+                showMessage(
+                    "Password must contain at least 6 characters."
+                );
+
+
+                return;
+            }
+
+
+            if (
+                password !==
+                confirmPassword
+            ) {
+
+                showMessage(
+                    "Passwords do not match."
+                );
+
+
+                return;
+            }
+
+
+            if (
+                normalizedEmail(
+                    invitedUser.email
+                )
+                !==
+                normalizedEmail(
+                    invitationData.email
+                )
+            ) {
+
+                showMessage(
+                    "The authenticated email no longer matches this invitation."
+                );
+
+
+                return;
+            }
+
+
+            button.disabled =
+                true;
+
+
+            button.textContent =
+                "Creating Account...";
+
+
+            try {
+
+                const userRef =
+                    doc(
+                        db,
+                        "Users",
+                        invitedUser.uid
+                    );
+
+
+                const existingUser =
+                    await getDoc(
+                        userRef
+                    );
+
+
+                if (
+                    existingUser.exists()
+                ) {
+
+                    throw new Error(
+                        "An application account already exists for this email address."
+                    );
+                }
+
+
+                /*
+                 * Create password while email-link
+                 * authentication is fresh.
+                 */
+
+                await updatePassword(
+                    invitedUser,
+                    password
+                );
+
+
+                /*
+                 * CRITICAL:
+                 *
+                 * User creation AND invitation acceptance
+                 * must happen in the SAME Firestore batch.
+                 *
+                 * Your Firestore rules use getAfter()
+                 * to enforce this.
+                 */
+
+                const batch =
+                    writeBatch(
+                        db
+                    );
+
+
+                /* -----------------------------------------
+                   MAIN USERS DOCUMENT
+                ----------------------------------------- */
+
+                batch.set(
+
+                    userRef,
+
+                    {
+                        name:
+                            invitationData.name,
+
+                        email:
+                            invitedUser.email,
+
+                        role:
+                            invitationData.role,
+
+                        status:
+                            "active",
+
+                        invitationId:
+                            invitationId,
+
+                        createdAt:
+                            serverTimestamp(),
+
+                        createdBy:
+                            invitationData.createdBy
+                    }
+
+                );
+
+
+                /* -----------------------------------------
+                   SUB-ADMIN PROFILE
+                ----------------------------------------- */
+
+                if (
+                    invitationData.role ===
+                    "sub_admin"
+                ) {
+
+                    batch.set(
+
+                        doc(
+                            db,
+                            "SubAdmins",
+                            invitedUser.uid
+                        ),
+
+                        {
+                            name:
+                                invitationData.name,
+
+                            email:
+                                invitedUser.email,
+
+                            role:
+                                "sub_admin",
+
+                            status:
+                                "active",
+
+                            duties:
+                                [],
+
+                            invitationId:
+                                invitationId,
+
+                            createdAt:
+                                serverTimestamp(),
+
+                            createdBy:
+                                invitationData.createdBy
+                        }
+
+                    );
+
+                }
+
+
+                /* -----------------------------------------
+                   ELECTION COMMISSION PROFILE
+                ----------------------------------------- */
+
+                if (
+                    invitationData.role ===
+                    "election_commission"
+                ) {
+
+                    batch.set(
+
+                        doc(
+                            db,
+                            "ElectionCommission",
+                            invitedUser.uid
+                        ),
+
+                        {
+                            name:
+                                invitationData.name,
+
+                            email:
+                                invitedUser.email,
+
+                            role:
+                                "election_commission",
+
+                            status:
+                                "active",
+
+                            duties:
+                                [],
+
+                            invitationId:
+                                invitationId,
+
+                            createdAt:
+                                serverTimestamp(),
+
+                            createdBy:
+                                invitationData.createdBy
+                        }
+
+                    );
+
+                }
+
+
+                /*
+                 * PO and APO currently only require
+                 * the Users document.
+                 *
+                 * No duplicate role-specific collection
+                 * is created for them.
+                 */
+
+
+                /* -----------------------------------------
+                   MARK INVITATION ACCEPTED
+                ----------------------------------------- */
+
+                batch.update(
+
+                    doc(
+                        db,
+                        "Invitations",
+                        invitationId
+                    ),
+
+                    {
+                        status:
+                            "accepted",
+
+                        acceptedUid:
+                            invitedUser.uid,
+
+                        acceptedAt:
+                            serverTimestamp()
+                    }
+
+                );
+
+
+                /*
+                 * Atomic Firestore acceptance.
+                 */
+
+                await batch.commit();
+
+
+                registrationCompleted =
+                    true;
+
+
+                const roleLabel =
+
+                    roleLabels[
+                        invitationData.role
+                    ]
+
+                    ||
+
+                    invitationData.role;
+
+
+                $("successText")
+                    .textContent =
+
+                    `Your ${roleLabel} account has been created successfully. You can now sign in using your email and password.`;
+
+
+                showStep(
+                    "successStep"
+                );
+
+
+                hideMessage();
+
+
+                /*
+                 * End temporary passwordless
+                 * invitation session.
+                 */
+
+                await signOut(
+                    auth
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Account registration error:",
+                    error
+                );
+
+
+                let message =
+
+                    error?.message
+
+                    ||
+
+                    "Registration could not be completed.";
+
+
+                if (
+                    error?.code ===
+                        "permission-denied"
+
+                    ||
+
+                    error?.code ===
+                        "firestore/permission-denied"
+                ) {
+
+                    message =
+                        "Firestore rejected the account-creation transaction. The invitation or account data does not match the security rules.";
+                }
+
+
+                else if (
+                    error?.code ===
+                    "auth/weak-password"
+                ) {
+
+                    message =
+                        "The password is too weak. Use at least 6 characters.";
+                }
+
+
+                else if (
+                    error?.code ===
+                    "auth/requires-recent-login"
+                ) {
+
+                    message =
+                        "Your verification session is no longer fresh. Open a new invitation link and try again.";
+                }
+
+
+                showMessage(
+                    message
+                );
+
+            } finally {
+
+                button.disabled =
+                    false;
+
+
+                button.textContent =
+                    "Complete Registration";
+            }
+
+        }
+    );
+
+
+/* =====================================================
+   FIREBASE AUTH INITIALIZATION
+===================================================== */
+
+let invitationStarted =
+    false;
+
+
+const unsubscribeAuth =
+    onAuthStateChanged(
+        auth,
+        async () => {
+
+            if (
+                invitationStarted
+            ) {
+
+                return;
+            }
+
+
+            invitationStarted =
+                true;
+
+
+            unsubscribeAuth();
+
+
+            await startInvitation();
+
+        }
+    );
+
+
+</script>
+
+
+</body>
+
+</html>

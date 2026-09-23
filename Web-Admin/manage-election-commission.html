@@ -1,0 +1,2724 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Manage Election Commission</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+
+        body {
+            background: #f4f6f8;
+            color: #222;
+            min-height: 100vh;
+        }
+
+
+        /* ================================
+           HEADER
+        ================================= */
+
+        .header {
+            background: #1976d2;
+            color: white;
+            padding: 20px 30px;
+        }
+
+
+        .header h1 {
+            margin-bottom: 5px;
+        }
+
+
+        .header p {
+            opacity: 0.9;
+        }
+
+
+        /* ================================
+           CONTAINER
+        ================================= */
+
+        .container {
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #1976d2;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+
+        /* ================================
+           MAIN CARD
+        ================================= */
+
+        .page-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow:
+                0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+
+        .page-card h2 {
+            margin-bottom: 8px;
+        }
+
+
+        .description {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+
+        /* ================================
+           MESSAGE
+        ================================= */
+
+        #message {
+            display: none;
+            margin-bottom: 20px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+
+        #message.success {
+            display: block;
+            background: #e5f7e5;
+            color: #146b14;
+            border: 1px solid #c8e6c9;
+        }
+
+
+        #message.error {
+            display: block;
+            background: #ffe5e5;
+            color: #b00020;
+            border: 1px solid #ffcdd2;
+        }
+
+
+        /* ================================
+           MEMBER LIST
+        ================================= */
+
+        .member-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+
+        .member-card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            gap: 25px;
+            background: white;
+        }
+
+
+        .member-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+
+        .member-info h3 {
+            margin-bottom: 7px;
+            font-size: 18px;
+        }
+
+
+        .member-info p {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0;
+            word-break: break-word;
+        }
+
+
+        /* ================================
+           MEMBER STATUS
+        ================================= */
+
+        .member-status {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 4px 9px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+
+        .status-active {
+            background: #e5f7e5;
+            color: #146b14;
+        }
+
+
+        .status-disabled {
+            background: #ffe5e5;
+            color: #b00020;
+        }
+
+
+        .member-role {
+            color: #555 !important;
+            font-size: 13px !important;
+        }
+
+
+        /* ================================
+           DUTIES PREVIEW
+        ================================= */
+
+        .duties-preview {
+            margin-top: 10px !important;
+            color: #555 !important;
+            line-height: 1.5;
+        }
+
+
+        /* ================================
+           ACTIONS
+        ================================= */
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+
+        .actions button {
+            padding: 9px 13px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            color: white;
+        }
+
+
+        .edit-btn {
+            background: #455a64;
+        }
+
+
+        .duty-btn {
+            background: #6a1b9a;
+        }
+
+
+        .disable-btn {
+            background: #c62828;
+        }
+
+
+        .enable-btn {
+            background: #2e7d32;
+        }
+
+
+        .actions button:disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+
+
+        /* ================================
+           EMPTY
+        ================================= */
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #777;
+            line-height: 1.5;
+        }
+
+
+        /* ================================
+           MODAL
+        ================================= */
+
+        .modal {
+            position: fixed;
+            inset: 0;
+
+            background: rgba(0, 0, 0, 0.45);
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            padding: 20px;
+            z-index: 2000;
+        }
+
+
+        .modal.hidden {
+            display: none;
+        }
+
+
+        .modal-content {
+            width: 100%;
+            max-width: 520px;
+
+            background: white;
+
+            border-radius: 10px;
+
+            padding: 25px;
+
+            box-shadow:
+                0 5px 25px rgba(0, 0, 0, 0.2);
+
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 20px;
+        }
+
+
+        .modal-header h2 {
+            font-size: 20px;
+        }
+
+
+        .close-btn {
+            border: none;
+            background: transparent;
+
+            color: #666;
+            font-size: 25px;
+
+            cursor: pointer;
+            padding: 0;
+        }
+
+
+        /* ================================
+           FORM
+        ================================= */
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+
+        .form-group label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+
+        .form-group input {
+            width: 100%;
+            padding: 11px;
+
+            border: 1px solid #ccc;
+            border-radius: 5px;
+
+            font-size: 14px;
+        }
+
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
+
+        .form-group input:disabled {
+            background: #f3f3f3;
+            color: #777;
+        }
+
+
+        .input-note {
+            margin-top: 6px;
+            color: #777;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+
+        /* ================================
+           DUTIES
+        ================================= */
+
+        .duty-description {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 18px;
+            font-size: 14px;
+        }
+
+
+        .duties-list {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+
+        .duty-option {
+            display: flex;
+            align-items: center;
+
+            gap: 10px;
+
+            padding: 12px;
+
+            border: 1px solid #ddd;
+            border-radius: 6px;
+
+            cursor: pointer;
+        }
+
+
+        .duty-option input {
+            width: auto;
+            cursor: pointer;
+        }
+
+
+        /* ================================
+           STATUS CONFIRMATION
+        ================================= */
+
+        .status-text {
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+
+        .status-member-name {
+            font-weight: bold;
+            font-size: 17px;
+            margin-bottom: 15px;
+        }
+
+
+        .status-warning {
+            background: #fff4f4;
+            border: 1px solid #ffd6d6;
+            color: #9b1c1c;
+
+            padding: 12px;
+
+            border-radius: 6px;
+
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+
+        .status-confirm-btn {
+            background: #c62828;
+            color: white;
+        }
+
+
+        .status-confirm-btn.enable-action {
+            background: #2e7d32;
+        }
+
+
+        /* ================================
+           MODAL ACTIONS
+        ================================= */
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+
+        .modal-actions button {
+            padding: 10px 16px;
+
+            border: none;
+            border-radius: 5px;
+
+            cursor: pointer;
+
+            font-size: 14px;
+        }
+
+
+        .modal-actions button:disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+
+
+        .save-btn {
+            background: #1976d2;
+            color: white;
+        }
+
+
+        .cancel-btn {
+            background: #777;
+            color: white;
+        }
+
+
+        /* ================================
+           MOBILE
+        ================================= */
+
+        @media (max-width: 750px) {
+
+            .member-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+
+            .actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+
+            .actions button {
+                flex: 1;
+            }
+
+        }
+
+    </style>
+
+        <link rel="stylesheet" href="assets/css/navigation.css?v=20260913-nav">
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+</head>
+
+
+<body>
+
+
+    <!-- =================================
+         HEADER
+    ================================= -->
+
+    <div class="header">
+
+        <h1>
+            Manage Election Commission
+        </h1>
+
+        <p>
+            Controlled Institutional Election Management System
+        </p>
+
+    </div>
+
+
+
+    <!-- =================================
+         MAIN CONTAINER
+    ================================= -->
+
+    <div class="container">
+
+
+        <nav class="page-navigation" aria-label="Page navigation">
+            <a
+                id="backLink"
+                class="back-link back-dashboard-button"
+            >
+                Back to Dashboard
+            </a>
+        </nav>
+
+
+        <div class="page-card">
+
+
+            <h2>
+                Election Commission Members
+            </h2>
+
+
+            <p class="description">
+                Manage Election Commission members,
+                their assigned duties, and their system
+                access status.
+            </p>
+
+
+            <div
+                id="message"
+            ></div>
+
+
+            <div
+                id="memberList"
+                class="member-list"
+            >
+
+                <div class="empty">
+                    Loading Election Commission members...
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =================================
+         EDIT MODAL
+    ================================= -->
+
+    <div
+        id="editModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-content">
+
+
+            <div class="modal-header">
+
+                <h2>
+                    Edit EC Member
+                </h2>
+
+
+                <button
+                    type="button"
+                    class="close-btn"
+                    id="closeEditBtn"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+
+            <div class="form-group">
+
+                <label for="editName">
+                    Full Name
+                </label>
+
+
+                <input
+                    type="text"
+                    id="editName"
+                    placeholder="Enter full name"
+                    maxlength="100"
+                >
+
+            </div>
+
+
+
+            <div class="form-group">
+
+                <label for="editEmail">
+                    Email Address
+                </label>
+
+
+                <input
+                    type="email"
+                    id="editEmail"
+                    disabled
+                >
+
+
+                <p class="input-note">
+                    Email cannot be changed here.
+                </p>
+
+            </div>
+
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="save-btn"
+                    id="saveEditBtn"
+                >
+                    Save Changes
+                </button>
+
+
+                <button
+                    type="button"
+                    class="cancel-btn"
+                    id="cancelEditBtn"
+                >
+                    Cancel
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================
+         DUTIES MODAL
+    ================================= -->
+
+    <div
+        id="dutiesModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-content">
+
+
+            <div class="modal-header">
+
+                <h2>
+                    Manage Duties
+                </h2>
+
+
+                <button
+                    type="button"
+                    class="close-btn"
+                    id="closeDutiesBtn"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+
+            <p class="duty-description">
+
+                Select the duties this Election Commission
+                member is allowed to perform.
+
+            </p>
+
+
+
+            <div class="duties-list">
+
+
+                <label class="duty-option">
+
+                    <input
+                        type="checkbox"
+                        value="Voter Management"
+                    >
+
+                    <span>
+                        Voter Management
+                    </span>
+
+                </label>
+
+
+
+                <label class="duty-option">
+
+                    <input
+                        type="checkbox"
+                        value="Nomination & Candidate Management"
+                    >
+
+                    <span>
+                        Nomination &amp; Candidate Management
+                    </span>
+
+                </label>
+
+
+
+                <label class="duty-option">
+
+                    <input
+                        type="checkbox"
+                        value="Booth & Polling Staff Management"
+                    >
+
+                    <span>
+                        Booth &amp; Polling Staff Management
+                    </span>
+
+                </label>
+
+
+            </div>
+
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="save-btn"
+                    id="saveDutiesBtn"
+                >
+                    Save Duties
+                </button>
+
+
+                <button
+                    type="button"
+                    class="cancel-btn"
+                    id="cancelDutiesBtn"
+                >
+                    Cancel
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================
+         ENABLE / DISABLE MODAL
+    ================================= -->
+
+    <div
+        id="statusModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-content">
+
+
+            <div class="modal-header">
+
+                <h2 id="statusModalTitle">
+                    Disable EC Member
+                </h2>
+
+
+                <button
+                    type="button"
+                    class="close-btn"
+                    id="closeStatusBtn"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+
+            <p
+                id="statusModalMessage"
+                class="status-text"
+            >
+                Are you sure you want to disable
+                this Election Commission member?
+            </p>
+
+
+            <p
+                id="statusMemberName"
+                class="status-member-name"
+            >
+            </p>
+
+
+            <div
+                id="statusWarning"
+                class="status-warning"
+            >
+                The member will no longer be able
+                to access the election management
+                system. Their account and records
+                will be retained.
+            </div>
+
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="status-confirm-btn"
+                    id="confirmStatusBtn"
+                >
+                    Disable
+                </button>
+
+
+                <button
+                    type="button"
+                    class="cancel-btn"
+                    id="cancelStatusBtn"
+                >
+                    Cancel
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================
+         FIREBASE + APPLICATION LOGIC
+    ================================= -->
+
+   <script type="module">
+
+    /* =====================================================
+       FIREBASE + APPLICATION IMPORTS
+    ===================================================== */
+
+    import {
+        auth,
+        db
+    } from "./js/firebase.js";
+
+
+    import {
+        onAuthStateChanged
+    } from
+    "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+
+    import {
+        collection,
+        getDocs,
+        doc,
+        getDoc,
+        writeBatch
+    } from
+    "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+
+    import {
+        checkAdminPermission
+    } from "./admin-permissions.js";
+
+
+    import {
+        getDashboardForRole
+    } from "./js/navigation.js";
+
+
+
+    /* =====================================================
+       ELEMENTS
+    ===================================================== */
+
+    const memberList =
+        document.getElementById("memberList");
+
+
+    const messageBox =
+        document.getElementById("message");
+
+
+    const editModal =
+        document.getElementById("editModal");
+
+
+    const dutiesModal =
+        document.getElementById("dutiesModal");
+
+
+    const statusModal =
+        document.getElementById("statusModal");
+
+
+    const editName =
+        document.getElementById("editName");
+
+
+    const editEmail =
+        document.getElementById("editEmail");
+
+
+    const saveEditBtn =
+        document.getElementById("saveEditBtn");
+
+
+    const saveDutiesBtn =
+        document.getElementById("saveDutiesBtn");
+
+
+    const confirmStatusBtn =
+        document.getElementById("confirmStatusBtn");
+
+
+    const statusModalTitle =
+        document.getElementById("statusModalTitle");
+
+
+    const statusModalMessage =
+        document.getElementById("statusModalMessage");
+
+
+    const statusMemberName =
+        document.getElementById("statusMemberName");
+
+
+    const statusWarning =
+        document.getElementById("statusWarning");
+
+
+
+    /* =====================================================
+       STATE
+    ===================================================== */
+
+    let selectedMemberId = null;
+
+    let statusMemberId = null;
+
+    let currentUser = null;
+
+    let currentUserRole = null;
+
+    let currentUserData = null;
+
+    let pageAuthorized = false;
+
+    let authCheckCompleted = false;
+
+    let messageTimer = null;
+
+    let changingStatus = false;
+
+
+
+    /* =====================================================
+       REQUIRED DUTY
+    ===================================================== */
+
+    const REQUIRED_DUTY =
+        "Manage Election Commission";
+
+
+
+    /* =====================================================
+       INITIAL PAGE STATE
+    ===================================================== */
+
+    /*
+     * Do not allow actions before Firebase authentication
+     * has finished restoring the current session.
+     */
+
+    memberList.innerHTML = `
+        <div class="empty">
+            Checking your account...
+        </div>
+    `;
+
+
+
+    /* =====================================================
+       AUTHENTICATION + PERMISSION CHECK
+    ===================================================== */
+
+    onAuthStateChanged(
+        auth,
+        async (user) => {
+
+            /*
+             * Firebase has now completed this authentication
+             * check. This flag prevents the page from treating
+             * a temporary null state as an expired session.
+             */
+
+            authCheckCompleted = true;
+
+
+            if (!user) {
+
+                window.location.href =
+                    "login.html";
+
+                return;
+
+            }
+
+
+            try {
+
+                /*
+                 * First verify that the signed-in Firebase user
+                 * has a valid application profile.
+                 */
+
+                const userRef =
+                    doc(
+                        db,
+                        "Users",
+                        user.uid
+                    );
+
+
+                const userSnapshot =
+                    await getDoc(userRef);
+
+
+                if (!userSnapshot.exists()) {
+
+                    alert(
+                        "Your user profile could not be found."
+                    );
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+
+                }
+
+
+                const userData =
+                    userSnapshot.data();
+
+
+                if (
+                    userData.status !==
+                    "active"
+                ) {
+
+                    alert(
+                        "Your account is not active."
+                    );
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+
+                }
+
+
+                /*
+                 * Principal receives full access.
+                 *
+                 * Sub-Admin must have:
+                 * Manage Election Commission
+                 */
+
+                const permission =
+                    await checkAdminPermission(
+                        db,
+                        user,
+                        REQUIRED_DUTY
+                    );
+
+
+                if (!permission.allowed) {
+
+                    pageAuthorized = false;
+
+                    showPageError(
+                        "You are not authorized to manage Election Commission members."
+                    );
+
+                    return;
+
+                }
+
+
+                /*
+                 * Store the authenticated user only AFTER
+                 * authentication and permission verification
+                 * have completed successfully.
+                 */
+
+                currentUser =
+                    user;
+
+
+                currentUserData =
+                    userData;
+
+
+                currentUserRole =
+                    permission.role;
+
+
+                pageAuthorized =
+                    true;
+
+
+                await loadMembers();
+
+
+            } catch (error) {
+
+                console.error(
+                    "Manage EC access check error:",
+                    error
+                );
+
+
+                pageAuthorized =
+                    false;
+
+
+                showPageError(
+                    "Unable to verify your account."
+                );
+
+            }
+
+        }
+    );
+
+
+
+    /* =====================================================
+       LOAD EC MEMBERS
+    ===================================================== */
+
+    async function loadMembers() {
+
+        if (
+            !authCheckCompleted ||
+            !pageAuthorized ||
+            !currentUser
+        ) {
+
+            return;
+
+        }
+
+
+        memberList.innerHTML = `
+            <div class="empty">
+                Loading Election Commission members...
+            </div>
+        `;
+
+
+        try {
+
+            const snapshot =
+                await getDocs(
+                    collection(
+                        db,
+                        "ElectionCommission"
+                    )
+                );
+
+
+            memberList.innerHTML =
+                "";
+
+
+            if (snapshot.empty) {
+
+                memberList.innerHTML = `
+                    <div class="empty">
+                        No Election Commission members found.
+                    </div>
+                `;
+
+                return;
+
+            }
+
+
+            snapshot.forEach(
+                (memberDocument) => {
+
+                    const member =
+                        memberDocument.data();
+
+
+                    const memberId =
+                        memberDocument.id;
+
+
+                    const duties =
+                        Array.isArray(
+                            member.duties
+                        )
+                            ? member.duties
+                            : [];
+
+
+                    const dutiesText =
+                        duties.length > 0
+                            ? duties.join(", ")
+                            : "No duties assigned";
+
+
+                    const status =
+                        member.status ===
+                        "disabled"
+                            ? "disabled"
+                            : "active";
+
+
+                    const statusClass =
+                        status === "disabled"
+                            ? "status-disabled"
+                            : "status-active";
+
+
+                    const statusText =
+                        status === "disabled"
+                            ? "Disabled"
+                            : "Active";
+
+
+                    const actionButtonClass =
+                        status === "disabled"
+                            ? "enable-btn"
+                            : "disable-btn";
+
+
+                    const actionButtonText =
+                        status === "disabled"
+                            ? "Enable"
+                            : "Disable";
+
+
+                    const card =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    card.className =
+                        "member-card";
+
+
+                    card.innerHTML = `
+
+                        <div class="member-info">
+
+                            <h3>
+                                ${escapeHTML(
+                                    member.name ||
+                                    "Unnamed Member"
+                                )}
+                            </h3>
+
+
+                            <p>
+                                ${escapeHTML(
+                                    member.email ||
+                                    "No email"
+                                )}
+                            </p>
+
+
+                            <p class="member-role">
+                                Election Commission Member
+                            </p>
+
+
+                            <p class="duties-preview">
+
+                                <strong>
+                                    Duties:
+                                </strong>
+
+                                ${escapeHTML(
+                                    dutiesText
+                                )}
+
+                            </p>
+
+
+                            <span
+                                class="member-status ${statusClass}"
+                            >
+                                ${statusText}
+                            </span>
+
+                        </div>
+
+
+                        <div class="actions">
+
+                            <button
+                                type="button"
+                                class="edit-btn"
+                                data-id="${escapeHTML(
+                                    memberId
+                                )}"
+                            >
+                                Edit
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="duty-btn"
+                                data-id="${escapeHTML(
+                                    memberId
+                                )}"
+                            >
+                                Manage Duties
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="${actionButtonClass}"
+                                data-id="${escapeHTML(
+                                    memberId
+                                )}"
+                            >
+                                ${actionButtonText}
+                            </button>
+
+                        </div>
+
+                    `;
+
+
+                    memberList.appendChild(
+                        card
+                    );
+
+                }
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Load EC members error:",
+                error
+            );
+
+
+            memberList.innerHTML = `
+                <div class="empty">
+                    Unable to load Election Commission members.
+                </div>
+            `;
+
+
+            if (
+                error.code ===
+                "permission-denied"
+            ) {
+
+                showMessage(
+                    "Permission denied. Check your Firestore security rules.",
+                    "error"
+                );
+
+            } else {
+
+                showMessage(
+                    "Unable to load Election Commission members.",
+                    "error"
+                );
+
+            }
+
+        }
+
+    }
+
+
+
+    /* =====================================================
+       MEMBER BUTTONS
+    ===================================================== */
+
+    memberList.addEventListener(
+        "click",
+        async (event) => {
+
+            const button =
+                event.target.closest(
+                    "button"
+                );
+
+
+            if (!button) {
+                return;
+            }
+
+
+            if (
+                !authCheckCompleted ||
+                !pageAuthorized ||
+                !currentUser
+            ) {
+
+                showMessage(
+                    "Your session is not ready. Please wait a moment and try again.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const memberId =
+                button.dataset.id;
+
+
+            if (!memberId) {
+                return;
+            }
+
+
+            if (
+                button.classList.contains(
+                    "edit-btn"
+                )
+            ) {
+
+                await openEditModal(
+                    memberId
+                );
+
+                return;
+
+            }
+
+
+            if (
+                button.classList.contains(
+                    "duty-btn"
+                )
+            ) {
+
+                await openDutiesModal(
+                    memberId
+                );
+
+                return;
+
+            }
+
+
+            if (
+                button.classList.contains(
+                    "disable-btn"
+                ) ||
+                button.classList.contains(
+                    "enable-btn"
+                )
+            ) {
+
+                await openStatusModal(
+                    memberId
+                );
+
+                return;
+
+            }
+
+        }
+    );
+
+
+
+    /* =====================================================
+       OPEN EDIT MODAL
+    ===================================================== */
+
+    async function openEditModal(
+        memberId
+    ) {
+
+        try {
+
+            const memberSnapshot =
+                await getDoc(
+                    doc(
+                        db,
+                        "ElectionCommission",
+                        memberId
+                    )
+                );
+
+
+            if (
+                !memberSnapshot.exists()
+            ) {
+
+                showMessage(
+                    "EC member was not found.",
+                    "error"
+                );
+
+                await loadMembers();
+
+                return;
+
+            }
+
+
+            const member =
+                memberSnapshot.data();
+
+
+            selectedMemberId =
+                memberId;
+
+
+            editName.value =
+                member.name || "";
+
+
+            editEmail.value =
+                member.email || "";
+
+
+            editModal.classList.remove(
+                "hidden"
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Open edit modal error:",
+                error
+            );
+
+
+            showMessage(
+                "Unable to open edit form.",
+                "error"
+            );
+
+        }
+
+    }
+
+
+
+    /* =====================================================
+       SAVE EDIT
+    ===================================================== */
+
+    saveEditBtn.addEventListener(
+        "click",
+        async () => {
+
+            if (
+                !pageAuthorized ||
+                !currentUser
+            ) {
+
+                showMessage(
+                    "You are not authorized to perform this action.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            if (!selectedMemberId) {
+
+                showMessage(
+                    "No EC member selected.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const name =
+                editName.value.trim();
+
+
+            if (!name) {
+
+                showMessage(
+                    "Please enter the member's name.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            try {
+
+                saveEditBtn.disabled =
+                    true;
+
+
+                saveEditBtn.textContent =
+                    "Saving...";
+
+
+                const memberRef =
+                    doc(
+                        db,
+                        "ElectionCommission",
+                        selectedMemberId
+                    );
+
+
+                const userRef =
+                    doc(
+                        db,
+                        "Users",
+                        selectedMemberId
+                    );
+
+
+                const batch =
+                    writeBatch(db);
+
+
+                batch.update(
+                    memberRef,
+                    {
+                        name: name
+                    }
+                );
+
+
+                batch.update(
+                    userRef,
+                    {
+                        name: name
+                    }
+                );
+
+
+                await batch.commit();
+
+
+                editModal.classList.add(
+                    "hidden"
+                );
+
+
+                selectedMemberId =
+                    null;
+
+
+                await loadMembers();
+
+
+                showMessage(
+                    "EC member information updated successfully.",
+                    "success"
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Save edit error:",
+                    error
+                );
+
+
+                if (
+                    error.code ===
+                    "permission-denied"
+                ) {
+
+                    showMessage(
+                        "Permission denied. Check your Firestore security rules.",
+                        "error"
+                    );
+
+                } else {
+
+                    showMessage(
+                        "Unable to update EC member.",
+                        "error"
+                    );
+
+                }
+
+
+            } finally {
+
+                saveEditBtn.disabled =
+                    false;
+
+
+                saveEditBtn.textContent =
+                    "Save Changes";
+
+            }
+
+        }
+    );
+
+
+
+    /* =====================================================
+       OPEN DUTIES MODAL
+    ===================================================== */
+
+    async function openDutiesModal(
+        memberId
+    ) {
+
+        try {
+
+            const memberSnapshot =
+                await getDoc(
+                    doc(
+                        db,
+                        "ElectionCommission",
+                        memberId
+                    )
+                );
+
+
+            if (
+                !memberSnapshot.exists()
+            ) {
+
+                showMessage(
+                    "EC member was not found.",
+                    "error"
+                );
+
+                await loadMembers();
+
+                return;
+
+            }
+
+
+            const member =
+                memberSnapshot.data();
+
+
+            selectedMemberId =
+                memberId;
+
+
+            const currentDuties =
+                Array.isArray(
+                    member.duties
+                )
+                    ? member.duties
+                    : [];
+
+
+            document
+                .querySelectorAll(
+                    ".duty-option input"
+                )
+                .forEach(
+                    (checkbox) => {
+
+                        checkbox.checked =
+                            currentDuties.includes(
+                                checkbox.value
+                            );
+
+                    }
+                );
+
+
+            dutiesModal.classList.remove(
+                "hidden"
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Open duties modal error:",
+                error
+            );
+
+
+            showMessage(
+                "Unable to open duties.",
+                "error"
+            );
+
+        }
+
+    }
+
+
+
+    /* =====================================================
+       SAVE DUTIES
+    ===================================================== */
+
+    saveDutiesBtn.addEventListener(
+        "click",
+        async () => {
+
+            if (
+                !pageAuthorized ||
+                !currentUser
+            ) {
+
+                showMessage(
+                    "You are not authorized to perform this action.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            if (!selectedMemberId) {
+
+                showMessage(
+                    "No EC member selected.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const selectedDuties =
+                Array.from(
+                    document.querySelectorAll(
+                        ".duty-option input:checked"
+                    )
+                )
+                .map(
+                    (checkbox) =>
+                        checkbox.value
+                );
+
+
+            try {
+
+                saveDutiesBtn.disabled =
+                    true;
+
+
+                saveDutiesBtn.textContent =
+                    "Saving...";
+
+
+                const memberRef =
+                    doc(
+                        db,
+                        "ElectionCommission",
+                        selectedMemberId
+                    );
+
+
+                const batch =
+                    writeBatch(db);
+
+
+                batch.update(
+                    memberRef,
+                    {
+                        duties:
+                            selectedDuties
+                    }
+                );
+
+
+                await batch.commit();
+
+
+                dutiesModal.classList.add(
+                    "hidden"
+                );
+
+
+                selectedMemberId =
+                    null;
+
+
+                await loadMembers();
+
+
+                showMessage(
+                    "EC duties updated successfully.",
+                    "success"
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Save duties error:",
+                    error
+                );
+
+
+                if (
+                    error.code ===
+                    "permission-denied"
+                ) {
+
+                    showMessage(
+                        "Permission denied. Check your Firestore security rules.",
+                        "error"
+                    );
+
+                } else {
+
+                    showMessage(
+                        "Unable to update EC duties.",
+                        "error"
+                    );
+
+                }
+
+            } finally {
+
+                saveDutiesBtn.disabled =
+                    false;
+
+
+                saveDutiesBtn.textContent =
+                    "Save Duties";
+
+            }
+
+        }
+    );
+
+
+
+    /* =====================================================
+       OPEN STATUS MODAL
+    ===================================================== */
+
+    async function openStatusModal(
+        memberId
+    ) {
+
+        try {
+
+            const memberSnapshot =
+                await getDoc(
+                    doc(
+                        db,
+                        "ElectionCommission",
+                        memberId
+                    )
+                );
+
+
+            if (
+                !memberSnapshot.exists()
+            ) {
+
+                showMessage(
+                    "EC member was not found.",
+                    "error"
+                );
+
+                await loadMembers();
+
+                return;
+
+            }
+
+
+            const member =
+                memberSnapshot.data();
+
+
+            const currentStatus =
+                member.status === "disabled"
+                    ? "disabled"
+                    : "active";
+
+
+            const isDisabled =
+                currentStatus ===
+                "disabled";
+
+
+            statusMemberId =
+                memberId;
+
+
+            statusMemberName.textContent =
+                "EC Member: " +
+                (
+                    member.name ||
+                    member.email ||
+                    "Election Commission Member"
+                );
+
+
+            if (isDisabled) {
+
+                statusModalTitle.textContent =
+                    "Enable EC Member";
+
+
+                statusModalMessage.textContent =
+                    "Are you sure you want to enable this Election Commission member?";
+
+
+                statusWarning.textContent =
+                    "The member will be allowed to access the election management system again. Their account and records will remain unchanged.";
+
+
+                confirmStatusBtn.textContent =
+                    "Enable";
+
+
+                confirmStatusBtn.classList.add(
+                    "enable-action"
+                );
+
+            } else {
+
+                statusModalTitle.textContent =
+                    "Disable EC Member";
+
+
+                statusModalMessage.textContent =
+                    "Are you sure you want to disable this Election Commission member?";
+
+
+                statusWarning.textContent =
+                    "The member will no longer be able to access the election management system. Their account and records will be retained.";
+
+
+                confirmStatusBtn.textContent =
+                    "Disable";
+
+
+                confirmStatusBtn.classList.remove(
+                    "enable-action"
+                );
+
+            }
+
+
+            statusModal.classList.remove(
+                "hidden"
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Open status modal error:",
+                error
+            );
+
+
+            showMessage(
+                "Unable to open account status confirmation.",
+                "error"
+            );
+
+        }
+
+    }
+
+
+
+    /* =====================================================
+       CONFIRM STATUS CHANGE
+    ===================================================== */
+
+    confirmStatusBtn.addEventListener(
+        "click",
+        async () => {
+
+            if (
+                changingStatus ||
+                !statusMemberId
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                !pageAuthorized ||
+                !currentUser
+            ) {
+
+                showMessage(
+                    "You are not authorized to perform this action.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const memberId =
+                statusMemberId;
+
+
+            try {
+
+                changingStatus =
+                    true;
+
+
+                confirmStatusBtn.disabled =
+                    true;
+
+
+                const memberRef =
+                    doc(
+                        db,
+                        "ElectionCommission",
+                        memberId
+                    );
+
+
+                const userRef =
+                    doc(
+                        db,
+                        "Users",
+                        memberId
+                    );
+
+
+                const memberSnapshot =
+                    await getDoc(
+                        memberRef
+                    );
+
+
+                const userSnapshot =
+                    await getDoc(
+                        userRef
+                    );
+
+
+                if (
+                    !memberSnapshot.exists() ||
+                    !userSnapshot.exists()
+                ) {
+
+                    statusModal.classList.add(
+                        "hidden"
+                    );
+
+
+                    statusMemberId =
+                        null;
+
+
+                    showMessage(
+                        "The EC member account record was not found.",
+                        "error"
+                    );
+
+
+                    await loadMembers();
+
+                    return;
+
+                }
+
+
+                const member =
+                    memberSnapshot.data();
+
+
+                const memberName =
+                    member.name ||
+                    member.email ||
+                    "EC Member";
+
+
+                const currentStatus =
+                    member.status === "disabled"
+                        ? "disabled"
+                        : "active";
+
+
+                const newStatus =
+                    currentStatus === "disabled"
+                        ? "active"
+                        : "disabled";
+
+
+                confirmStatusBtn.textContent =
+                    newStatus === "disabled"
+                        ? "Disabling..."
+                        : "Enabling...";
+
+
+                const batch =
+                    writeBatch(db);
+
+
+                batch.update(
+                    memberRef,
+                    {
+                        status:
+                            newStatus
+                    }
+                );
+
+
+                batch.update(
+                    userRef,
+                    {
+                        status:
+                            newStatus
+                    }
+                );
+
+
+                await batch.commit();
+
+
+                statusModal.classList.add(
+                    "hidden"
+                );
+
+
+                statusMemberId =
+                    null;
+
+
+                await loadMembers();
+
+
+                showMessage(
+                    newStatus === "disabled"
+                        ? "EC member \"" +
+                          memberName +
+                          "\" has been disabled."
+                        : "EC member \"" +
+                          memberName +
+                          "\" has been enabled.",
+                    "success"
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Change EC member status error:",
+                    error
+                );
+
+
+                if (
+                    error.code ===
+                    "permission-denied"
+                ) {
+
+                    showMessage(
+                        "Unable to change account status. Firestore permission was denied.",
+                        "error"
+                    );
+
+                } else {
+
+                    showMessage(
+                        "Unable to change EC member status.",
+                        "error"
+                    );
+
+                }
+
+            } finally {
+
+                changingStatus =
+                    false;
+
+
+                confirmStatusBtn.disabled =
+                    false;
+
+
+                confirmStatusBtn.classList.remove(
+                    "enable-action"
+                );
+
+            }
+
+        }
+    );
+
+
+
+    /* =====================================================
+       CLOSE EDIT MODAL
+    ===================================================== */
+
+    document
+        .getElementById(
+            "closeEditBtn"
+        )
+        .addEventListener(
+            "click",
+            closeEditModal
+        );
+
+
+    document
+        .getElementById(
+            "cancelEditBtn"
+        )
+        .addEventListener(
+            "click",
+            closeEditModal
+        );
+
+
+    function closeEditModal() {
+
+        editModal.classList.add(
+            "hidden"
+        );
+
+
+        selectedMemberId =
+            null;
+
+    }
+
+
+
+    /* =====================================================
+       CLOSE DUTIES MODAL
+    ===================================================== */
+
+    document
+        .getElementById(
+            "closeDutiesBtn"
+        )
+        .addEventListener(
+            "click",
+            closeDutiesModal
+        );
+
+
+    document
+        .getElementById(
+            "cancelDutiesBtn"
+        )
+        .addEventListener(
+            "click",
+            closeDutiesModal
+        );
+
+
+    function closeDutiesModal() {
+
+        dutiesModal.classList.add(
+            "hidden"
+        );
+
+
+        selectedMemberId =
+            null;
+
+    }
+
+
+
+    /* =====================================================
+       CLOSE STATUS MODAL
+    ===================================================== */
+
+    document
+        .getElementById(
+            "closeStatusBtn"
+        )
+        .addEventListener(
+            "click",
+            closeStatusModal
+        );
+
+
+    document
+        .getElementById(
+            "cancelStatusBtn"
+        )
+        .addEventListener(
+            "click",
+            closeStatusModal
+        );
+
+
+    function closeStatusModal() {
+
+        if (changingStatus) {
+            return;
+        }
+
+
+        statusModal.classList.add(
+            "hidden"
+        );
+
+
+        statusMemberId =
+            null;
+
+
+        confirmStatusBtn.classList.remove(
+            "enable-action"
+        );
+
+    }
+
+
+
+    /* =====================================================
+       BACK TO CORRECT DASHBOARD
+    ===================================================== */
+
+    document
+        .getElementById(
+            "backLink"
+        )
+        .addEventListener(
+            "click",
+            (event) => {
+
+                event.preventDefault();
+
+
+                /*
+                 * Do not redirect to login merely because
+                 * Firebase authentication has not finished.
+                 */
+
+                if (!authCheckCompleted) {
+
+                    return;
+
+                }
+
+
+                if (
+                    !currentUser ||
+                    !currentUserRole
+                ) {
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+
+                }
+
+
+                const dashboard =
+                    getDashboardForRole(
+                        currentUserRole
+                    );
+
+
+                if (
+                    !dashboard ||
+                    dashboard === "login.html"
+                ) {
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+
+                }
+
+
+                window.location.href =
+                    dashboard;
+
+            }
+        );
+
+
+
+    /* =====================================================
+       PAGE ERROR
+    ===================================================== */
+
+    function showPageError(
+        text
+    ) {
+
+        memberList.innerHTML = `
+
+            <div class="empty">
+
+                ${escapeHTML(text)}
+
+            </div>
+
+        `;
+
+    }
+
+
+
+    /* =====================================================
+       MESSAGE
+    ===================================================== */
+
+    function showMessage(
+        text,
+        type
+    ) {
+
+        messageBox.textContent =
+            text;
+
+
+        messageBox.className =
+            type;
+
+
+        messageBox.style.display =
+            "block";
+
+
+        if (messageTimer) {
+
+            clearTimeout(
+                messageTimer
+            );
+
+        }
+
+
+        messageTimer =
+            setTimeout(
+                () => {
+
+                    messageBox.style.display =
+                        "none";
+
+                    messageBox.className =
+                        "";
+
+                },
+                4000
+            );
+
+    }
+
+
+
+    /* =====================================================
+       HTML ESCAPE
+    ===================================================== */
+
+    function escapeHTML(
+        value
+    ) {
+
+        return String(
+            value ?? ""
+        )
+
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+
+            .replace(
+                /</g,
+                "&lt;"
+            )
+
+            .replace(
+                />/g,
+                "&gt;"
+            )
+
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+</script>

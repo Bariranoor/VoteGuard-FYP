@@ -1,0 +1,7428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>VoteGuard | Presiding Officer Dashboard</title>
+
+<!-- Legacy duplicate. The maintained operational screen is presiding-dashboard.html. -->
+<script>
+    window.location.replace("presiding-dashboard.html");
+</script>
+
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+
+:root {
+
+    --blue: #1976d2;
+    --blue-dark: #155fa8;
+
+    --bg: #f5f7fa;
+    --border: #dfe3e8;
+
+    --text: #1f2937;
+    --muted: #667085;
+
+    --green: #067647;
+    --green-bg: #ecfdf3;
+
+    --red: #b42318;
+    --red-bg: #fef3f2;
+
+    --amber: #b54708;
+    --amber-bg: #fff6ed;
+
+    --purple: #6941c6;
+    --purple-bg: #f4f3ff;
+
+}
+
+
+body {
+
+    margin: 0;
+
+    font-family:
+        Arial,
+        sans-serif;
+
+    background:
+        var(--bg);
+
+    color:
+        var(--text);
+
+}
+
+
+button,
+input,
+select {
+
+    font:
+        inherit;
+
+}
+
+
+/* ==========================================
+   TOP BAR
+========================================== */
+
+.topbar {
+
+    min-height:
+        64px;
+
+    background:
+        #ffffff;
+
+    border-bottom:
+        1px solid var(--border);
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    padding:
+        10px 24px;
+
+    gap:
+        15px;
+
+    position:
+        sticky;
+
+    top:
+        0;
+
+    z-index:
+        50;
+
+}
+
+
+.brand {
+
+    font-size:
+        19px;
+
+    font-weight:
+        700;
+
+    color:
+        var(--blue);
+
+}
+
+
+.top-actions {
+
+    display:
+        flex;
+
+    gap:
+        8px;
+
+    flex-wrap:
+        wrap;
+
+}
+
+
+/* ==========================================
+   BUTTONS
+========================================== */
+
+.btn {
+
+    border:
+        none;
+
+    border-radius:
+        6px;
+
+    padding:
+        9px 14px;
+
+    cursor:
+        pointer;
+
+    font-size:
+        13px;
+
+    font-weight:
+        600;
+
+}
+
+
+.btn:disabled {
+
+    opacity:
+        0.5;
+
+    cursor:
+        not-allowed;
+
+}
+
+
+.btn-primary {
+
+    background:
+        var(--blue);
+
+    color:
+        #ffffff;
+
+}
+
+
+.btn-primary:hover:not(:disabled) {
+
+    background:
+        var(--blue-dark);
+
+}
+
+
+.btn-secondary {
+
+    background:
+        #ffffff;
+
+    color:
+        #344054;
+
+    border:
+        1px solid #d0d5dd;
+
+}
+
+
+.btn-danger {
+
+    background:
+        #ffffff;
+
+    color:
+        var(--red);
+
+    border:
+        1px solid #f0b7b1;
+
+}
+
+
+.btn-warning {
+
+    background:
+        #fff6ed;
+
+    color:
+        #b54708;
+
+    border:
+        1px solid #fedf89;
+
+}
+
+
+/* ==========================================
+   MAIN
+========================================== */
+
+.container {
+
+    max-width:
+        1320px;
+
+    margin:
+        0 auto;
+
+    padding:
+        24px 18px 40px;
+
+}
+
+
+/* ==========================================
+   MESSAGES
+========================================== */
+
+.message {
+
+    display:
+        none;
+
+    margin-bottom:
+        14px;
+
+    padding:
+        12px 14px;
+
+    border-radius:
+        7px;
+
+    font-size:
+        14px;
+
+    line-height:
+        1.5;
+
+}
+
+
+.message.show {
+
+    display:
+        block;
+
+}
+
+
+.message.info {
+
+    background:
+        #eff8ff;
+
+    color:
+        #175cd3;
+
+    border:
+        1px solid #b2ddff;
+
+}
+
+
+.message.success {
+
+    background:
+        var(--green-bg);
+
+    color:
+        var(--green);
+
+    border:
+        1px solid #abefc6;
+
+}
+
+
+.message.error {
+
+    background:
+        var(--red-bg);
+
+    color:
+        var(--red);
+
+    border:
+        1px solid #fecdca;
+
+}
+
+
+.message.warning {
+
+    background:
+        #fffaeb;
+
+    color:
+        #93370d;
+
+    border:
+        1px solid #fedf89;
+
+}
+
+
+/* ==========================================
+   HERO
+========================================== */
+
+.hero {
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        10px;
+
+    padding:
+        20px;
+
+    margin-bottom:
+        16px;
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    gap:
+        18px;
+
+    align-items:
+        flex-start;
+
+    flex-wrap:
+        wrap;
+
+}
+
+
+.hero h1 {
+
+    margin:
+        0 0 6px;
+
+    font-size:
+        25px;
+
+}
+
+
+.hero p {
+
+    margin:
+        0;
+
+    color:
+        var(--muted);
+
+    font-size:
+        13px;
+
+    line-height:
+        1.5;
+
+}
+
+
+.identity {
+
+    min-width:
+        260px;
+
+    background:
+        #f8fafc;
+
+    border:
+        1px solid #e4e7ec;
+
+    border-radius:
+        7px;
+
+    padding:
+        11px 13px;
+
+    font-size:
+        13px;
+
+    line-height:
+        1.6;
+
+}
+
+
+/* ==========================================
+   PANELS
+========================================== */
+
+.control-row {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1.5fr 1fr;
+
+    gap:
+        14px;
+
+    margin-bottom:
+        16px;
+
+}
+
+
+.panel {
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        10px;
+
+    overflow:
+        hidden;
+
+}
+
+
+.panel-head {
+
+    padding:
+        15px 18px;
+
+    border-bottom:
+        1px solid #eaecf0;
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    gap:
+        12px;
+
+    align-items:
+        center;
+
+    flex-wrap:
+        wrap;
+
+}
+
+
+.panel-head h2,
+.panel-head h3 {
+
+    margin:
+        0;
+
+    font-size:
+        17px;
+
+}
+
+
+.panel-head p {
+
+    margin:
+        4px 0 0;
+
+    color:
+        var(--muted);
+
+    font-size:
+        12px;
+
+}
+
+
+.panel-body {
+
+    padding:
+        17px 18px;
+
+}
+
+
+/* ==========================================
+   FORM FIELDS
+========================================== */
+
+.field label {
+
+    display:
+        block;
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+    margin-bottom:
+        6px;
+
+    color:
+        #475467;
+
+}
+
+
+.field select,
+.field input {
+
+    width:
+        100%;
+
+    padding:
+        10px 11px;
+
+    border:
+        1px solid #d0d5dd;
+
+    border-radius:
+        6px;
+
+    background:
+        #ffffff;
+
+    color:
+        #101828;
+
+}
+
+
+.field input:focus,
+.field select:focus {
+
+    outline:
+        2px solid #d1e9ff;
+
+    border-color:
+        #84caff;
+
+}
+
+
+/* ==========================================
+   STATUS
+========================================== */
+
+.status-box {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    flex-wrap:
+        wrap;
+
+}
+
+
+.badge {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    padding:
+        5px 9px;
+
+    border-radius:
+        999px;
+
+    font-size:
+        11px;
+
+    font-weight:
+        700;
+
+}
+
+
+.badge.green {
+
+    background:
+        var(--green-bg);
+
+    color:
+        var(--green);
+
+}
+
+
+.badge.red {
+
+    background:
+        var(--red-bg);
+
+    color:
+        var(--red);
+
+}
+
+
+.badge.amber {
+
+    background:
+        var(--amber-bg);
+
+    color:
+        var(--amber);
+
+}
+
+
+.badge.blue {
+
+    background:
+        #eff8ff;
+
+    color:
+        #175cd3;
+
+}
+
+
+.badge.gray {
+
+    background:
+        #f2f4f7;
+
+    color:
+        #475467;
+
+}
+
+
+.badge.purple {
+
+    background:
+        var(--purple-bg);
+
+    color:
+        var(--purple);
+
+}
+
+
+/* ==========================================
+   STATS
+========================================== */
+
+.stats {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            5,
+            1fr
+        );
+
+    gap:
+        12px;
+
+    margin-bottom:
+        16px;
+
+}
+
+
+.stat {
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        9px;
+
+    padding:
+        16px;
+
+}
+
+
+.stat .label {
+
+    font-size:
+        12px;
+
+    color:
+        var(--muted);
+
+    margin-bottom:
+        7px;
+
+}
+
+
+.stat .value {
+
+    font-size:
+        26px;
+
+    font-weight:
+        700;
+
+    color:
+        var(--blue);
+
+}
+
+
+.stat .sub {
+
+    font-size:
+        11px;
+
+    color:
+        #98a2b3;
+
+    margin-top:
+        5px;
+
+}
+
+
+/* ==========================================
+   VOTER WORKFLOW
+========================================== */
+
+.workflow-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1.15fr .85fr;
+
+    gap:
+        16px;
+
+    margin-bottom:
+        16px;
+
+}
+
+
+.search-row {
+
+    display:
+        flex;
+
+    gap:
+        8px;
+
+}
+
+
+.search-row input {
+
+    flex:
+        1;
+
+    min-width:
+        0;
+
+}
+
+
+.result-list {
+
+    margin-top:
+        12px;
+
+    border:
+        1px solid #eaecf0;
+
+    border-radius:
+        7px;
+
+    max-height:
+        230px;
+
+    overflow:
+        auto;
+
+}
+
+
+.result-item {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    gap:
+        10px;
+
+    align-items:
+        center;
+
+    padding:
+        10px 12px;
+
+    border-bottom:
+        1px solid #f0f2f5;
+
+}
+
+
+.result-item:last-child {
+
+    border-bottom:
+        none;
+
+}
+
+
+.result-name {
+
+    font-size:
+        13px;
+
+    font-weight:
+        700;
+
+}
+
+
+.result-meta {
+
+    font-size:
+        11px;
+
+    color:
+        var(--muted);
+
+    margin-top:
+        3px;
+
+}
+
+
+/* ==========================================
+   VERIFICATION
+========================================== */
+
+.verify-card {
+
+    margin-top:
+        14px;
+
+    border:
+        1px solid #e4e7ec;
+
+    border-radius:
+        8px;
+
+    background:
+        #f8fafc;
+
+    padding:
+        14px;
+
+}
+
+
+.verify-title {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        flex-start;
+
+    gap:
+        12px;
+
+}
+
+
+.verify-title h3 {
+
+    margin:
+        0 0 4px;
+
+    font-size:
+        17px;
+
+}
+
+
+.verify-title p {
+
+    margin:
+        0;
+
+    color:
+        var(--muted);
+
+    font-size:
+        12px;
+
+}
+
+
+.checks {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:
+        8px;
+
+    margin:
+        13px 0;
+
+}
+
+
+.check {
+
+    border-radius:
+        6px;
+
+    padding:
+        9px 10px;
+
+    font-size:
+        12px;
+
+    font-weight:
+        600;
+
+}
+
+
+.check.ok {
+
+    background:
+        var(--green-bg);
+
+    color:
+        var(--green);
+
+}
+
+
+.check.bad {
+
+    background:
+        var(--red-bg);
+
+    color:
+        var(--red);
+
+}
+
+
+.verify-actions {
+
+    display:
+        flex;
+
+    justify-content:
+        flex-end;
+
+    gap:
+        8px;
+
+    flex-wrap:
+        wrap;
+
+}
+
+
+.reason {
+
+    margin-top:
+        10px;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.5;
+
+    color:
+        #475467;
+
+}
+
+
+/* ==========================================
+   SESSION
+========================================== */
+
+.session-empty {
+
+    text-align:
+        center;
+
+    color:
+        var(--muted);
+
+    font-size:
+        13px;
+
+    padding:
+        28px 10px;
+
+}
+
+
+.session-card {
+
+    border:
+        1px solid #e4e7ec;
+
+    border-radius:
+        8px;
+
+    padding:
+        14px;
+
+    background:
+        #fafcff;
+
+}
+
+
+.session-top {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    gap:
+        10px;
+
+    align-items:
+        flex-start;
+
+}
+
+
+.session-top h3 {
+
+    margin:
+        0 0 4px;
+
+    font-size:
+        17px;
+
+}
+
+
+.session-meta {
+
+    font-size:
+        12px;
+
+    color:
+        var(--muted);
+
+    line-height:
+        1.6;
+
+}
+
+
+.session-progress {
+
+    margin:
+        14px 0;
+
+    padding:
+        11px 12px;
+
+    border-radius:
+        7px;
+
+    background:
+        #f4f3ff;
+
+    color:
+        #6941c6;
+
+    font-size:
+        13px;
+
+    font-weight:
+        700;
+
+}
+
+
+.session-actions {
+
+    display:
+        flex;
+
+    justify-content:
+        flex-end;
+
+    gap:
+        8px;
+
+    flex-wrap:
+        wrap;
+
+}
+
+
+/* ==========================================
+   FILTERS
+========================================== */
+
+.filters {
+
+    display:
+        flex;
+
+    gap:
+        8px;
+
+    flex-wrap:
+        wrap;
+
+}
+
+
+.filter-btn {
+
+    border:
+        1px solid #d0d5dd;
+
+    background:
+        #ffffff;
+
+    color:
+        #475467;
+
+    border-radius:
+        999px;
+
+    padding:
+        6px 10px;
+
+    cursor:
+        pointer;
+
+    font-size:
+        12px;
+
+}
+
+
+.filter-btn.active {
+
+    background:
+        #eff8ff;
+
+    color:
+        #175cd3;
+
+    border-color:
+        #84caff;
+
+}
+
+
+/* ==========================================
+   TABLES
+========================================== */
+
+.table-wrap {
+
+    overflow:
+        auto;
+
+}
+
+
+.table-wrap table {
+
+    width:
+        100%;
+
+    border-collapse:
+        collapse;
+
+    min-width:
+        760px;
+
+}
+
+
+th,
+td {
+
+    padding:
+        11px 12px;
+
+    border-bottom:
+        1px solid #eaecf0;
+
+    text-align:
+        left;
+
+    font-size:
+        12px;
+
+    white-space:
+        nowrap;
+
+}
+
+
+th {
+
+    background:
+        #f9fafb;
+
+    color:
+        #475467;
+
+    font-weight:
+        700;
+
+}
+
+
+.empty {
+
+    padding:
+        28px;
+
+    text-align:
+        center;
+
+    color:
+        var(--muted);
+
+    font-size:
+        13px;
+
+}
+
+
+.link-btn {
+
+    border:
+        none;
+
+    background:
+        transparent;
+
+    color:
+        var(--blue);
+
+    font-weight:
+        700;
+
+    cursor:
+        pointer;
+
+    padding:
+        4px;
+
+}
+
+
+/* ==========================================
+   ANALYTICS
+========================================== */
+
+.bottom-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:
+        16px;
+
+    margin-top:
+        16px;
+
+}
+
+
+.activity-list {
+
+    max-height:
+        340px;
+
+    overflow:
+        auto;
+
+}
+
+
+.activity {
+
+    padding:
+        10px 0;
+
+    border-bottom:
+        1px solid #f0f2f5;
+
+}
+
+
+.activity:last-child {
+
+    border-bottom:
+        none;
+
+}
+
+
+.activity-title {
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+}
+
+
+.activity-meta {
+
+    font-size:
+        11px;
+
+    color:
+        var(--muted);
+
+    margin-top:
+        3px;
+
+}
+
+
+.turnout-table {
+
+    width:
+        100%;
+
+    border-collapse:
+        collapse;
+
+}
+
+
+.turnout-table th,
+.turnout-table td {
+
+    padding:
+        9px 8px;
+
+    font-size:
+        12px;
+
+}
+
+
+.progress {
+
+    height:
+        7px;
+
+    background:
+        #eaecf0;
+
+    border-radius:
+        999px;
+
+    overflow:
+        hidden;
+
+    min-width:
+        90px;
+
+}
+
+
+.progress > span {
+
+    display:
+        block;
+
+    height:
+        100%;
+
+    background:
+        var(--blue);
+
+}
+
+
+/* ==========================================
+   CONFIRM MODAL
+========================================== */
+
+.modal {
+
+    display:
+        none;
+
+    position:
+        fixed;
+
+    inset:
+        0;
+
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            .45
+        );
+
+    z-index:
+        1000;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        20px;
+
+}
+
+
+.modal.show {
+
+    display:
+        flex;
+
+}
+
+
+.modal-card {
+
+    width:
+        100%;
+
+    max-width:
+        520px;
+
+    background:
+        #ffffff;
+
+    border-radius:
+        10px;
+
+    padding:
+        20px;
+
+}
+
+
+.modal-card h3 {
+
+    margin:
+        0 0 8px;
+
+}
+
+
+.modal-card p {
+
+    font-size:
+        13px;
+
+    color:
+        var(--muted);
+
+    line-height:
+        1.55;
+
+    margin:
+        0;
+
+}
+
+
+.modal-summary {
+
+    background:
+        #f8fafc;
+
+    border:
+        1px solid #e4e7ec;
+
+    border-radius:
+        7px;
+
+    padding:
+        12px;
+
+    margin-top:
+        14px;
+
+    font-size:
+        13px;
+
+    line-height:
+        1.6;
+
+}
+
+
+.modal-actions {
+
+    display:
+        flex;
+
+    justify-content:
+        flex-end;
+
+    gap:
+        8px;
+
+    margin-top:
+        18px;
+
+}
+
+
+.note {
+
+    font-size:
+        11px;
+
+    color:
+        #667085;
+
+    line-height:
+        1.5;
+
+    margin-top:
+        8px;
+
+}
+
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media (
+    max-width: 1050px
+) {
+
+    .stats {
+
+        grid-template-columns:
+            repeat(
+                3,
+                1fr
+            );
+
+    }
+
+
+    .workflow-grid,
+    .bottom-grid,
+    .control-row {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+}
+
+
+@media (
+    max-width: 700px
+) {
+
+    .stats {
+
+        grid-template-columns:
+            repeat(
+                2,
+                1fr
+            );
+
+    }
+
+
+    .checks {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .container {
+
+        padding:
+            16px 10px 30px;
+
+    }
+
+
+    .topbar {
+
+        padding:
+            10px 12px;
+
+    }
+
+
+    .hero h1 {
+
+        font-size:
+            21px;
+
+    }
+
+}
+
+</style>
+
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+</head>
+
+
+<body>
+
+
+<!-- ==========================================
+     TOP BAR
+========================================== -->
+
+<header class="topbar">
+
+    <div class="brand">
+        Institutional Election — Booth Operations
+    </div>
+
+
+    <div class="top-actions">
+
+        <button
+            class="btn btn-secondary"
+            id="refreshBtn"
+            type="button"
+        >
+            Refresh
+        </button>
+
+
+        <button
+            class="btn btn-secondary"
+            id="profileBtn"
+            type="button"
+        >
+            Profile
+        </button>
+
+
+        <button
+            class="btn btn-danger"
+            id="logoutBtn"
+            type="button"
+        >
+            Sign Out
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- ==========================================
+     MAIN
+========================================== -->
+
+<main class="container">
+
+
+    <div
+        id="message"
+        class="message"
+    ></div>
+
+
+    <!-- ======================================
+         HERO
+    ======================================= -->
+
+    <section class="hero">
+
+
+        <div>
+
+            <h1 id="pageTitle">
+                Presiding Officer Dashboard
+            </h1>
+
+            <p>
+                Verify assigned voters, authorize one-time ballots,
+                monitor booth turnout, and supervise active voting sessions.
+            </p>
+
+        </div>
+
+
+        <div class="identity">
+
+            <strong id="userName">
+                Loading...
+            </strong>
+
+            <br>
+
+            <span id="userEmail">
+                —
+            </span>
+
+            <br>
+
+            <span id="userRole">
+                —
+            </span>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- ======================================
+         BOOTH + ELECTION
+    ======================================= -->
+
+    <section class="control-row">
+
+
+        <div class="panel">
+
+
+            <div class="panel-head">
+
+                <div>
+
+                    <h2>
+                        Assigned Booth
+                    </h2>
+
+                    <p>
+                        Select the booth you are currently operating.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel-body">
+
+
+                <div class="field">
+
+                    <label for="boothSelect">
+                        Booth
+                    </label>
+
+                    <select id="boothSelect">
+
+                        <option value="">
+                            Loading assignments...
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div
+                    class="note"
+                    id="boothInfo"
+                >
+                    No booth selected.
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+        <div class="panel">
+
+
+            <div class="panel-head">
+
+                <div>
+
+                    <h2>
+                        Election Status
+                    </h2>
+
+                    <p>
+                        Ballots can only be authorized while voting is active.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel-body">
+
+
+                <div class="status-box">
+
+                    <span
+                        id="electionStatusBadge"
+                        class="badge gray"
+                    >
+                        Not Loaded
+                    </span>
+
+
+                    <strong id="electionName">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div
+                    class="note"
+                    id="electionInfo"
+                >
+                    Select an assigned booth.
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+    <!-- ======================================
+         SUMMARY
+    ======================================= -->
+
+    <section class="stats">
+
+
+        <div class="stat">
+
+            <div class="label">
+                Assigned Voters
+            </div>
+
+            <div
+                class="value"
+                id="totalVoters"
+            >
+                0
+            </div>
+
+            <div class="sub">
+                Eligible voters in this booth
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="label">
+                Not Voted
+            </div>
+
+            <div
+                class="value"
+                id="notVotedCount"
+            >
+                0
+            </div>
+
+            <div class="sub">
+                Still waiting to vote
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="label">
+                In Session
+            </div>
+
+            <div
+                class="value"
+                id="inSessionCount"
+            >
+                0
+            </div>
+
+            <div class="sub">
+                Authorized / ballot open
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="label">
+                Voted
+            </div>
+
+            <div
+                class="value"
+                id="votedCount"
+            >
+                0
+            </div>
+
+            <div class="sub">
+                Successfully completed
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="label">
+                Turnout
+            </div>
+
+            <div
+                class="value"
+                id="turnoutValue"
+            >
+                0%
+            </div>
+
+            <div class="sub">
+                Completed / assigned
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- ======================================
+         MAIN WORKFLOW
+    ======================================= -->
+
+    <section class="workflow-grid">
+
+
+        <!-- ==================================
+             VOTER VERIFICATION
+        =================================== -->
+
+        <div class="panel">
+
+
+            <div class="panel-head">
+
+                <div>
+
+                    <h2>
+                        Voter Verification
+                    </h2>
+
+                    <p>
+                        Search by roll number first.
+                        Name search is available for assistance.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel-body">
+
+
+                <div class="search-row field">
+
+
+                    <input
+                        id="voterSearch"
+                        type="search"
+                        placeholder="Enter roll number or student name"
+                        autocomplete="off"
+                    >
+
+
+                    <button
+                        class="btn btn-primary"
+                        id="searchVoterBtn"
+                        type="button"
+                    >
+                        Search
+                    </button>
+
+
+                </div>
+
+
+                <div
+                    id="searchResults"
+                    class="result-list"
+                    style="display:none"
+                ></div>
+
+
+                <div
+                    id="verificationEmpty"
+                    class="empty"
+                >
+                    Search for a student assigned to this booth.
+                </div>
+
+
+                <div
+                    id="verificationCard"
+                    class="verify-card"
+                    style="display:none"
+                >
+
+
+                    <div class="verify-title">
+
+
+                        <div>
+
+                            <h3 id="verifiedName">
+                                —
+                            </h3>
+
+                            <p id="verifiedMeta">
+                                —
+                            </p>
+
+                        </div>
+
+
+                        <span
+                            id="verificationReadyBadge"
+                            class="badge gray"
+                        >
+                            Not Checked
+                        </span>
+
+
+                    </div>
+
+
+                    <div class="checks">
+
+
+                        <div
+                            id="checkBooth"
+                            class="check bad"
+                        >
+                            Booth: Not checked
+                        </div>
+
+
+                        <div
+                            id="checkEligibility"
+                            class="check bad"
+                        >
+                            Eligibility: Not checked
+                        </div>
+
+
+                        <div
+                            id="checkVoteStatus"
+                            class="check bad"
+                        >
+                            Voting status: Not checked
+                        </div>
+
+
+                        <div
+                            id="checkElection"
+                            class="check bad"
+                        >
+                            Election: Not checked
+                        </div>
+
+
+                    </div>
+
+
+                    <div
+                        id="verificationReason"
+                        class="reason"
+                    ></div>
+
+
+                    <div class="verify-actions">
+
+
+                        <button
+                            class="btn btn-secondary"
+                            id="clearVerifiedBtn"
+                            type="button"
+                        >
+                            Clear
+                        </button>
+
+
+                        <button
+                            class="btn btn-primary"
+                            id="openBallotBtn"
+                            type="button"
+                            disabled
+                        >
+                            Verify & Open Ballot
+                        </button>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ==================================
+             ACTIVE SESSION
+        =================================== -->
+
+        <div class="panel">
+
+
+            <div class="panel-head">
+
+                <div>
+
+                    <h2>
+                        Active Voting Session
+                    </h2>
+
+                    <p>
+                        Only a successfully submitted ballot will mark
+                        a voter as voted.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel-body">
+
+
+                <div
+                    id="sessionEmpty"
+                    class="session-empty"
+                >
+                    No active voting session.
+                </div>
+
+
+                <div
+                    id="sessionCard"
+                    class="session-card"
+                    style="display:none"
+                >
+
+
+                    <div class="session-top">
+
+
+                        <div>
+
+                            <h3 id="sessionVoterName">
+                                —
+                            </h3>
+
+                            <div
+                                id="sessionVoterMeta"
+                                class="session-meta"
+                            >
+                                —
+                            </div>
+
+                        </div>
+
+
+                        <span
+                            id="sessionStatusBadge"
+                            class="badge purple"
+                        >
+                            Authorized
+                        </span>
+
+
+                    </div>
+
+
+                    <div
+                        id="sessionProgress"
+                        class="session-progress"
+                    >
+                        Waiting for Android voting device...
+                    </div>
+
+
+                    <div
+                        id="sessionDetails"
+                        class="session-meta"
+                    ></div>
+
+
+                    <div class="session-actions">
+
+                        <button
+                            class="btn btn-warning"
+                            id="cancelSessionBtn"
+                            type="button"
+                        >
+                            Cancel Session
+                        </button>
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="note">
+
+                    Opening a ballot does
+                    <strong>
+                        not
+                    </strong>
+                    mark the student as voted.
+
+                    That happens only after secure vote submission
+                    from the voting device.
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+    <!-- ======================================
+         VOTER LIST
+    ======================================= -->
+
+    <section class="panel">
+
+
+        <div class="panel-head">
+
+
+            <div>
+
+                <h2>
+                    Assigned Voter List
+                </h2>
+
+                <p>
+                    Operational view for this booth only.
+                    Candidate choices are never shown here.
+                </p>
+
+            </div>
+
+
+            <div class="filters">
+
+
+                <button
+                    class="filter-btn active"
+                    data-filter="all"
+                    type="button"
+                >
+                    All
+                </button>
+
+
+                <button
+                    class="filter-btn"
+                    data-filter="not_voted"
+                    type="button"
+                >
+                    Not Voted
+                </button>
+
+
+                <button
+                    class="filter-btn"
+                    data-filter="in_session"
+                    type="button"
+                >
+                    In Session
+                </button>
+
+
+                <button
+                    class="filter-btn"
+                    data-filter="voted"
+                    type="button"
+                >
+                    Voted
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+
+        <div
+            class="panel-body"
+            style="padding:0"
+        >
+
+
+            <div class="table-wrap">
+
+
+                <table>
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Name</th>
+
+                            <th>Roll Number</th>
+
+                            <th>Class</th>
+
+                            <th>Section</th>
+
+                            <th>Eligibility</th>
+
+                            <th>Status</th>
+
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="voterTableBody">
+                    </tbody>
+
+
+                </table>
+
+
+            </div>
+
+
+            <div
+                id="voterTableEmpty"
+                class="empty"
+            >
+                Select an assigned booth.
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+    <!-- ======================================
+         ANALYTICS
+    ======================================= -->
+
+    <section class="bottom-grid">
+
+
+        <!-- TURNOUT -->
+
+        <div class="panel">
+
+
+            <div class="panel-head">
+
+                <div>
+
+                    <h3>
+                        Turnout by Class / Section
+                    </h3>
+
+                    <p>
+                        Booth-level participation analysis only.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="panel-body"
+                style="padding:0"
+            >
+
+
+                <div class="table-wrap">
+
+
+                    <table class="turnout-table">
+
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Group</th>
+
+                                <th>Voted</th>
+
+                                <th>Total</th>
+
+                                <th>Turnout</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="turnoutBody">
+                        </tbody>
+
+
+                    </table>
+
+
+                </div>
+
+
+                <div
+                    id="turnoutEmpty"
+                    class="empty"
+                >
+                    No voter data available.
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ACTIVITY -->
+
+        <div class="panel">
+
+
+            <div class="panel-head">
+
+                <div>
+
+                    <h3>
+                        Recent Booth Activity
+                    </h3>
+
+                    <p>
+                        Session events only — never vote choices.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel-body">
+
+
+                <div
+                    id="activityList"
+                    class="activity-list"
+                ></div>
+
+
+                <div
+                    id="activityEmpty"
+                    class="empty"
+                >
+                    No voting-session activity yet.
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+</main>
+
+
+<!-- ==========================================
+     CONFIRMATION MODAL
+========================================== -->
+
+<div
+    class="modal"
+    id="confirmModal"
+>
+
+
+    <div class="modal-card">
+
+
+        <h3 id="confirmTitle">
+            Confirm
+        </h3>
+
+
+        <p id="confirmMessage">
+        </p>
+
+
+        <div
+            id="confirmSummary"
+            class="modal-summary"
+        ></div>
+
+
+        <div class="modal-actions">
+
+
+            <button
+                class="btn btn-secondary"
+                id="confirmCancelBtn"
+                type="button"
+            >
+                Cancel
+            </button>
+
+
+            <button
+                class="btn btn-primary"
+                id="confirmOkBtn"
+                type="button"
+            >
+                Confirm
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+<!-- ==========================================
+     JAVASCRIPT
+========================================== -->
+
+<script type="module">
+
+
+/* ==========================================
+   FIREBASE
+========================================== */
+
+import {
+
+    auth,
+    db
+
+} from "./js/firebase.js";
+
+
+import {
+
+    onAuthStateChanged,
+    signOut
+
+} from
+"https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+
+import {
+
+    collection,
+    query,
+    where,
+    getDocs,
+    getDoc,
+    doc,
+    onSnapshot,
+    runTransaction,
+    serverTimestamp,
+    Timestamp
+
+} from
+"https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+
+/* ==========================================
+   BASIC HELPERS
+========================================== */
+
+const $ =
+    id =>
+        document.getElementById(
+            id
+        );
+
+
+const ACTIVE_SESSION_STATUSES = [
+
+    "authorized",
+    "ballot_open"
+
+];
+
+
+const SESSION_MINUTES =
+    5;
+
+
+/* ==========================================
+   STATE
+========================================== */
+
+let currentUser =
+    null;
+
+
+let currentUserData =
+    null;
+
+
+let assignedBooths =
+    [];
+
+
+let currentAssignment =
+    null;
+
+
+let currentBooth =
+    null;
+
+
+let currentElection =
+    null;
+
+
+let voters =
+    [];
+
+
+let sessions =
+    [];
+
+
+let selectedVoter =
+    null;
+
+
+let voterFilter =
+    "all";
+
+
+let unsubscribeVoters =
+    null;
+
+
+let unsubscribeSessions =
+    null;
+
+
+let authHandled =
+    false;
+
+
+/* ==========================================
+   ESCAPE HTML
+========================================== */
+
+function escapeHtml(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+/* ==========================================
+   NORMALIZE
+========================================== */
+
+function normalize(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+        .trim()
+        .toLowerCase();
+
+}
+
+
+/* ==========================================
+   NATURAL SORT
+========================================== */
+
+function naturalCompare(
+    a,
+    b
+) {
+
+    return String(
+        a ?? ""
+    )
+        .localeCompare(
+
+            String(
+                b ?? ""
+            ),
+
+            undefined,
+
+            {
+
+                numeric:
+                    true,
+
+                sensitivity:
+                    "base"
+
+            }
+
+        );
+
+}
+
+
+/* ==========================================
+   ROLE LABEL
+========================================== */
+
+function roleLabel(
+    role
+) {
+
+    if (
+        role ===
+        "presiding_officer"
+    ) {
+
+        return "Presiding Officer";
+
+    }
+
+
+    if (
+        role ===
+        "assistant_presiding_officer"
+    ) {
+
+        return "Assistant Presiding Officer";
+
+    }
+
+
+    return "Polling Officer";
+
+}
+
+
+/* ==========================================
+   MESSAGE
+========================================== */
+
+function showMessage(
+    type,
+    text
+) {
+
+    const box =
+        $("message");
+
+
+    box.textContent =
+        text;
+
+
+    box.className =
+        `message show ${type}`;
+
+
+    clearTimeout(
+        showMessage.timer
+    );
+
+
+    showMessage.timer =
+        setTimeout(
+            () => {
+
+                box.className =
+                    "message";
+
+                box.textContent =
+                    "";
+
+            },
+            7000
+        );
+
+}
+
+
+/* ==========================================
+   DATE FORMAT
+========================================== */
+
+function formatDate(
+    value
+) {
+
+    if (
+        !value
+    ) {
+
+        return "—";
+
+    }
+
+
+    try {
+
+        const date =
+
+            value.toDate
+
+                ?
+
+                value.toDate()
+
+                :
+
+                new Date(
+                    value
+                );
+
+
+        return date
+            .toLocaleString();
+
+    }
+
+    catch {
+
+        return "—";
+
+    }
+
+}
+
+
+/* ==========================================
+   SESSION DOCUMENT ID
+========================================== */
+
+function sessionDocId(
+    electionId,
+    voterId
+) {
+
+    return `${electionId}_${voterId}`;
+
+}
+
+
+/* ==========================================
+   SESSION EFFECTIVE STATUS
+========================================== */
+
+function effectiveSessionStatus(
+    session
+) {
+
+    if (
+        !session
+    ) {
+
+        return "none";
+
+    }
+
+
+    if (
+
+        session.status ===
+            "authorized"
+
+        &&
+
+        session.expiresAt
+            ?.toMillis
+
+        &&
+
+        session.expiresAt
+            .toMillis() <=
+            Date.now()
+
+    ) {
+
+        return "expired";
+
+    }
+
+
+    return (
+        session.status ||
+        "unknown"
+    );
+
+}
+
+
+/* ==========================================
+   TIMESTAMP TO MILLISECONDS
+========================================== */
+
+function timestampMs(
+    value
+) {
+
+    if (
+        !value
+    ) {
+
+        return 0;
+
+    }
+
+
+    try {
+
+        return value.toMillis
+
+            ?
+
+            value.toMillis()
+
+            :
+
+            new Date(
+                value
+            )
+            .getTime();
+
+    }
+
+    catch {
+
+        return 0;
+
+    }
+
+}
+
+
+/* ==========================================
+   SESSION HELPERS
+========================================== */
+
+function getSessionForVoter(
+    voterId
+) {
+
+    return (
+
+        sessions.find(
+
+            session =>
+
+                session.voterId ===
+                    voterId
+
+                &&
+
+                [
+                    "authorized",
+                    "ballot_open"
+                ]
+                .includes(
+                    effectiveSessionStatus(
+                        session
+                    )
+                )
+
+        )
+
+        ||
+
+        null
+
+    );
+
+}
+
+
+function getActiveSessions() {
+
+    return sessions.filter(
+
+        session =>
+
+            ACTIVE_SESSION_STATUSES
+                .includes(
+                    effectiveSessionStatus(
+                        session
+                    )
+                )
+
+    );
+
+}
+
+
+function getActiveBoothSession() {
+
+    return (
+
+        getActiveSessions()
+
+            .slice()
+
+            .sort(
+                (a, b) =>
+
+                    timestampMs(
+                        b.updatedAt
+                    )
+
+                    -
+
+                    timestampMs(
+                        a.updatedAt
+                    )
+            )[0]
+
+        ||
+
+        null
+
+    );
+
+}
+
+
+/* ==========================================
+   VOTER HELPERS
+========================================== */
+
+function getVoterById(
+    id
+) {
+
+    return (
+
+        voters.find(
+            voter =>
+                voter.id === id
+        )
+
+        ||
+
+        null
+
+    );
+
+}
+
+
+function isCurrentBoothVoter(
+    voter
+) {
+
+    return !!(
+
+        voter
+
+        &&
+
+        currentBooth
+
+        &&
+
+        currentElection
+
+        &&
+
+        voter.boothId ===
+            currentBooth.id
+
+        &&
+
+        voter.electionId ===
+            currentElection.id
+
+    );
+
+}
+
+
+/* ==========================================
+   AUTHORIZATION POWER
+========================================== */
+
+function canAuthorize() {
+
+    return (
+        currentUserData?.role ===
+        "presiding_officer"
+    );
+
+}
+
+
+/* ==========================================
+   CONFIRMATION MODAL
+========================================== */
+
+async function confirmAction({
+
+    title,
+    message,
+    summary,
+    confirmText =
+        "Confirm"
+
+}) {
+
+
+    $("confirmTitle")
+        .textContent =
+        title;
+
+
+    $("confirmMessage")
+        .textContent =
+        message;
+
+
+    $("confirmSummary")
+        .textContent =
+        summary;
+
+
+    $("confirmOkBtn")
+        .textContent =
+        confirmText;
+
+
+    $("confirmModal")
+        .classList
+        .add(
+            "show"
+        );
+
+
+    return new Promise(
+
+        resolve => {
+
+
+            let done =
+                false;
+
+
+            const finish =
+                result => {
+
+
+                    if (
+                        done
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    done =
+                        true;
+
+
+                    $("confirmModal")
+                        .classList
+                        .remove(
+                            "show"
+                        );
+
+
+                    cleanup();
+
+
+                    resolve(
+                        result
+                    );
+
+                };
+
+
+            const onBackdrop =
+                event => {
+
+
+                    if (
+                        event.target ===
+                        $("confirmModal")
+                    ) {
+
+                        finish(
+                            false
+                        );
+
+                    }
+
+                };
+
+
+            const cleanup =
+                () => {
+
+
+                    $("confirmOkBtn")
+                        .onclick =
+                        null;
+
+
+                    $("confirmCancelBtn")
+                        .onclick =
+                        null;
+
+
+                    $("confirmModal")
+                        .removeEventListener(
+                            "click",
+                            onBackdrop
+                        );
+
+                };
+
+
+            $("confirmOkBtn")
+                .onclick =
+                () =>
+                    finish(
+                        true
+                    );
+
+
+            $("confirmCancelBtn")
+                .onclick =
+                () =>
+                    finish(
+                        false
+                    );
+
+
+            $("confirmModal")
+                .addEventListener(
+                    "click",
+                    onBackdrop
+                );
+
+
+        }
+
+    );
+
+}
+
+
+/* ==========================================
+   ACCESS CHECK
+========================================== */
+
+async function checkAccess(
+    user
+) {
+
+
+    if (
+        !user
+    ) {
+
+        location.href =
+            "login.html";
+
+        return false;
+
+    }
+
+
+    const snap =
+        await getDoc(
+
+            doc(
+                db,
+                "Users",
+                user.uid
+            )
+
+        );
+
+
+    if (
+        !snap.exists()
+    ) {
+
+        showMessage(
+
+            "error",
+
+            "Your user profile could not be found."
+
+        );
+
+        return false;
+
+    }
+
+
+    const data =
+        snap.data();
+
+
+    if (
+
+        data.status !==
+            "active"
+
+        ||
+
+        ![
+            "presiding_officer",
+            "assistant_presiding_officer"
+        ]
+        .includes(
+            data.role
+        )
+
+    ) {
+
+        showMessage(
+
+            "error",
+
+            "This page is only for active Presiding Officer or Assistant Presiding Officer accounts."
+
+        );
+
+        return false;
+
+    }
+
+
+    currentUser =
+        user;
+
+
+    currentUserData =
+        data;
+
+
+    const label =
+        roleLabel(
+            data.role
+        );
+
+
+    $("pageTitle")
+        .textContent =
+        `${label} Dashboard`;
+
+
+    $("userName")
+        .textContent =
+        data.name ||
+        label;
+
+
+    $("userEmail")
+        .textContent =
+        data.email ||
+        user.email ||
+        "—";
+
+
+    $("userRole")
+        .textContent =
+
+        label
+
+        +
+
+        (
+            data.role ===
+                "assistant_presiding_officer"
+
+                ?
+
+                " — verification/monitoring only"
+
+                :
+
+                ""
+        );
+
+
+    return true;
+
+}
+
+
+/* ==========================================
+   LOAD ASSIGNED BOOTHS
+========================================== */
+
+async function loadAssignedBooths() {
+
+
+    const field =
+
+        currentUserData.role ===
+        "presiding_officer"
+
+            ?
+
+            "poUid"
+
+            :
+
+            "apoUid";
+
+
+    const snap =
+        await getDocs(
+
+            query(
+
+                collection(
+                    db,
+                    "BoothStaff"
+                ),
+
+                where(
+                    field,
+                    "==",
+                    currentUser.uid
+                )
+
+            )
+
+        );
+
+
+    const assignments =
+
+        snap.docs.map(
+
+            documentSnapshot => ({
+
+                id:
+                    documentSnapshot.id,
+
+                ...documentSnapshot.data()
+
+            })
+
+        );
+
+
+    const loaded =
+        await Promise.all(
+
+            assignments.map(
+
+                async assignment => {
+
+
+                    if (
+
+                        !assignment.boothId
+
+                        ||
+
+                        !assignment.electionId
+
+                    ) {
+
+                        return null;
+
+                    }
+
+
+                    const [
+
+                        boothSnap,
+                        electionSnap
+
+                    ] =
+
+                    await Promise.all([
+
+
+                        getDoc(
+
+                            doc(
+                                db,
+                                "Booths",
+                                assignment.boothId
+                            )
+
+                        ),
+
+
+                        getDoc(
+
+                            doc(
+                                db,
+                                "Elections",
+                                assignment.electionId
+                            )
+
+                        )
+
+
+                    ]);
+
+
+                    if (
+
+                        !boothSnap.exists()
+
+                        ||
+
+                        !electionSnap.exists()
+
+                    ) {
+
+                        return null;
+
+                    }
+
+
+                    const booth = {
+
+                        id:
+                            boothSnap.id,
+
+                        ...boothSnap.data()
+
+                    };
+
+
+                    const election = {
+
+                        id:
+                            electionSnap.id,
+
+                        ...electionSnap.data()
+
+                    };
+
+
+                    if (
+                        booth.electionId !==
+                        election.id
+                    ) {
+
+                        return null;
+
+                    }
+
+
+                    return {
+
+                        assignment,
+                        booth,
+                        election
+
+                    };
+
+                }
+
+            )
+
+        );
+
+
+    assignedBooths =
+
+        loaded
+
+            .filter(
+                Boolean
+            )
+
+            .sort(
+
+                (a, b) =>
+
+                    naturalCompare(
+
+                        a.election
+                            .electionName,
+
+                        b.election
+                            .electionName
+
+                    )
+
+                    ||
+
+                    naturalCompare(
+
+                        a.booth
+                            .boothNumber,
+
+                        b.booth
+                            .boothNumber
+
+                    )
+
+            );
+
+
+    const select =
+        $("boothSelect");
+
+
+    select.innerHTML =
+        '<option value="">Select assigned booth</option>';
+
+
+    assignedBooths.forEach(
+
+        (
+            item,
+            index
+        ) => {
+
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                String(
+                    index
+                );
+
+
+            option.textContent =
+
+                `${
+                    item.booth
+                        .boothNumber ||
+                    "Booth"
+                } — ${
+                    item.election
+                        .electionName ||
+                    "Election"
+                }`;
+
+
+            select.appendChild(
+                option
+            );
+
+
+        }
+
+    );
+
+
+    if (
+        assignedBooths.length ===
+        1
+    ) {
+
+
+        select.value =
+            "0";
+
+
+        await activateBooth(
+            0
+        );
+
+
+    }
+
+
+    else if (
+        !assignedBooths.length
+    ) {
+
+
+        select.innerHTML =
+            '<option value="">No booth assigned</option>';
+
+
+        $("boothInfo")
+            .textContent =
+            "No polling booth is assigned to this account.";
+
+
+        resetOperationalView();
+
+
+    }
+
+}
+
+
+/* ==========================================
+   ACTIVATE BOOTH
+========================================== */
+
+async function activateBooth(
+    index
+) {
+
+
+    stopRealtimeListeners();
+
+
+    selectedVoter =
+        null;
+
+
+    voters =
+        [];
+
+
+    sessions =
+        [];
+
+
+    currentAssignment =
+
+        assignedBooths[
+            index
+        ]
+        ?.assignment
+
+        ||
+
+        null;
+
+
+    currentBooth =
+
+        assignedBooths[
+            index
+        ]
+        ?.booth
+
+        ||
+
+        null;
+
+
+    currentElection =
+
+        assignedBooths[
+            index
+        ]
+        ?.election
+
+        ||
+
+        null;
+
+
+    if (
+
+        !currentBooth
+
+        ||
+
+        !currentElection
+
+    ) {
+
+        resetOperationalView();
+
+        return;
+
+    }
+
+
+    $("boothInfo")
+        .textContent =
+
+        `${
+            currentBooth
+                .boothNumber ||
+            "Booth"
+        } | ${
+            currentBooth
+                .location ||
+            "No location"
+        } | Setup: ${
+            currentBooth
+                .status ||
+            "unknown"
+        }`;
+
+
+    renderElectionStatus();
+
+
+    listenToVoters();
+
+
+    listenToSessions();
+
+}
+
+
+/* ==========================================
+   STOP REALTIME
+========================================== */
+
+function stopRealtimeListeners() {
+
+
+    if (
+        unsubscribeVoters
+    ) {
+
+        unsubscribeVoters();
+
+        unsubscribeVoters =
+            null;
+
+    }
+
+
+    if (
+        unsubscribeSessions
+    ) {
+
+        unsubscribeSessions();
+
+        unsubscribeSessions =
+            null;
+
+    }
+
+}
+
+
+/* ==========================================
+   REALTIME VOTERS
+========================================== */
+
+function listenToVoters() {
+
+
+    unsubscribeVoters =
+        onSnapshot(
+
+            query(
+
+                collection(
+                    db,
+                    "Voters"
+                ),
+
+                where(
+                    "boothId",
+                    "==",
+                    currentBooth.id
+                )
+
+            ),
+
+
+            snapshot => {
+
+
+                voters =
+
+                    snapshot.docs
+
+                        .map(
+
+                            documentSnapshot => ({
+
+                                id:
+                                    documentSnapshot.id,
+
+                                ...documentSnapshot.data()
+
+                            })
+
+                        )
+
+                        .filter(
+
+                            voter =>
+
+                                voter.electionId ===
+                                    currentElection.id
+
+                                &&
+
+                                voter.eligible ===
+                                    true
+
+                        )
+
+                        .sort(
+
+                            (a, b) =>
+
+                                naturalCompare(
+                                    a.className,
+                                    b.className
+                                )
+
+                                ||
+
+                                naturalCompare(
+                                    a.section,
+                                    b.section
+                                )
+
+                                ||
+
+                                naturalCompare(
+                                    a.rollNumber,
+                                    b.rollNumber
+                                )
+
+                        );
+
+
+                if (
+                    selectedVoter
+                ) {
+
+                    selectedVoter =
+                        getVoterById(
+                            selectedVoter.id
+                        );
+
+                }
+
+
+                renderAll();
+
+
+            },
+
+
+            error => {
+
+
+                console.error(
+                    "Voter listener error:",
+                    error
+                );
+
+
+                showMessage(
+
+                    "error",
+
+                    "Assigned voters could not be loaded. Check Firestore permissions."
+
+                );
+
+            }
+
+        );
+
+}
+
+
+/* ==========================================
+   REALTIME VOTING SESSIONS
+========================================== */
+
+function listenToSessions() {
+
+
+    unsubscribeSessions =
+        onSnapshot(
+
+            query(
+
+                collection(
+                    db,
+                    "VotingSessions"
+                ),
+
+                where(
+                    "boothId",
+                    "==",
+                    currentBooth.id
+                )
+
+            ),
+
+
+            snapshot => {
+
+
+                sessions =
+
+                    snapshot.docs
+
+                        .map(
+
+                            documentSnapshot => ({
+
+                                id:
+                                    documentSnapshot.id,
+
+                                ...documentSnapshot.data()
+
+                            })
+
+                        )
+
+                        .filter(
+
+                            session =>
+
+                                session.electionId ===
+                                currentElection.id
+
+                        );
+
+
+                renderAll();
+
+
+            },
+
+
+            error => {
+
+
+                console.error(
+                    "VotingSessions listener error:",
+                    error
+                );
+
+
+                sessions =
+                    [];
+
+
+                renderAll();
+
+
+                if (
+
+                    error?.code ===
+                        "permission-denied"
+
+                    ||
+
+                    error?.code ===
+                        "firestore/permission-denied"
+
+                ) {
+
+
+                    showMessage(
+
+                        "warning",
+
+                        "Voting session controls are waiting for the next Firestore rules update. Voter monitoring can still load if its permissions are already published."
+
+                    );
+
+                }
+
+
+            }
+
+        );
+
+}
+
+
+/* ==========================================
+   ELECTION STATUS
+========================================== */
+
+function renderElectionStatus() {
+
+
+    if (
+        !currentElection
+    ) {
+
+
+        $("electionName")
+            .textContent =
+            "—";
+
+
+        $("electionStatusBadge")
+            .className =
+            "badge gray";
+
+
+        $("electionStatusBadge")
+            .textContent =
+            "Not Loaded";
+
+
+        $("electionInfo")
+            .textContent =
+            "Select an assigned booth.";
+
+
+        return;
+
+    }
+
+
+    const map = {
+
+        finalized:
+            [
+                "Preparation",
+                "amber"
+            ],
+
+        voting_active:
+            [
+                "Voting Active",
+                "green"
+            ],
+
+        voting_stopped:
+            [
+                "Voting Stopped",
+                "amber"
+            ],
+
+        closed:
+            [
+                "Closed",
+                "gray"
+            ],
+
+        draft:
+            [
+                "Draft",
+                "gray"
+            ]
+
+    };
+
+
+    const [
+
+        label,
+        color
+
+    ] =
+
+    map[
+        currentElection.status
+    ]
+
+    ||
+
+    [
+        currentElection.status ||
+        "Unknown",
+
+        "gray"
+    ];
+
+
+    $("electionName")
+        .textContent =
+
+        currentElection
+            .electionName
+
+        ||
+
+        "Unnamed Election";
+
+
+    $("electionStatusBadge")
+        .className =
+        `badge ${color}`;
+
+
+    $("electionStatusBadge")
+        .textContent =
+        label;
+
+
+    $("electionInfo")
+        .textContent =
+
+        `Academic Session: ${
+            currentElection
+                .academicSession ||
+            "—"
+        }. ${
+            currentElection.status ===
+                "voting_active"
+
+                ?
+
+                "New ballots may be authorized."
+
+                :
+
+                "New ballots cannot be authorized in the current election state."
+        }`;
+
+}
+
+
+/* ==========================================
+   VOTER VALIDATION
+========================================== */
+
+function voterValidation(
+    voter
+) {
+
+
+    const result = {
+
+        booth:
+            false,
+
+        eligible:
+            false,
+
+        notVoted:
+            false,
+
+        election:
+            false,
+
+        noSession:
+            false,
+
+        noOtherBoothSession:
+            false,
+
+        allowed:
+            false,
+
+        reasons:
+            []
+
+    };
+
+
+    if (
+
+        !voter
+
+        ||
+
+        !currentBooth
+
+        ||
+
+        !currentElection
+
+    ) {
+
+
+        result.reasons.push(
+            "No voter or booth is selected."
+        );
+
+
+        return result;
+
+    }
+
+
+    result.booth =
+        isCurrentBoothVoter(
+            voter
+        );
+
+
+    if (
+        !result.booth
+    ) {
+
+        result.reasons.push(
+            "Student is not assigned to this booth."
+        );
+
+    }
+
+
+    result.eligible =
+        voter.eligible ===
+        true;
+
+
+    if (
+        !result.eligible
+    ) {
+
+        result.reasons.push(
+            "Student is not eligible for this election."
+        );
+
+    }
+
+
+    result.notVoted =
+
+        (
+            voter.participationStatus ||
+            "not_voted"
+        )
+
+        ===
+
+        "not_voted";
+
+
+    if (
+        !result.notVoted
+    ) {
+
+        result.reasons.push(
+            "This voter has already completed voting."
+        );
+
+    }
+
+
+    result.election =
+
+        currentElection.status ===
+        "voting_active";
+
+
+    if (
+        !result.election
+    ) {
+
+        result.reasons.push(
+            "Voting is not currently active."
+        );
+
+    }
+
+
+    result.noSession =
+
+        !getSessionForVoter(
+            voter.id
+        );
+
+
+    if (
+        !result.noSession
+    ) {
+
+        result.reasons.push(
+            "This voter already has an active voting session."
+        );
+
+    }
+
+
+    const active =
+        getActiveBoothSession();
+
+
+    result.noOtherBoothSession =
+
+        !active
+
+        ||
+
+        active.voterId ===
+        voter.id;
+
+
+    if (
+        !result.noOtherBoothSession
+    ) {
+
+        result.reasons.push(
+            "Another voter currently has an active ballot session at this booth."
+        );
+
+    }
+
+
+    if (
+        !canAuthorize()
+    ) {
+
+        result.reasons.push(
+            "Assistant Presiding Officer accounts can verify voters but cannot authorize ballots."
+        );
+
+    }
+
+
+    result.allowed =
+
+        result.booth
+
+        &&
+
+        result.eligible
+
+        &&
+
+        result.notVoted
+
+        &&
+
+        result.election
+
+        &&
+
+        result.noSession
+
+        &&
+
+        result.noOtherBoothSession
+
+        &&
+
+        canAuthorize();
+
+
+    return result;
+
+}
+
+
+/* ==========================================
+   RENDER VERIFICATION
+========================================== */
+
+function renderVerification() {
+
+
+    const empty =
+        $("verificationEmpty");
+
+
+    const card =
+        $("verificationCard");
+
+
+    if (
+        !selectedVoter
+    ) {
+
+
+        empty.style.display =
+            "block";
+
+
+        card.style.display =
+            "none";
+
+
+        return;
+
+    }
+
+
+    empty.style.display =
+        "none";
+
+
+    card.style.display =
+        "block";
+
+
+    $("verifiedName")
+        .textContent =
+
+        selectedVoter.name
+
+        ||
+
+        "Unnamed Student";
+
+
+    $("verifiedMeta")
+        .textContent =
+
+        `Roll: ${
+            selectedVoter
+                .rollNumber ||
+            "—"
+        } | ${
+            selectedVoter
+                .className ||
+            "—"
+        } ${
+            selectedVoter.section
+
+                ?
+
+                "— " +
+                selectedVoter.section
+
+                :
+
+                ""
+        }`;
+
+
+    const validation =
+        voterValidation(
+            selectedVoter
+        );
+
+
+    setCheck(
+
+        "checkBooth",
+
+        validation.booth,
+
+        validation.booth
+
+            ?
+
+            `Booth: ${
+                currentBooth
+                    .boothNumber ||
+                "Correct"
+            }`
+
+            :
+
+            "Booth: Incorrect"
+
+    );
+
+
+    setCheck(
+
+        "checkEligibility",
+
+        validation.eligible,
+
+        validation.eligible
+
+            ?
+
+            "Eligibility: Eligible"
+
+            :
+
+            "Eligibility: Not eligible"
+
+    );
+
+
+    setCheck(
+
+        "checkVoteStatus",
+
+        validation.notVoted,
+
+        validation.notVoted
+
+            ?
+
+            "Voting status: Not voted"
+
+            :
+
+            "Voting status: Already voted"
+
+    );
+
+
+    setCheck(
+
+        "checkElection",
+
+        validation.election,
+
+        validation.election
+
+            ?
+
+            "Election: Voting active"
+
+            :
+
+            "Election: Not active"
+
+    );
+
+
+    $("verificationReadyBadge")
+        .className =
+
+        `badge ${
+            validation.allowed
+                ?
+                "green"
+                :
+                "red"
+        }`;
+
+
+    $("verificationReadyBadge")
+        .textContent =
+
+        validation.allowed
+
+            ?
+
+            "Ready to Vote"
+
+            :
+
+            "Blocked";
+
+
+    $("verificationReason")
+        .textContent =
+
+        validation.allowed
+
+            ?
+
+            "Identity must now be physically checked by the polling officer. If confirmed, open a one-time ballot session."
+
+            :
+
+            validation.reasons
+                .join(
+                    " "
+                );
+
+
+    $("openBallotBtn")
+        .disabled =
+        !validation.allowed;
+
+}
+
+
+/* ==========================================
+   CHECK BOX STYLE
+========================================== */
+
+function setCheck(
+    id,
+    ok,
+    text
+) {
+
+
+    const element =
+        $(id);
+
+
+    element.className =
+
+        `check ${
+            ok
+                ?
+                "ok"
+                :
+                "bad"
+        }`;
+
+
+    element.textContent =
+
+        (
+            ok
+                ?
+                "✓ "
+                :
+                "✕ "
+        )
+
+        +
+
+        text;
+
+}
+
+
+/* ==========================================
+   SEARCH VOTERS
+========================================== */
+
+function searchVoters() {
+
+
+    const term =
+        normalize(
+
+            $("voterSearch")
+                .value
+
+        );
+
+
+    const box =
+        $("searchResults");
+
+
+    if (
+        !term
+    ) {
+
+
+        box.style.display =
+            "none";
+
+
+        box.innerHTML =
+            "";
+
+
+        return;
+
+    }
+
+
+    const matches =
+
+        voters
+
+            .filter(
+
+                voter =>
+
+                    normalize(
+                        voter.rollNumber
+                    )
+                    .includes(
+                        term
+                    )
+
+                    ||
+
+                    normalize(
+                        voter.name
+                    )
+                    .includes(
+                        term
+                    )
+
+            )
+
+            .slice(
+                0,
+                20
+            );
+
+
+    box.innerHTML =
+        "";
+
+
+    box.style.display =
+        "block";
+
+
+    if (
+        !matches.length
+    ) {
+
+
+        box.innerHTML =
+            '<div class="empty">No assigned eligible voter matched this search.</div>';
+
+
+        return;
+
+    }
+
+
+    matches.forEach(
+
+        voter => {
+
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+            row.className =
+                "result-item";
+
+
+            row.innerHTML = `
+
+                <div>
+
+                    <div class="result-name">
+
+                        ${escapeHtml(
+                            voter.name ||
+                            "Unnamed"
+                        )}
+
+                    </div>
+
+                    <div class="result-meta">
+
+                        ${escapeHtml(
+                            voter.rollNumber ||
+                            "—"
+                        )}
+
+                        |
+
+                        ${escapeHtml(
+                            voter.className ||
+                            "—"
+                        )}
+
+                        ${escapeHtml(
+                            voter.section ||
+                            ""
+                        )}
+
+                    </div>
+
+                </div>
+
+                <button
+                    class="btn btn-secondary"
+                    type="button"
+                    data-select-voter="${escapeHtml(
+                        voter.id
+                    )}"
+                >
+                    Check
+                </button>
+
+            `;
+
+
+            box.appendChild(
+                row
+            );
+
+
+        }
+
+    );
+
+}
+
+
+/* ==========================================
+   SELECT VOTER
+========================================== */
+
+function selectVoter(
+    id
+) {
+
+
+    selectedVoter =
+        getVoterById(
+            id
+        );
+
+
+    $("searchResults")
+        .style.display =
+        "none";
+
+
+    renderVerification();
+
+}
+
+
+/* ==========================================
+   CLEAR SELECTED VOTER
+========================================== */
+
+function clearSelectedVoter() {
+
+
+    selectedVoter =
+        null;
+
+
+    $("voterSearch")
+        .value =
+        "";
+
+
+    $("searchResults")
+        .style.display =
+        "none";
+
+
+    renderVerification();
+
+}
+
+
+/* ==========================================
+   AUTHORIZE BALLOT
+========================================== */
+
+async function authorizeSelectedVoter() {
+
+
+    if (
+        !selectedVoter
+    ) {
+
+        return;
+
+    }
+
+
+    const validation =
+        voterValidation(
+            selectedVoter
+        );
+
+
+    if (
+        !validation.allowed
+    ) {
+
+
+        renderVerification();
+
+
+        showMessage(
+
+            "error",
+
+            validation.reasons
+                .join(
+                    " "
+                )
+
+            ||
+
+            "This voter cannot be authorized."
+
+        );
+
+
+        return;
+
+    }
+
+
+    const confirmed =
+        await confirmAction({
+
+            title:
+                "Verify Identity & Open Ballot",
+
+            message:
+                "Confirm that you have physically verified this student's identity. A one-time voting session will be opened for the Android voting device.",
+
+            summary:
+                `${
+                    selectedVoter.name ||
+                    "Student"
+                } | ${
+                    selectedVoter.rollNumber ||
+                    "—"
+                } | ${
+                    currentBooth.boothNumber ||
+                    "Booth"
+                }`,
+
+            confirmText:
+                "Open Ballot"
+
+        });
+
+
+    if (
+        !confirmed
+    ) {
+
+        return;
+
+    }
+
+
+    const button =
+        $("openBallotBtn");
+
+
+    button.disabled =
+        true;
+
+
+    button.textContent =
+        "Opening...";
+
+
+    try {
+
+
+        const voterRef =
+            doc(
+
+                db,
+                "Voters",
+                selectedVoter.id
+
+            );
+
+
+        const sessionRef =
+            doc(
+
+                db,
+                "VotingSessions",
+
+                sessionDocId(
+                    currentElection.id,
+                    selectedVoter.id
+                )
+
+            );
+
+
+        await runTransaction(
+
+            db,
+
+            async transaction => {
+
+
+                const [
+
+                    voterSnap,
+                    sessionSnap
+
+                ] =
+
+                await Promise.all([
+
+
+                    transaction.get(
+                        voterRef
+                    ),
+
+
+                    transaction.get(
+                        sessionRef
+                    )
+
+
+                ]);
+
+
+                if (
+                    !voterSnap.exists()
+                ) {
+
+                    throw new Error(
+                        "Voter record no longer exists."
+                    );
+
+                }
+
+
+                const fresh = {
+
+                    id:
+                        voterSnap.id,
+
+                    ...voterSnap.data()
+
+                };
+
+
+                if (
+
+                    fresh.electionId !==
+                        currentElection.id
+
+                    ||
+
+                    fresh.boothId !==
+                        currentBooth.id
+
+                ) {
+
+                    throw new Error(
+                        "Voter is no longer assigned to this booth."
+                    );
+
+                }
+
+
+                if (
+                    fresh.eligible !==
+                    true
+                ) {
+
+                    throw new Error(
+                        "Voter is no longer eligible."
+                    );
+
+                }
+
+
+                if (
+
+                    (
+                        fresh.participationStatus ||
+                        "not_voted"
+                    )
+
+                    !==
+
+                    "not_voted"
+
+                ) {
+
+                    throw new Error(
+                        "Voter has already completed voting."
+                    );
+
+                }
+
+
+                if (
+                    currentElection.status !==
+                    "voting_active"
+                ) {
+
+                    throw new Error(
+                        "Voting is not active."
+                    );
+
+                }
+
+
+                let attemptCount =
+                    1;
+
+
+                if (
+                    sessionSnap.exists()
+                ) {
+
+
+                    const old =
+                        sessionSnap.data();
+
+
+                    const status =
+                        effectiveSessionStatus(
+                            old
+                        );
+
+
+                    if (
+                        status ===
+                        "submitted"
+                    ) {
+
+                        throw new Error(
+                            "A submitted voting session already exists for this voter."
+                        );
+
+                    }
+
+
+                    if (
+                        [
+                            "authorized",
+                            "ballot_open"
+                        ]
+                        .includes(
+                            status
+                        )
+                    ) {
+
+                        throw new Error(
+                            "An active voting session already exists for this voter."
+                        );
+
+                    }
+
+
+                    attemptCount =
+
+                        Number(
+                            old.attemptCount ||
+                            0
+                        )
+
+                        +
+
+                        1;
+
+
+                    transaction.update(
+
+                        sessionRef,
+
+                        {
+
+                            boothId:
+                                currentBooth.id,
+
+                            electionId:
+                                currentElection.id,
+
+                            voterId:
+                                fresh.id,
+
+                            authorizedBy:
+                                currentUser.uid,
+
+                            authorizedByRole:
+                                currentUserData.role,
+
+                            status:
+                                "authorized",
+
+                            authorizedAt:
+                                serverTimestamp(),
+
+                            updatedAt:
+                                serverTimestamp(),
+
+                            expiresAt:
+                                Timestamp.fromMillis(
+
+                                    Date.now()
+
+                                    +
+
+                                    SESSION_MINUTES
+                                    *
+                                    60
+                                    *
+                                    1000
+
+                                ),
+
+                            ballotOpenedAt:
+                                null,
+
+                            submittedAt:
+                                null,
+
+                            cancelledAt:
+                                null,
+
+                            deviceId:
+                                "",
+
+                            attemptCount:
+                                attemptCount
+
+                        }
+
+                    );
+
+
+                }
+
+
+                else {
+
+
+                    transaction.set(
+
+                        sessionRef,
+
+                        {
+
+                            electionId:
+                                currentElection.id,
+
+                            boothId:
+                                currentBooth.id,
+
+                            voterId:
+                                fresh.id,
+
+                            authorizedBy:
+                                currentUser.uid,
+
+                            authorizedByRole:
+                                currentUserData.role,
+
+                            status:
+                                "authorized",
+
+                            createdAt:
+                                serverTimestamp(),
+
+                            authorizedAt:
+                                serverTimestamp(),
+
+                            updatedAt:
+                                serverTimestamp(),
+
+                            expiresAt:
+                                Timestamp.fromMillis(
+
+                                    Date.now()
+
+                                    +
+
+                                    SESSION_MINUTES
+                                    *
+                                    60
+                                    *
+                                    1000
+
+                                ),
+
+                            ballotOpenedAt:
+                                null,
+
+                            submittedAt:
+                                null,
+
+                            cancelledAt:
+                                null,
+
+                            deviceId:
+                                "",
+
+                            attemptCount:
+                                attemptCount
+
+                        }
+
+                    );
+
+
+                }
+
+
+            }
+
+        );
+
+
+        showMessage(
+
+            "success",
+
+            "Voter verified. One-time ballot session opened for the voting device."
+
+        );
+
+
+        clearSelectedVoter();
+
+
+    }
+
+
+    catch (
+        error
+    ) {
+
+
+        console.error(
+            "Authorize ballot error:",
+            error
+        );
+
+
+        showMessage(
+
+            "error",
+
+            error?.message
+
+            ||
+
+            "Ballot authorization failed."
+
+        );
+
+
+    }
+
+
+    finally {
+
+
+        button.textContent =
+            "Verify & Open Ballot";
+
+
+        renderVerification();
+
+
+    }
+
+}
+
+
+/* ==========================================
+   CANCEL ACTIVE SESSION
+========================================== */
+
+async function cancelActiveSession() {
+
+
+    const session =
+        getActiveBoothSession();
+
+
+    if (
+        !session
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !canAuthorize()
+    ) {
+
+        showMessage(
+
+            "error",
+
+            "Only the Presiding Officer can cancel a voting session."
+
+        );
+
+        return;
+
+    }
+
+
+    const voter =
+        getVoterById(
+            session.voterId
+        );
+
+
+    const confirmed =
+        await confirmAction({
+
+            title:
+                "Cancel Voting Session",
+
+            message:
+                "Cancel this ballot session only if voting has not been successfully submitted. The voter will remain Not Voted and may be re-authorized later.",
+
+            summary:
+                `${
+                    voter?.name ||
+                    "Voter"
+                } | ${
+                    voter?.rollNumber ||
+                    session.voterId
+                }`,
+
+            confirmText:
+                "Cancel Session"
+
+        });
+
+
+    if (
+        !confirmed
+    ) {
+
+        return;
+
+    }
+
+
+    const button =
+        $("cancelSessionBtn");
+
+
+    button.disabled =
+        true;
+
+
+    button.textContent =
+        "Cancelling...";
+
+
+    try {
+
+
+        const sessionRef =
+            doc(
+
+                db,
+                "VotingSessions",
+                session.id
+
+            );
+
+
+        await runTransaction(
+
+            db,
+
+            async transaction => {
+
+
+                const snap =
+                    await transaction.get(
+                        sessionRef
+                    );
+
+
+                if (
+                    !snap.exists()
+                ) {
+
+                    throw new Error(
+                        "Session no longer exists."
+                    );
+
+                }
+
+
+                const data =
+                    snap.data();
+
+
+                const status =
+                    effectiveSessionStatus(
+                        data
+                    );
+
+
+                if (
+
+                    ![
+                        "authorized",
+                        "ballot_open"
+                    ]
+                    .includes(
+                        status
+                    )
+
+                ) {
+
+                    throw new Error(
+                        "This session can no longer be cancelled."
+                    );
+
+                }
+
+
+                transaction.update(
+
+                    sessionRef,
+
+                    {
+
+                        status:
+                            "cancelled",
+
+                        cancelledAt:
+                            serverTimestamp(),
+
+                        updatedAt:
+                            serverTimestamp(),
+
+                        cancelledBy:
+                            currentUser.uid
+
+                    }
+
+                );
+
+
+            }
+
+        );
+
+
+        showMessage(
+
+            "success",
+
+            "Voting session cancelled. The voter has not been marked as voted."
+
+        );
+
+
+    }
+
+
+    catch (
+        error
+    ) {
+
+
+        console.error(
+            "Cancel session error:",
+            error
+        );
+
+
+        showMessage(
+
+            "error",
+
+            error?.message
+
+            ||
+
+            "Session cancellation failed."
+
+        );
+
+
+    }
+
+
+    finally {
+
+
+        button.disabled =
+            false;
+
+
+        button.textContent =
+            "Cancel Session";
+
+
+    }
+
+}
+
+
+/* ==========================================
+   SUMMARY STATS
+========================================== */
+
+function renderStats() {
+
+
+    const total =
+        voters.length;
+
+
+    const voted =
+
+        voters.filter(
+
+            voter =>
+
+                (
+                    voter.participationStatus ||
+                    "not_voted"
+                )
+
+                ===
+
+                "voted"
+
+        )
+        .length;
+
+
+    const inSession =
+
+        new Set(
+
+            getActiveSessions()
+                .map(
+                    session =>
+                        session.voterId
+                )
+
+        )
+        .size;
+
+
+    const notVoted =
+
+        voters.filter(
+
+            voter =>
+
+                (
+                    voter.participationStatus ||
+                    "not_voted"
+                )
+
+                ===
+
+                "not_voted"
+
+                &&
+
+                !getSessionForVoter(
+                    voter.id
+                )
+
+        )
+        .length;
+
+
+    $("totalVoters")
+        .textContent =
+        total;
+
+
+    $("votedCount")
+        .textContent =
+        voted;
+
+
+    $("inSessionCount")
+        .textContent =
+        inSession;
+
+
+    $("notVotedCount")
+        .textContent =
+        notVoted;
+
+
+    $("turnoutValue")
+        .textContent =
+
+        total
+
+            ?
+
+            `${(
+                (
+                    voted /
+                    total
+                )
+                *
+                100
+            ).toFixed(
+                1
+            )}%`
+
+            :
+
+            "0%";
+
+}
+
+
+/* ==========================================
+   ACTIVE SESSION UI
+========================================== */
+
+function renderSession() {
+
+
+    const session =
+        getActiveBoothSession();
+
+
+    if (
+        !session
+    ) {
+
+
+        $("sessionEmpty")
+            .style.display =
+            "block";
+
+
+        $("sessionCard")
+            .style.display =
+            "none";
+
+
+        return;
+
+    }
+
+
+    const voter =
+        getVoterById(
+            session.voterId
+        );
+
+
+    const status =
+        effectiveSessionStatus(
+            session
+        );
+
+
+    $("sessionEmpty")
+        .style.display =
+        "none";
+
+
+    $("sessionCard")
+        .style.display =
+        "block";
+
+
+    $("sessionVoterName")
+        .textContent =
+
+        voter?.name
+
+        ||
+
+        "Assigned Voter";
+
+
+    $("sessionVoterMeta")
+        .textContent =
+
+        `${
+            voter?.rollNumber ||
+            session.voterId
+        } | ${
+            voter?.className ||
+            "—"
+        } ${
+            voter?.section ||
+            ""
+        }`;
+
+
+    const label =
+
+        status ===
+        "authorized"
+
+            ?
+
+            "Authorized"
+
+            :
+
+            status ===
+            "ballot_open"
+
+                ?
+
+                "Ballot Open"
+
+                :
+
+                status;
+
+
+    $("sessionStatusBadge")
+        .textContent =
+        label;
+
+
+    $("sessionStatusBadge")
+        .className =
+
+        `badge ${
+            status ===
+            "ballot_open"
+
+                ?
+
+                "green"
+
+                :
+
+                "purple"
+        }`;
+
+
+    $("sessionProgress")
+        .textContent =
+
+        status ===
+        "authorized"
+
+            ?
+
+            "Waiting for Android voting device to claim/open the ballot..."
+
+            :
+
+            "Ballot is open on the voting device. Waiting for secure submission...";
+
+
+    $("sessionDetails")
+        .textContent =
+
+        `Authorized: ${
+            formatDate(
+                session.authorizedAt
+            )
+        } | Expires: ${
+            formatDate(
+                session.expiresAt
+            )
+        }${
+            session.deviceId
+
+                ?
+
+                ` | Device: ${
+                    session.deviceId
+                }`
+
+                :
+
+                ""
+        }`;
+
+
+    $("cancelSessionBtn")
+        .disabled =
+        !canAuthorize();
+
+}
+
+
+/* ==========================================
+   VOTER OPERATIONAL STATUS
+========================================== */
+
+function voterOperationalStatus(
+    voter
+) {
+
+
+    if (
+
+        (
+            voter.participationStatus ||
+            "not_voted"
+        )
+
+        ===
+
+        "voted"
+
+    ) {
+
+        return {
+
+            key:
+                "voted",
+
+            label:
+                "Voted",
+
+            color:
+                "green"
+
+        };
+
+    }
+
+
+    const session =
+        getSessionForVoter(
+            voter.id
+        );
+
+
+    if (
+        session
+    ) {
+
+
+        return {
+
+            key:
+                "in_session",
+
+            label:
+
+                effectiveSessionStatus(
+                    session
+                )
+
+                ===
+
+                "ballot_open"
+
+                    ?
+
+                    "Ballot Open"
+
+                    :
+
+                    "Authorized",
+
+            color:
+                "purple"
+
+        };
+
+    }
+
+
+    return {
+
+        key:
+            "not_voted",
+
+        label:
+            "Not Voted",
+
+        color:
+            "amber"
+
+    };
+
+}
+
+
+/* ==========================================
+   RENDER VOTER TABLE
+========================================== */
+
+function renderVoterTable() {
+
+
+    const body =
+        $("voterTableBody");
+
+
+    body.innerHTML =
+        "";
+
+
+    let list =
+        voters.slice();
+
+
+    if (
+        voterFilter !==
+        "all"
+    ) {
+
+
+        list =
+            list.filter(
+
+                voter =>
+
+                    voterOperationalStatus(
+                        voter
+                    ).key
+
+                    ===
+
+                    voterFilter
+
+            );
+
+    }
+
+
+    $("voterTableEmpty")
+        .style.display =
+
+        list.length
+
+            ?
+
+            "none"
+
+            :
+
+            "block";
+
+
+    $("voterTableEmpty")
+        .textContent =
+
+        currentBooth
+
+            ?
+
+            "No voters match this filter."
+
+            :
+
+            "Select an assigned booth.";
+
+
+    list.forEach(
+
+        voter => {
+
+
+            const status =
+                voterOperationalStatus(
+                    voter
+                );
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML = `
+
+                <td>
+                    ${escapeHtml(
+                        voter.name ||
+                        "—"
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        voter.rollNumber ||
+                        "—"
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        voter.className ||
+                        "—"
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        voter.section ||
+                        "—"
+                    )}
+                </td>
+
+                <td>
+
+                    <span class="badge ${
+                        voter.eligible ===
+                        true
+                            ?
+                            "green"
+                            :
+                            "red"
+                    }">
+
+                        ${
+                            voter.eligible ===
+                            true
+                                ?
+                                "Eligible"
+                                :
+                                "Not Eligible"
+                        }
+
+                    </span>
+
+                </td>
+
+                <td>
+
+                    <span class="badge ${status.color}">
+
+                        ${status.label}
+
+                    </span>
+
+                </td>
+
+                <td>
+
+                    <button
+                        class="link-btn"
+                        type="button"
+                        data-table-check="${escapeHtml(
+                            voter.id
+                        )}"
+                    >
+                        Check
+                    </button>
+
+                </td>
+
+            `;
+
+
+            body.appendChild(
+                row
+            );
+
+
+        }
+
+    );
+
+}
+
+
+/* ==========================================
+   TURNOUT ANALYTICS
+========================================== */
+
+function renderTurnout() {
+
+
+    const groups =
+        new Map();
+
+
+    voters.forEach(
+
+        voter => {
+
+
+            const key =
+
+                `${
+                    voter.className ||
+                    "Unknown"
+                }${
+                    voter.section
+
+                        ?
+
+                        " — " +
+                        voter.section
+
+                        :
+
+                        ""
+                }`;
+
+
+            if (
+                !groups.has(
+                    key
+                )
+            ) {
+
+                groups.set(
+
+                    key,
+
+                    {
+
+                        total:
+                            0,
+
+                        voted:
+                            0
+
+                    }
+
+                );
+
+            }
+
+
+            const group =
+                groups.get(
+                    key
+                );
+
+
+            group.total++;
+
+
+            if (
+
+                (
+                    voter.participationStatus ||
+                    "not_voted"
+                )
+
+                ===
+
+                "voted"
+
+            ) {
+
+                group.voted++;
+
+            }
+
+
+        }
+
+    );
+
+
+    const body =
+        $("turnoutBody");
+
+
+    body.innerHTML =
+        "";
+
+
+    const entries =
+
+        [
+            ...groups.entries()
+        ]
+        .sort(
+
+            (a, b) =>
+                naturalCompare(
+                    a[0],
+                    b[0]
+                )
+
+        );
+
+
+    $("turnoutEmpty")
+        .style.display =
+
+        entries.length
+
+            ?
+
+            "none"
+
+            :
+
+            "block";
+
+
+    entries.forEach(
+
+        (
+            [
+                name,
+                group
+            ]
+        ) => {
+
+
+            const percentage =
+
+                group.total
+
+                    ?
+
+                    (
+                        group.voted /
+                        group.total
+                    )
+                    *
+                    100
+
+                    :
+
+                    0;
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML = `
+
+                <td>
+                    ${escapeHtml(
+                        name
+                    )}
+                </td>
+
+                <td>
+                    ${group.voted}
+                </td>
+
+                <td>
+                    ${group.total}
+                </td>
+
+                <td>
+
+                    <div
+                        style="
+                            display:flex;
+                            align-items:center;
+                            gap:8px
+                        "
+                    >
+
+                        <div class="progress">
+
+                            <span
+                                style="
+                                    width:${Math.min(
+                                        100,
+                                        percentage
+                                    )}%
+                                "
+                            ></span>
+
+                        </div>
+
+                        <span>
+                            ${percentage.toFixed(
+                                1
+                            )}%
+                        </span>
+
+                    </div>
+
+                </td>
+
+            `;
+
+
+            body.appendChild(
+                row
+            );
+
+
+        }
+
+    );
+
+}
+
+
+/* ==========================================
+   ACTIVITY
+========================================== */
+
+function renderActivity() {
+
+
+    const list =
+        $("activityList");
+
+
+    list.innerHTML =
+        "";
+
+
+    const ordered =
+
+        sessions
+
+            .slice()
+
+            .sort(
+
+                (a, b) =>
+
+                    timestampMs(
+
+                        b.updatedAt
+                        ||
+                        b.authorizedAt
+                        ||
+                        b.createdAt
+
+                    )
+
+                    -
+
+                    timestampMs(
+
+                        a.updatedAt
+                        ||
+                        a.authorizedAt
+                        ||
+                        a.createdAt
+
+                    )
+
+            )
+
+            .slice(
+                0,
+                20
+            );
+
+
+    $("activityEmpty")
+        .style.display =
+
+        ordered.length
+
+            ?
+
+            "none"
+
+            :
+
+            "block";
+
+
+    ordered.forEach(
+
+        session => {
+
+
+            const voter =
+                getVoterById(
+                    session.voterId
+                );
+
+
+            const status =
+                effectiveSessionStatus(
+                    session
+                );
+
+
+            const label = {
+
+                authorized:
+                    "Ballot authorized",
+
+                ballot_open:
+                    "Ballot opened on device",
+
+                submitted:
+                    "Vote submitted",
+
+                cancelled:
+                    "Session cancelled",
+
+                expired:
+                    "Session expired"
+
+            }[
+                status
+            ]
+
+            ||
+
+            `Session: ${status}`;
+
+
+            const element =
+                document.createElement(
+                    "div"
+                );
+
+
+            element.className =
+                "activity";
+
+
+            element.innerHTML = `
+
+                <div class="activity-title">
+
+                    ${escapeHtml(
+                        label
+                    )}
+
+                    —
+
+                    ${escapeHtml(
+                        voter?.name
+                        ||
+                        voter?.rollNumber
+                        ||
+                        session.voterId
+                        ||
+                        "Voter"
+                    )}
+
+                </div>
+
+                <div class="activity-meta">
+
+                    ${escapeHtml(
+                        voter?.rollNumber ||
+                        ""
+                    )}
+
+                    ${formatDate(
+
+                        session.updatedAt
+                        ||
+                        session.submittedAt
+                        ||
+                        session.cancelledAt
+                        ||
+                        session.authorizedAt
+                        ||
+                        session.createdAt
+
+                    )}
+
+                </div>
+
+            `;
+
+
+            list.appendChild(
+                element
+            );
+
+
+        }
+
+    );
+
+}
+
+
+/* ==========================================
+   RENDER EVERYTHING
+========================================== */
+
+function renderAll() {
+
+    renderElectionStatus();
+
+    renderStats();
+
+    renderVerification();
+
+    renderSession();
+
+    renderVoterTable();
+
+    renderTurnout();
+
+    renderActivity();
+
+}
+
+
+/* ==========================================
+   RESET VIEW
+========================================== */
+
+function resetOperationalView() {
+
+
+    currentAssignment =
+        null;
+
+
+    currentBooth =
+        null;
+
+
+    currentElection =
+        null;
+
+
+    voters =
+        [];
+
+
+    sessions =
+        [];
+
+
+    selectedVoter =
+        null;
+
+
+    renderAll();
+
+
+    $("boothInfo")
+        .textContent =
+        "No booth selected.";
+
+}
+
+
+/* ==========================================
+   BOOTH CHANGE
+========================================== */
+
+$("boothSelect")
+    .addEventListener(
+
+        "change",
+
+        async event => {
+
+
+            const value =
+                event.target.value;
+
+
+            if (
+                value ===
+                ""
+            ) {
+
+
+                stopRealtimeListeners();
+
+                resetOperationalView();
+
+                return;
+
+            }
+
+
+            await activateBooth(
+                Number(
+                    value
+                )
+            );
+
+
+        }
+
+    );
+
+
+/* ==========================================
+   SEARCH EVENTS
+========================================== */
+
+$("searchVoterBtn")
+    .addEventListener(
+
+        "click",
+
+        searchVoters
+
+    );
+
+
+$("voterSearch")
+    .addEventListener(
+
+        "input",
+
+        searchVoters
+
+    );
+
+
+$("voterSearch")
+    .addEventListener(
+
+        "keydown",
+
+        event => {
+
+
+            if (
+                event.key ===
+                "Enter"
+            ) {
+
+                event.preventDefault();
+
+                searchVoters();
+
+            }
+
+
+        }
+
+    );
+
+
+/* ==========================================
+   SEARCH RESULT SELECTION
+========================================== */
+
+$("searchResults")
+    .addEventListener(
+
+        "click",
+
+        event => {
+
+
+            const button =
+                event.target.closest(
+                    "[data-select-voter]"
+                );
+
+
+            if (
+                button
+            ) {
+
+                selectVoter(
+                    button.dataset
+                        .selectVoter
+                );
+
+            }
+
+
+        }
+
+    );
+
+
+/* ==========================================
+   TABLE CHECK BUTTON
+========================================== */
+
+$("voterTableBody")
+    .addEventListener(
+
+        "click",
+
+        event => {
+
+
+            const button =
+                event.target.closest(
+                    "[data-table-check]"
+                );
+
+
+            if (
+                !button
+            ) {
+
+                return;
+
+            }
+
+
+            selectedVoter =
+                getVoterById(
+
+                    button.dataset
+                        .tableCheck
+
+                );
+
+
+            $("voterSearch")
+                .value =
+
+                selectedVoter
+                    ?.rollNumber
+
+                ||
+
+                selectedVoter
+                    ?.name
+
+                ||
+
+                "";
+
+
+            window.scrollTo({
+
+                top:
+                    0,
+
+                behavior:
+                    "smooth"
+
+            });
+
+
+            renderVerification();
+
+
+        }
+
+    );
+
+
+/* ==========================================
+   VERIFICATION BUTTONS
+========================================== */
+
+$("clearVerifiedBtn")
+    .addEventListener(
+
+        "click",
+
+        clearSelectedVoter
+
+    );
+
+
+$("openBallotBtn")
+    .addEventListener(
+
+        "click",
+
+        authorizeSelectedVoter
+
+    );
+
+
+/* ==========================================
+   CANCEL SESSION
+========================================== */
+
+$("cancelSessionBtn")
+    .addEventListener(
+
+        "click",
+
+        cancelActiveSession
+
+    );
+
+
+/* ==========================================
+   FILTERS
+========================================== */
+
+document
+    .querySelectorAll(
+        "[data-filter]"
+    )
+    .forEach(
+
+        button =>
+
+            button.addEventListener(
+
+                "click",
+
+                () => {
+
+
+                    voterFilter =
+                        button.dataset
+                            .filter;
+
+
+                    document
+                        .querySelectorAll(
+                            "[data-filter]"
+                        )
+                        .forEach(
+
+                            item =>
+
+                                item.classList
+                                    .toggle(
+
+                                        "active",
+
+                                        item ===
+                                        button
+
+                                    )
+
+                        );
+
+
+                    renderVoterTable();
+
+
+                }
+
+            )
+
+    );
+
+
+/* ==========================================
+   PROFILE
+========================================== */
+
+$("profileBtn")
+    .addEventListener(
+
+        "click",
+
+        () => {
+
+            location.href =
+                "profile.html";
+
+        }
+
+    );
+
+
+/* ==========================================
+   REFRESH
+========================================== */
+
+$("refreshBtn")
+    .addEventListener(
+
+        "click",
+
+        async () => {
+
+
+            const index =
+                $("boothSelect")
+                    .value;
+
+
+            try {
+
+
+                await loadAssignedBooths();
+
+
+                if (
+
+                    index !==
+                        ""
+
+                    &&
+
+                    assignedBooths[
+                        Number(
+                            index
+                        )
+                    ]
+
+                ) {
+
+
+                    $("boothSelect")
+                        .value =
+                        index;
+
+
+                    await activateBooth(
+                        Number(
+                            index
+                        )
+                    );
+
+
+                }
+
+
+                showMessage(
+
+                    "success",
+
+                    "Dashboard refreshed."
+
+                );
+
+
+            }
+
+
+            catch (
+                error
+            ) {
+
+
+                console.error(
+                    error
+                );
+
+
+                showMessage(
+
+                    "error",
+
+                    "Dashboard refresh failed."
+
+                );
+
+
+            }
+
+
+        }
+
+    );
+
+
+/* ==========================================
+   LOGOUT
+========================================== */
+
+$("logoutBtn")
+    .addEventListener(
+
+        "click",
+
+        async () => {
+
+
+            stopRealtimeListeners();
+
+
+            await signOut(
+                auth
+            );
+
+
+            location.href =
+                "login.html";
+
+
+        }
+
+    );
+
+
+/* ==========================================
+   CLEANUP
+========================================== */
+
+window
+    .addEventListener(
+
+        "beforeunload",
+
+        stopRealtimeListeners
+
+    );
+
+
+/* ==========================================
+   AUTH INITIALIZATION
+========================================== */
+
+onAuthStateChanged(
+
+    auth,
+
+    async user => {
+
+
+        if (
+            authHandled
+        ) {
+
+            return;
+
+        }
+
+
+        authHandled =
+            true;
+
+
+        try {
+
+
+            if (
+                !await checkAccess(
+                    user
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            await loadAssignedBooths();
+
+
+            if (
+                currentUserData.role ===
+                "assistant_presiding_officer"
+            ) {
+
+
+                showMessage(
+
+                    "info",
+
+                    "Assistant Presiding Officer mode: voter verification and monitoring are available, but ballot authorization remains restricted to the Presiding Officer."
+
+                );
+
+
+            }
+
+
+        }
+
+
+        catch (
+            error
+        ) {
+
+
+            console.error(
+                "Dashboard initialization error:",
+                error
+            );
+
+
+            showMessage(
+
+                "error",
+
+                error?.message
+
+                ||
+
+                "Presiding Officer dashboard could not be initialized."
+
+            );
+
+
+        }
+
+
+    }
+
+);
+
+
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sub-Admin Dashboard</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        background: #f4f6f8;
+        color: #222;
+        min-height: 100vh;
+    }
+
+    .header {
+        background: #1976d2;
+        color: white;
+        padding: 20px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .header-title {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .header h1 {
+        margin-bottom: 6px;
+        font-size: 25px;
+    }
+
+    .header p {
+        opacity: 0.9;
+        font-size: 14px;
+    }
+
+    .header-profile {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .header-profile-button {
+        width: auto;
+        min-width: 150px;
+        padding: 9px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: none;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.12);
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .header-avatar {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: white;
+        color: #1976d2;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .header-arrow {
+        font-size: 9px;
+    }
+
+    .header-profile-dropdown {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: 230px;
+        background: white;
+        color: #222;
+        border-radius: 8px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.18);
+        overflow: hidden;
+        z-index: 1000;
+    }
+
+    .header-profile-dropdown[hidden] {
+        display: none;
+    }
+
+    .profile-dropdown-info {
+        padding: 15px;
+    }
+
+    .profile-dropdown-info strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 15px;
+    }
+
+    .profile-dropdown-info span {
+        color: #777;
+        font-size: 12px;
+    }
+
+    .profile-dropdown-item {
+        width: 100%;
+        padding: 13px 15px;
+        display: block;
+        border: none;
+        border-radius: 0;
+        background: white;
+        color: #333;
+        text-align: left;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .logout-item {
+        margin-top: 2px;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        padding: 30px;
+    }
+
+    .welcome {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        margin-bottom: 28px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .welcome h2 {
+        margin-bottom: 8px;
+        font-size: 22px;
+    }
+
+    .institution-name {
+        color: #1976d2;
+        font-weight: bold;
+        margin-bottom: 12px;
+        font-size: 16px;
+    }
+
+    .welcome p {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .section-title {
+        margin: 28px 0 15px;
+        font-size: 20px;
+    }
+
+    .overview {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+
+    .overview-card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .overview-card h3 {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 10px;
+    }
+
+    .overview-value {
+        font-size: 20px;
+        font-weight: bold;
+        color: #222;
+        line-height: 1.25;
+    }
+
+    .overview-description {
+        margin-top: 7px;
+        font-size: 12px;
+        color: #777;
+        line-height: 1.45;
+    }
+
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .card {
+        background: white;
+        padding: 22px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card h3 {
+        margin-bottom: 10px;
+        font-size: 18px;
+    }
+
+    .card p {
+        color: #666;
+        margin-bottom: 18px;
+        line-height: 1.5;
+        flex-grow: 1;
+    }
+
+    .card button {
+        width: 100%;
+        padding: 11px 16px;
+        border: none;
+        border-radius: 6px;
+        background: #1976d2;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    #permissionContent {
+        visibility: hidden;
+    }
+
+    #permissionContent.loaded {
+        visibility: visible;
+    }
+
+    @media (max-width: 1000px) {
+        .overview {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 600px) {
+        .overview {
+            grid-template-columns: 1fr;
+        }
+
+        .cards {
+            grid-template-columns: 1fr;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .header {
+            padding: 15px 20px;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .header h1 {
+            font-size: 21px;
+        }
+
+        .header-profile {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .header-profile-button {
+            min-width: 130px;
+        }
+
+        .header-profile-dropdown {
+            width: 210px;
+        }
+    }
+</style>
+    <link rel="stylesheet" href="assets/css/style.css?v=20260913-ec-navigation">
+</head>
+
+<body>
+
+<div class="header">
+    <div class="header-title">
+        <h1>Sub-Admin Dashboard</h1>
+        <p id="institutionHeader">Institutional Election Management System</p>
+    </div>
+
+    <div class="header-profile">
+        <button
+            type="button"
+            id="profileButton"
+            class="header-profile-button"
+            aria-expanded="false"
+            aria-controls="profileDropdown"
+        >
+            <span class="header-avatar" id="headerAvatar">SA</span>
+            <span id="headerProfileName">Profile</span>
+            <span class="header-arrow">▼</span>
+        </button>
+
+        <div id="profileDropdown" class="header-profile-dropdown" hidden>
+            <div class="profile-dropdown-info">
+                <strong id="dropdownProfileName">Sub-Admin</strong>
+                <span>Sub-Admin</span>
+            </div>
+
+            <button type="button" id="myProfileButton" class="profile-dropdown-item">
+                My Profile
+            </button>
+
+            <button type="button" id="dashboardSignOutButton" class="profile-dropdown-item logout-item">
+                Sign Out
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="welcome">
+        <h2>
+            Welcome,
+            <span id="subAdminName">Sub-Admin</span>
+        </h2>
+
+        <div class="institution-name" id="institutionName">
+            Loading institution...
+        </div>
+
+        <p>
+            Manage the administrative functions delegated to you by the Principal.
+        </p>
+    </div>
+
+    <h2 class="section-title">Election Overview</h2>
+
+    <div class="overview">
+        <div class="overview-card">
+            <h3>Current Election</h3>
+            <div class="overview-value" id="currentElection">No Active Election</div>
+            <div class="overview-description">Current institutional election</div>
+        </div>
+
+        <div class="overview-card">
+            <h3>Election Status</h3>
+            <div class="overview-value" id="electionStatus">Not Available</div>
+            <div class="overview-description">Current election lifecycle status</div>
+        </div>
+
+        <div class="overview-card">
+            <h3>Voter Turnout</h3>
+            <div class="overview-value" id="voterTurnout">Not Available</div>
+            <div class="overview-description">Voters who have completed voting</div>
+        </div>
+
+        <div class="overview-card">
+            <h3>Voting Activity</h3>
+            <div class="overview-value" id="votingActivity">Not Started</div>
+            <div class="overview-description">Open ballots and completed voting sessions</div>
+        </div>
+    </div>
+
+
+
+    <div id="permissionContent">
+
+        <div id="electionManagementSection" hidden>
+            <h2 class="section-title">Election Management</h2>
+            <div class="cards">
+                <div class="card" data-permission="Create New Election" hidden>
+                    <h3>Create Election</h3>
+                    <p>Create a new institutional election and define its basic information, positions, and schedule.</p>
+                    <button id="createElectionBtn">Create Election</button>
+                </div>
+
+                <div class="card" data-permission="Manage Elections" hidden>
+                    <h3>Manage Elections</h3>
+                    <p>View existing elections and manage their configuration and lifecycle.</p>
+                    <button id="manageElectionsBtn">Manage Elections</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="administrativeManagementSection" hidden>
+            <h2 class="section-title">Administrative Management</h2>
+            <div class="cards">
+                <div class="card" data-permission="Create Sub-Admin" hidden>
+                    <h3>Create Sub-Admin</h3>
+                    <p>Create an administrative staff account and assign the required permissions.</p>
+                    <button id="createSubAdminBtn">Create Sub-Admin</button>
+                </div>
+
+                <div class="card" data-permission="Manage Sub-Admins" hidden>
+                    <h3>Manage Sub-Admins</h3>
+                    <p>View Sub-Admin accounts and manage their assigned administrative access.</p>
+                    <button id="manageSubAdminsBtn">Manage Sub-Admins</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="electionCommissionSection" hidden>
+            <h2 class="section-title">Election Commission</h2>
+            <div class="cards">
+                <div class="card" data-permission="Create EC Member" hidden>
+                    <h3>Create EC Member</h3>
+                    <p>Create an account for an Election Commission member.</p>
+                    <button id="createECBtn">Create EC Member</button>
+                </div>
+
+                <div class="card" data-permission="Manage Election Commission" hidden>
+                    <h3>Manage Election Commission</h3>
+                    <p>Manage Election Commission accounts and their assigned responsibilities.</p>
+                    <button id="manageECBtn">Manage Election Commission</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultsSection" hidden>
+            <h2 class="section-title">Results</h2>
+            <div class="cards">
+                <div class="card" data-permission="Review Results" hidden>
+                    <h3>Review Results</h3>
+                    <p>Review final results for a closed election. Official publication is controlled by the Principal.</p>
+                    <button id="reviewResultsBtn">Review Results</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script type="module">
+    import { db, auth } from "./js/firebase.js";
+    import { requireRole } from "./js/auth.js";
+
+    import {
+        doc,
+        getDoc,
+        collection,
+        query,
+        where,
+        onSnapshot
+    } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+    import {
+        signOut
+    } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+    const permissionContent = document.getElementById("permissionContent");
+    const profileButton = document.getElementById("profileButton");
+    const profileDropdown = document.getElementById("profileDropdown");
+
+    profileButton.addEventListener("click", event => {
+        event.stopPropagation();
+        const willOpen = profileDropdown.hidden;
+        profileDropdown.hidden = !willOpen;
+        profileButton.setAttribute("aria-expanded", String(willOpen));
+    });
+
+    document.addEventListener("click", event => {
+        if (!profileDropdown.hidden && !profileDropdown.contains(event.target)) {
+            profileDropdown.hidden = true;
+            profileButton.setAttribute("aria-expanded", "false");
+        }
+    });
+
+    /* =================================================
+       ELECTION OVERVIEW
+       =================================================
+       The dashboard shows only the operational information
+       an administrator needs at a glance. Candidate-wise
+       totals remain part of the Results module.
+    ================================================= */
+
+    let overviewElection = null;
+    let overviewElectionId = "";
+    let overviewVoters = [];
+    let overviewSessions = [];
+
+    let electionsUnsubscribe = null;
+    let votersUnsubscribe = null;
+    let sessionsUnsubscribe = null;
+
+
+    function setOverviewText(id, value) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+        }
+    }
+
+
+    function timestampToMillis(value) {
+        if (!value) return 0;
+
+        if (typeof value.toMillis === "function") {
+            return value.toMillis();
+        }
+
+        if (value instanceof Date) {
+            return value.getTime();
+        }
+
+        const parsed = new Date(value).getTime();
+        return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+
+    function electionPriority(status) {
+        return ({
+            voting_active: 50,
+            voting_stopped: 40,
+            finalized: 30,
+            draft: 20,
+            closed: 10
+        })[status] || 0;
+    }
+
+
+    function chooseOverviewElection(elections) {
+        if (!elections.length) {
+            return null;
+        }
+
+        return [...elections].sort((a, b) => {
+            const priorityDifference =
+                electionPriority(b.status) - electionPriority(a.status);
+
+            if (priorityDifference !== 0) {
+                return priorityDifference;
+            }
+
+            return timestampToMillis(b.createdAt) -
+                   timestampToMillis(a.createdAt);
+        })[0];
+    }
+
+
+    function getElectionStatusLabel(status) {
+        return ({
+            draft: "Draft",
+            finalized: "Finalized",
+            voting_active: "Voting Active",
+            voting_stopped: "Voting Stopped",
+            closed: "Closed"
+        })[status] || "Not Available";
+    }
+
+
+    function resetOverviewData() {
+        overviewVoters = [];
+        overviewSessions = [];
+    }
+
+
+    function detachOverviewListeners() {
+        if (votersUnsubscribe) votersUnsubscribe();
+        if (sessionsUnsubscribe) sessionsUnsubscribe();
+
+        votersUnsubscribe = null;
+        sessionsUnsubscribe = null;
+    }
+
+
+    function showOverviewError(source, error) {
+        console.error(`Election overview ${source} error:`, error);
+    }
+
+
+    function renderElectionOverview() {
+        if (!overviewElection) {
+            setOverviewText("currentElection", "No Active Election");
+            setOverviewText("electionStatus", "Not Available");
+            setOverviewText("voterTurnout", "Not Available");
+            setOverviewText("votingActivity", "Not Started");
+            return;
+        }
+
+        const eligibleVoters = overviewVoters.filter(
+            voter => voter.eligible === true
+        );
+
+        const votesCast = eligibleVoters.filter(
+            voter => voter.participationStatus === "voted"
+        ).length;
+
+        const eligibleCount = eligibleVoters.length;
+        const turnout = eligibleCount > 0
+            ? ((votesCast / eligibleCount) * 100).toFixed(1)
+            : "0.0";
+
+        const activeSessions = overviewSessions.filter(
+            session => ["authorized", "ballot_open"].includes(session.status)
+        ).length;
+
+        const completedSessions = overviewSessions.filter(
+            session => session.status === "submitted"
+        ).length;
+
+        let activityText = "Not Started";
+
+        if (["voting_active", "voting_stopped"].includes(overviewElection.status)) {
+            activityText = `${activeSessions} active • ${completedSessions} completed`;
+        }
+        else if (overviewElection.status === "closed") {
+            activityText = `${completedSessions} completed`;
+        }
+
+        setOverviewText(
+            "currentElection",
+            overviewElection.electionName || "Unnamed Election"
+        );
+
+        setOverviewText(
+            "electionStatus",
+            getElectionStatusLabel(overviewElection.status)
+        );
+
+        setOverviewText(
+            "voterTurnout",
+            `${votesCast} / ${eligibleCount} (${turnout}%)`
+        );
+
+        setOverviewText("votingActivity", activityText);
+    }
+
+
+    function attachOverviewListeners(electionId) {
+        detachOverviewListeners();
+        resetOverviewData();
+        renderElectionOverview();
+
+        votersUnsubscribe = onSnapshot(
+            query(
+                collection(db, "Voters"),
+                where("electionId", "==", electionId)
+            ),
+            snapshot => {
+                overviewVoters = snapshot.docs.map(item => ({
+                    id: item.id,
+                    ...item.data()
+                }));
+                renderElectionOverview();
+            },
+            error => showOverviewError("voter data", error)
+        );
+
+        sessionsUnsubscribe = onSnapshot(
+            query(
+                collection(db, "VotingSessions"),
+                where("electionId", "==", electionId)
+            ),
+            snapshot => {
+                overviewSessions = snapshot.docs.map(item => ({
+                    id: item.id,
+                    ...item.data()
+                }));
+                renderElectionOverview();
+            },
+            error => showOverviewError("session data", error)
+        );
+    }
+
+
+    function startElectionOverview() {
+        electionsUnsubscribe = onSnapshot(
+            collection(db, "Elections"),
+            snapshot => {
+                const elections = snapshot.docs.map(item => ({
+                    id: item.id,
+                    ...item.data()
+                }));
+
+                const selected = chooseOverviewElection(elections);
+
+                if (!selected) {
+                    overviewElection = null;
+                    overviewElectionId = "";
+                    detachOverviewListeners();
+                    resetOverviewData();
+                    renderElectionOverview();
+                    return;
+                }
+
+                const electionChanged = selected.id !== overviewElectionId;
+
+                overviewElection = selected;
+                overviewElectionId = selected.id;
+                renderElectionOverview();
+
+                if (electionChanged) {
+                    attachOverviewListeners(selected.id);
+                }
+            },
+            error => showOverviewError("election data", error)
+        );
+    }
+
+
+    function stopElectionOverview() {
+        if (electionsUnsubscribe) electionsUnsubscribe();
+        electionsUnsubscribe = null;
+        detachOverviewListeners();
+    }
+
+
+
+
+
+    async function loadDashboard() {
+        const result = await requireRole("sub_admin");
+
+        if (!result) {
+            return;
+        }
+
+        const user = result.user;
+        const userData = result.data;
+
+        const displayName =
+            userData.name ||
+            user.displayName ||
+            (user.email ? user.email.split("@")[0] : "Sub-Admin");
+
+        document.getElementById("subAdminName").textContent = displayName;
+        document.getElementById("headerProfileName").textContent = displayName;
+        document.getElementById("dropdownProfileName").textContent = displayName;
+        document.getElementById("headerAvatar").textContent =
+            displayName.charAt(0).toUpperCase();
+
+        const [subAdminSnapshot, institutionSnapshot] = await Promise.all([
+            getDoc(doc(db, "SubAdmins", user.uid)),
+            getDoc(doc(db, "Institutions", "main"))
+        ]);
+
+        if (!subAdminSnapshot.exists()) {
+            alert("Sub-Admin profile was not found.");
+            await signOut(auth);
+            window.location.href = "login.html";
+            return;
+        }
+
+        const subAdminData = subAdminSnapshot.data();
+
+        if (subAdminData.status && subAdminData.status !== "active") {
+            alert("Your Sub-Admin account is not active.");
+            await signOut(auth);
+            window.location.href = "login.html";
+            return;
+        }
+
+        let institutionName =
+            userData.collegeName ||
+            userData.institutionName ||
+            "Institutional Election Management System";
+
+        if (institutionSnapshot.exists()) {
+            const institutionData = institutionSnapshot.data();
+            institutionName = institutionData.name || institutionName;
+        }
+
+        document.getElementById("institutionName").textContent = institutionName;
+        document.getElementById("institutionHeader").textContent =
+            institutionName + " — Institutional Election Management System";
+
+        const duties = Array.isArray(subAdminData.duties)
+            ? subAdminData.duties
+            : [];
+
+        document.querySelectorAll("[data-permission]").forEach(card => {
+            const requiredPermission = card.dataset.permission;
+            if (duties.includes(requiredPermission)) {
+                card.hidden = false;
+            }
+        });
+
+        const sections = [
+            {
+                element: document.getElementById("electionManagementSection"),
+                permissions: ["Create New Election", "Manage Elections"]
+            },
+            {
+                element: document.getElementById("administrativeManagementSection"),
+                permissions: ["Create Sub-Admin", "Manage Sub-Admins"]
+            },
+            {
+                element: document.getElementById("electionCommissionSection"),
+                permissions: ["Create EC Member", "Manage Election Commission"]
+            },
+            {
+                element: document.getElementById("resultsSection"),
+                permissions: ["Review Results"]
+            }
+        ];
+
+        sections.forEach(section => {
+            const hasPermission = section.permissions.some(
+                permission => duties.includes(permission)
+            );
+
+            if (hasPermission) {
+                section.element.hidden = false;
+            }
+        });
+
+        permissionContent.classList.add("loaded");
+
+        // Start the election overview only after the Sub-Admin account has
+        // been verified as active.
+        startElectionOverview();
+    }
+
+
+    document.getElementById("createElectionBtn").addEventListener("click", () => {
+        window.location.href = "create-election.html";
+    });
+
+    document.getElementById("manageElectionsBtn").addEventListener("click", () => {
+        window.location.href = "manage-elections.html";
+    });
+
+    document.getElementById("createSubAdminBtn").addEventListener("click", () => {
+        window.location.href = "create-sub-admin.html";
+    });
+
+    document.getElementById("manageSubAdminsBtn").addEventListener("click", () => {
+        window.location.href = "manage-sub-admins.html";
+    });
+
+    document.getElementById("createECBtn").addEventListener("click", () => {
+        window.location.href = "create-election-commission.html";
+    });
+
+    document.getElementById("manageECBtn").addEventListener("click", () => {
+        window.location.href = "manage-election-commission.html";
+    });
+
+    document.getElementById("reviewResultsBtn").addEventListener("click", () => {
+        window.location.href = "review-results.html";
+    });
+
+    document.getElementById("myProfileButton").addEventListener("click", () => {
+        window.location.href = "profile.html";
+    });
+
+    document.getElementById("dashboardSignOutButton").addEventListener("click", async () => {
+        try {
+            stopElectionOverview();
+            await signOut(auth);
+            window.location.href = "login.html";
+        } catch (error) {
+            console.error("Sign out error:", error);
+            alert("Unable to sign out. Please try again.");
+        }
+    });
+
+    window.addEventListener("pagehide", stopElectionOverview, { once: true });
+
+    loadDashboard().catch(error => {
+        console.error("Sub-Admin dashboard error:", error);
+        permissionContent.classList.add("loaded");
+        alert("Unable to load the Sub-Admin dashboard.");
+    });
+</script>
+
+</body>
+</html>
