@@ -34,4 +34,4 @@ with:
 resource.data.formStatus in ["finalized", "closed"]
 ```
 
-Do **not** change the public-student `allow get` or `NominationApplications` create check. Those must continue to require exactly `"finalized"`.
+Do **not** change the public-student `allow get` or `NominationApplications` create check. Those must continue to require exactly `"finalized"`........
