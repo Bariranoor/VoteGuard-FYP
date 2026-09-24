@@ -6,7 +6,7 @@ service cloud.firestore {
 
     /* ================================================
        HELPER FUNCTIONS
-    ===================================================== */
+    =============================================== */
 
     function isPrincipal() {
       return request.auth != null
