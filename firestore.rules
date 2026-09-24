@@ -17,7 +17,7 @@ service cloud.firestore {
           /databases/$(database)/documents/Users/$(request.auth.uid)
         ).data.status == "active";
     }
-
+//////////
 
     function isActiveSubAdmin() {
       return request.auth != null
