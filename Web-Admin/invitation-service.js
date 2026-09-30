@@ -12,7 +12,7 @@
 // password.
 //
 // Flow:
-// Principal/Admin
+// Principal/Admin  
 //      ↓
 // createInvitation()
 //      ↓
