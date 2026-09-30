@@ -4,7 +4,7 @@ const admin = require("firebase-admin");
 
 admin.initializeApp();
 
-const db = admin.firestore();
+const db = admin.firestore();]]]]
 
 setGlobalOptions({
     maxInstances: 10
