@@ -4,8 +4,6 @@ Apply these three edits to the deployed Firestore Rules only after the web and A
 
 The purpose is narrow: a nomination form that was formally closed must remain readable by a paired Android voting device and must be accepted by the election-start rule. Student nomination submissions must still require `formStatus == "finalized"`, so a closed form cannot accept new applications.
 
-
-
 1. In `function hasFinalizedNominationForm(electionId)`, replace:
 
 ```rules
